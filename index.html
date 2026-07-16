@@ -5,73 +5,273 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nails Studio - Agenda & Dashboard</title>
     <style>
-        /* --- CORRECCIÓN DE TAMAÑOS PARA MÓVIL (Safari / iOS Friendly) --- */
-* {
-    box-sizing: border-box; /* Fuerza a todos los elementos a calcular su tamaño correctamente */
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    -webkit-tap-highlight-color: transparent;
-}
+             <style>
+        /* --- DESIGN SYSTEM (Estilo Boho / Nail Studio Elegante) --- */
+        :root {
+            --bg-color: #FAF6F0;
+            --card-bg: #FFFFFF;
+            --primary: #8C5E58;
+            --primary-light: #F4EAE1;
+            --accent: #D4A373;
+            --text-dark: #4A3E3D;
+            --text-light: #8C7572;
+            --border: #F0E6D8;
+            --success: #2D6A4F;
+        }
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-dark);
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    overflow-x: hidden; /* Evita cualquier deslizamiento horizontal molesto */
-}
+        /* --- CONFIGURACIÓN PARA EVITAR DESBORDES EN MÓVIL --- */
+        * {
+            box-sizing: border-box; /* Obliga a calcular anchos correctamente con bordes incluidos */
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-/* Envoltório principal - Usamos max-width en lugar de width fijo */
-.phone-wrapper {
-    width: 100%;
-    max-width: 450px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding: 5px; /* Pequeño espacio de seguridad en los bordes de la pantalla */
-}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden; /* Bloquea cualquier deslizamiento hacia los lados */
+        }
 
-/* Secciones adaptables */
-.view-section {
-    display: none;
-    background-color: var(--card-bg);
-    border-radius: 20px;
-    padding: 18px; /* Un poco más compacto para ganar espacio interno */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    border: 1px solid var(--border);
-    width: 100%; /* Asegura que se adapte al ancho del wrapper */
-    max-width: 100%;
-    overflow: hidden; /* Corta cualquier desborde accidental */
-    animation: fadeIn 0.3s ease;
-}
+        /* Envoltório principal - Totalmente flexible en celulares */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 5px; /* Espacio mínimo de seguridad lateral */
+        }
 
-/* Inputs de Fecha y Hora adaptables al 100% */
-.form-control {
-    width: 100%;
-    max-width: 100%; /* Evita que el input de fecha se ensanche de más */
-    padding: 12px;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    color: var(--text-dark);
-    background-color: #FCFBF9;
-    transition: all 0.2s;
-    outline: none;
-    display: block;
-    -webkit-appearance: none; /* Quita estilos nativos de iOS que rompen el ancho */
-    appearance: none;
-}
+        /* --- CABEÇALHO --- */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 20px 15px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(140, 94, 88, 0.15);
+        }
 
-/* Contenedor de Hora Inicio y Fin */
-.time-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Divide el espacio exactamente en dos */
-    gap: 10px;
-    width: 100%;
-}
+        header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* --- ABAS DE NAVEGAÇÃO (TABS) --- */
+        .tab-navigation {
+            display: flex;
+            background-color: var(--primary-light);
+            padding: 6px;
+            border-radius: 14px;
+            gap: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .tab-button.active {
+            background-color: var(--card-bg);
+            color: var(--primary);
+            box-shadow: 0 4px 10px rgba(140, 94, 88, 0.08);
+        }
+
+        /* --- SEÇÕES DE CONTEÚDO (Ajustadas para no desbordar) --- */
+        .view-section {
+            display: none;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 18px; /* Un poco más de margen interno para respirar */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden; /* Corta cualquier error visual */
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        /* --- FORMULÁRIO (Optimizado para Safari/iOS) --- */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            max-width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            background-color: #FCFBF9;
+            transition: all 0.2s;
+            outline: none;
+            display: block;
+            /* Fuerza a los navegadores móviles a respetar el ancho interno */
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(140, 94, 88, 0.1);
+        }
+
+        /* Ajuste perfecto para Hora Inicio y Hora Fin en una sola línea */
+        .time-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(140, 94, 88, 0.2);
+        }
+
+        .btn-submit:active {
+            background-color: #734D48;
+            transform: scale(0.98);
+        }
+
+        /* --- DASHBOARD --- */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background-color: #FCFBF9;
+            border: 1px solid var(--border);
+            padding: 15px 10px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .kpi-card h3 {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .kpi-card p {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        /* --- LISTA DE CLIENTES --- */
+        .client-list {
+            list-style: none;
+        }
+
+        .client-item {
+            background-color: #FCFBF9;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--accent);
+        }
+
+        .client-info h4 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+
+        .client-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .badge {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .client-price {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+    </style>
 
     </style>
 </head>
