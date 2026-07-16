@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nails Studio - Agenda & Dashboard</title>
     <style>
-             <style>
         /* --- DESIGN SYSTEM (Estilo Boho / Nail Studio Elegante) --- */
         :root {
             --bg-color: #FAF6F0;
@@ -18,35 +17,75 @@
             --border: #F0E6D8;
             --success: #2D6A4F;
         }
+        
+        /* --- CORRECCIÓN DE TAMAÑOS PARA MÓVIL (Safari / iOS Friendly) --- */
+* {
+    box-sizing: border-box; /* Fuerza a todos los elementos a calcular su tamaño correctamente */
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        /* --- CONFIGURACIÓN PARA EVITAR DESBORDES EN MÓVIL --- */
-        * {
-            box-sizing: border-box; /* Obliga a calcular anchos correctamente con bordes incluidos */
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+body {
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden; /* Evita cualquier deslizamiento horizontal molesto */
+}
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            overflow-x: hidden; /* Bloquea cualquier deslizamiento hacia los lados */
-        }
+/* Envoltório principal - Usamos max-width en lugar de width fijo */
+.phone-wrapper {
+    width: 100%;
+    max-width: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 5px; /* Pequeño espacio de seguridad en los bordes de la pantalla */
+}
 
-        /* Envoltório principal - Totalmente flexible en celulares */
-        .phone-wrapper {
-            width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 0 5px; /* Espacio mínimo de seguridad lateral */
-        }
+/* Secciones adaptables */
+.view-section {
+    display: none;
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    padding: 18px; /* Un poco más compacto para ganar espacio interno */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--border);
+    width: 100%; /* Asegura que se adapte al ancho del wrapper */
+    max-width: 100%;
+    overflow: hidden; /* Corta cualquier desborde accidental */
+    animation: fadeIn 0.3s ease;
+}
+
+/* Inputs de Fecha y Hora adaptables al 100% */
+.form-control {
+    width: 100%;
+    max-width: 100%; /* Evita que el input de fecha se ensanche de más */
+    padding: 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    background-color: #FCFBF9;
+    transition: all 0.2s;
+    outline: none;
+    display: block;
+    -webkit-appearance: none; /* Quita estilos nativos de iOS que rompen el ancho */
+    appearance: none;
+}
+
+/* Contenedor de Hora Inicio y Fin */
+.time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Divide el espacio exactamente en dos */
+    gap: 10px;
+    width: 100%;
+}
+
 
         /* --- CABEÇALHO --- */
         header {
@@ -98,22 +137,19 @@
             box-shadow: 0 4px 10px rgba(140, 94, 88, 0.08);
         }
 
-        /* --- SEÇÕES DE CONTEÚDO (Ajustadas para no desbordar) --- */
+        /* --- SEÇÕES DE CONTEÚDO --- */
         .view-section {
-            display: none;
+            display: none; /* Ocultas por padrão */
             background-color: var(--card-bg);
             border-radius: 20px;
-            padding: 18px; /* Un poco más de margen interno para respirar */
+            padding: 20px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
             border: 1px solid var(--border);
-            width: 100%;
-            max-width: 100%;
-            overflow: hidden; /* Corta cualquier error visual */
             animation: fadeIn 0.3s ease;
         }
 
         .view-section.active {
-            display: block;
+            display: block; /* Mostra apenas a aba ativa */
         }
 
         @keyframes fadeIn {
@@ -132,7 +168,7 @@
             padding-bottom: 8px;
         }
 
-        /* --- FORMULÁRIO (Optimizado para Safari/iOS) --- */
+        /* --- FORMULÁRIO --- */
         .form-group {
             margin-bottom: 14px;
         }
@@ -147,7 +183,6 @@
 
         .form-control {
             width: 100%;
-            max-width: 100%;
             padding: 12px 14px;
             border: 1.5px solid var(--border);
             border-radius: 12px;
@@ -156,10 +191,6 @@
             background-color: #FCFBF9;
             transition: all 0.2s;
             outline: none;
-            display: block;
-            /* Fuerza a los navegadores móviles a respetar el ancho interno */
-            -webkit-appearance: none;
-            appearance: none;
         }
 
         .form-control:focus {
@@ -167,12 +198,10 @@
             box-shadow: 0 0 0 3px rgba(140, 94, 88, 0.1);
         }
 
-        /* Ajuste perfecto para Hora Inicio y Hora Fin en una sola línea */
         .time-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
+            gap: 12px;
         }
 
         .btn-submit {
@@ -195,7 +224,7 @@
             transform: scale(0.98);
         }
 
-        /* --- DASHBOARD --- */
+        /* --- DASHBOARD: MARCADORES KPI --- */
         .kpi-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -271,8 +300,6 @@
             font-weight: 700;
             color: var(--primary);
         }
-    </style>
-
     </style>
 </head>
 <body>
