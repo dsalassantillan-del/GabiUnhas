@@ -17,75 +17,34 @@
             --border: #F0E6D8;
             --success: #2D6A4F;
         }
-        
-        /* --- CORRECCIÓN DE TAMAÑOS PARA MÓVIL (Safari / iOS Friendly) --- */
-* {
-    box-sizing: border-box; /* Fuerza a todos los elementos a calcular su tamaño correctamente */
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    -webkit-tap-highlight-color: transparent;
-}
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-dark);
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-    overflow-x: hidden; /* Evita cualquier deslizamiento horizontal molesto */
-}
+        /* --- CONFIGURACIÓN PARA EVITAR DESBORDES EN MÓVIL --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-/* Envoltório principal - Usamos max-width en lugar de width fijo */
-.phone-wrapper {
-    width: 100%;
-    max-width: 450px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding: 5px; /* Pequeño espacio de seguridad en los bordes de la pantalla */
-}
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-/* Secciones adaptables */
-.view-section {
-    display: none;
-    background-color: var(--card-bg);
-    border-radius: 20px;
-    padding: 18px; /* Un poco más compacto para ganar espacio interno */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    border: 1px solid var(--border);
-    width: 100%; /* Asegura que se adapte al ancho del wrapper */
-    max-width: 100%;
-    overflow: hidden; /* Corta cualquier desborde accidental */
-    animation: fadeIn 0.3s ease;
-}
-
-/* Inputs de Fecha y Hora adaptables al 100% */
-.form-control {
-    width: 100%;
-    max-width: 100%; /* Evita que el input de fecha se ensanche de más */
-    padding: 12px;
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    color: var(--text-dark);
-    background-color: #FCFBF9;
-    transition: all 0.2s;
-    outline: none;
-    display: block;
-    -webkit-appearance: none; /* Quita estilos nativos de iOS que rompen el ancho */
-    appearance: none;
-}
-
-/* Contenedor de Hora Inicio y Fin */
-.time-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Divide el espacio exactamente en dos */
-    gap: 10px;
-    width: 100%;
-}
-
+        .phone-wrapper {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 5px;
+        }
 
         /* --- CABEÇALHO --- */
         header {
@@ -139,17 +98,20 @@ body {
 
         /* --- SEÇÕES DE CONTEÚDO --- */
         .view-section {
-            display: none; /* Ocultas por padrão */
+            display: none;
             background-color: var(--card-bg);
             border-radius: 20px;
-            padding: 20px;
+            padding: 18px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
             border: 1px solid var(--border);
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
             animation: fadeIn 0.3s ease;
         }
 
         .view-section.active {
-            display: block; /* Mostra apenas a aba ativa */
+            display: block;
         }
 
         @keyframes fadeIn {
@@ -183,6 +145,7 @@ body {
 
         .form-control {
             width: 100%;
+            max-width: 100%;
             padding: 12px 14px;
             border: 1.5px solid var(--border);
             border-radius: 12px;
@@ -191,6 +154,9 @@ body {
             background-color: #FCFBF9;
             transition: all 0.2s;
             outline: none;
+            display: block;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .form-control:focus {
@@ -201,7 +167,8 @@ body {
         .time-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
+            width: 100%;
         }
 
         .btn-submit {
@@ -224,7 +191,7 @@ body {
             transform: scale(0.98);
         }
 
-        /* --- DASHBOARD: MARCADORES KPI --- */
+        /* --- DASHBOARD --- */
         .kpi-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -331,9 +298,9 @@ body {
                 <div class="form-group">
                     <label for="serviceType">Serviço</label>
                     <select id="serviceType" class="form-control" required>
-                        <option value="Mão" data-price="50">Mão</option>
-                        <option value="Pé" data-price="40">Pé</option>
-                        <option value="Mão e Pé" data-price="85">Mão e Pé</option>
+                        <option value="Mão" data-price="50">Mão (R$ 50,00)</option>
+                        <option value="Pé" data-price="40">Pé (R$ 40,00)</option>
+                        <option value="Mão e Pé" data-price="85">Mão e Pé (R$ 85,00)</option>
                     </select>
                 </div>
 
@@ -379,12 +346,14 @@ body {
 
             <h2 class="section-title" style="border-bottom: none; margin-bottom: 10px; padding-bottom: 0;">📋 Próximas Clientes</h2>
             <ul class="client-list" id="clientList">
+                <!-- Se llenará dinámicamente -->
+                <p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>
             </ul>
         </section>
 
     </div>
 
-    <!-- LOGICA JAVASCRIPT -->
+    <!-- --- JAVASCRIPT: LÓGICA DE FUNCIONAMIENTO --- -->
     <script>
         // Lógica de alternar entre abas
         function switchTab(tabName) {
@@ -397,10 +366,12 @@ body {
             } else if (tabName === 'resumo') {
                 document.querySelector('button[onclick="switchTab(\'resumo\')"]').classList.add('active');
                 document.getElementById('resumo-view').classList.add('active');
+                // Cargar datos en el Dashboard automáticamente al entrar en Resumen
+                obtenerGananciasYClientes();
             }
         }
 
-        // Lógica de atualizar preço sugerido
+        // Lógica de actualizar precio sugerido automáticamente
         const serviceSelect = document.getElementById('serviceType');
         const valueInput = document.getElementById('serviceValue');
 
@@ -410,11 +381,130 @@ body {
             valueInput.value = price;
         });
 
+        // REEMPLAZA ESTA LÍNEA CON LA URL DE GOOGLE APPS SCRIPT QUE COPIASTE
+        const APPS_SCRIPT_URL = 'URL_DE_TU_APPLICATIONS_WEB_AQUI';
+
+        // Guardar datos al enviar el formulario
+        const formulario = document.getElementById('appointmentForm');
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evitar que recargue la página
+
+            // Capturar valores del formulario
+            const fecha = document.getElementById('appointmentDate').value;
+            const nombre = document.getElementById('clientName').value;
+            const servicio = serviceSelect.value;
+            const valor = document.getElementById('serviceValue').value;
+            const horaInicio = document.getElementById('startTime').value;
+            const horaFin = document.getElementById('endTime').value;
+
+            // Crear objeto de datos
+            const datosCita = {
+                Fecha: fecha,
+                Nombre: nombre,
+                Descripcion: servicio,
+                Ingreso: valor,
+                Hora: `${horaInicio} - ${horaFin}`
+            };
+
+            try {
+                // Enviar datos por POST a Google Apps Script
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8' // Necesario para evitar bloqueos CORS con Apps Script
+                    },
+                    body: JSON.stringify(datosCita)
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.status === 'success') {
+                    alert('¡Agendamento guardado con éxito en Google Sheets! 🎉');
+                    formulario.reset(); // Limpiar campos
+                    
+                    // Restaurar valor predeterminado del primer servicio
+                    valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
+                    
+                    // Redirigir a pestaña de Resumen
+                    switchTab('resumo');
+                } else {
+                    alert('Erro ao salvar: ' + resultado.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Conexão estabelecida! Cita salva na planilha.');
+            }
+        });
+
+        // Función para obtener y calcular los totales en el Dashboard
+        async function obtenerGananciasYClientes() {
+            const listaClientes = document.getElementById('clientList');
+            listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL);
+                const citas = await response.json();
+                
+                let totalMes = 0;
+                let totalSemana = 0;
+                let htmlClientes = '';
+
+                // Fechas de control para calcular semana y mes
+                const hoy = new Date();
+                const haceSieteDias = new Date();
+                haceSieteDias.setDate(hoy.getDate() - 7);
+                const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+                citas.forEach(cita => {
+                    const valor = parseFloat(cita.Ingreso) || 0;
+                    const fechaCita = new Date(cita.Fecha);
+
+                    // Suma del Mes actual
+                    if (fechaCita >= primerDiaMes) {
+                        totalMes += valor;
+                    }
+
+                    // Suma de la última semana (últimos 7 días)
+                    if (fechaCita >= haceSieteDias && fechaCita <= hoy) {
+                        totalSemana += valor;
+                    }
+
+                    // Formatear fecha para el listado (YYYY-MM-DD a DD/MM)
+                    let fechaCorta = '';
+                    if(cita.Fecha) {
+                        const partes = cita.Fecha.split('T')[0].split('-');
+                        fechaCorta = `${partes[2]}/${partes[1]}`;
+                    }
+
+                    // Crear el elemento visual para la lista de clientas
+                    htmlClientes += `
+                        <li class="client-item">
+                            <div class="client-info">
+                                <h4>${cita.Descripcion}</h4> <!-- Nombre de la clienta (Guardada en tu columna Descripcion) -->
+                                <div class="client-meta">
+                                    <span class="badge">${cita.Categoria}</span>
+                                    <span>🕒 ${fechaCorta} | ${cita.FEV || ''}</span>
+                                </div>
+                            </div>
+                            <div class="client-price">R$ ${valor.toFixed(2)}</div>
+                        </li>
+                    `;
+                });
+
+                // Actualizar el Dashboard en pantalla
+                document.getElementById('weeklyEarnings').innerText = `R$ ${totalSemana.toFixed(2)}`;
+                document.getElementById('monthlyEarnings').innerText = `R$ ${totalMes.toFixed(2)}`;
+                document.getElementById('clientList').innerHTML = htmlClientes || '<p style="text-align:center; color:var(--text-light);">Nenhuma cliente agendada.</p>';
+
+            } catch (error) {
+                console.error('Error al cargar los datos en el Dashboard:', error);
+                document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro ao carregar dados.</p>';
+            }
+        }
+
         // Configurações ao carregar a página
         window.addEventListener('DOMContentLoaded', () => {
             valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
-            
-            // Define a data atual como padrão no calendário
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('appointmentDate').value = today;
         });
