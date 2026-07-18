@@ -417,51 +417,53 @@
 
         // Guardar datos al enviar el formulario
         // Guardar datos al enviar el formulario
+        // Guardar datos al enviar el formulario
         const formulario = document.getElementById('appointmentForm');
-        formulario.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        if (formulario) {
+            formulario.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            const fecha = document.getElementById('appointmentDate').value;
-            const nombre = document.getElementById('clientName').value;
-            const servicio = serviceSelect.value;
-            const valor = document.getElementById('serviceValue').value;
-            const horaInicio = document.getElementById('startTime').value;
-            const horaFin = document.getElementById('endTime').value;
+                const fecha = document.getElementById('appointmentDate').value;
+                const nombre = document.getElementById('clientName').value;
+                const servicio = serviceSelect.value;
+                const valor = document.getElementById('serviceValue').value;
+                const horaInicio = document.getElementById('startTime').value;
+                const horaFin = document.getElementById('endTime').value;
 
-            const datosCita = {
-                Fecha: fecha, Nombre: nombre, Descripcion: servicio, Ingreso: valor, Hora: `${horaInicio} - ${horaFin}`
-            };
-
-            if (!gapiInited || !isInited) {
-                alert('As bibliotecas do Google ainda estão carregando. Tente novamente en 3 segundos.');
-                return;
-            }
-
-            // Definimos la acción que se ejecutará una vez que tengamos un token válido
-            const procesarAgendamiento = async () => {
-                const eventoCreado = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
-                if (eventoCreado) {
-                    enviarAGoogleSheets(datosCita);
-                }
-            };
-
-            // TRUCO CLAVE: Verificar si ya tenemos un token guardado en la sesión activa
-            const tokenActual = gapi.client.getToken();
-
-            if (tokenActual !== null) {
-                // Si el token ya existe y está activo, procesamos la cita DIRECTAMENTE sin pedir login de nuevo
-                await procesarAgendamiento();
-            } else {
-                // Si es la primera vez del día o expiró, definimos el callback y pedimos acceso una sola vez
-                tokenClient.callback = async (resp) => {
-                    if (resp.error !== undefined) { throw (resp); }
-                    await procesarAgendamiento();
+                const datosCita = {
+                    Fecha: fecha, Nombre: nombre, Descripcion: servicio, Ingreso: valor, Hora: `${horaInicio} - ${horaFin}`
                 };
 
-                // Abre la ventana de Google pidiendo consentimiento
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            }
-        });
+                // Corregido: Usamos solo las variables de inicialización que tu app ya tiene configuradas
+                if (!gapiInited || !gisInited) {
+                    alert('As bibliotecas do Google ainda estão carregando. Tente novamente em alguns segundos.');
+                    return;
+                }
+
+                // Función que procesa el guardado en ambas plataformas
+                const procesarAgendamiento = async () => {
+                    const eventoCreado = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
+                    if (eventoCreado) {
+                        await enviarAGoogleSheets(datosCita);
+                    }
+                };
+
+                // Revisamos si el navegador ya retiene la sesión activa de Google
+                if (gapi.client.getToken() !== null) {
+                    // Si ya está aprobada, guarda directo sin abrir ventanas molestas
+                    await procesarAgendamiento();
+                } else {
+                    // Si la sesión expiró o es la primera cita, configuramos el receptor limpio
+                    tokenClient.callback = async (resp) => {
+                        if (resp.error !== undefined) { throw (resp); }
+                        await procesarAgendamiento();
+                    };
+                    
+                    // SOLUCIÓN AL ERROR DE PERMISOS: Pedimos el token de forma fluida sin forzar la pantalla de bloqueo
+                    tokenClient.requestAccessToken({ prompt: '' });
+                }
+            });
+        }
 
         // Función interna para insertar el evento en Google Calendar
         async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
