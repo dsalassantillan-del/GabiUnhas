@@ -490,6 +490,8 @@
         return true;
     } catch (err) {
         console.error('Error al crear evento en Calendar:', err);
+        // 🧼 Esto borra el token corrupto de la memoria si da error, obligando a pedir uno limpio en el siguiente clic
+        gapi.client.setToken(null);
         alert('Error al agendar en Google Calendar. Verifica los permisos.');
         return false;
     }
