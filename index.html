@@ -461,7 +461,7 @@
         // Función interna para insertar el evento en Google Calendar
         async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
             const event = {
-                'summary': `💅 Cita: ${nombre}`,
+                'summary': `${nombre}`,
                 'description': `Serviço de Nails: ${servicio}`,
                 'start': { 'dateTime': `${fecha}T${horaInicio}:00`, 'timeZone': 'America/Sao_Paulo' },
                 'end': { 'dateTime': `${fecha}T${horaFin}:00`, 'timeZone': 'America/Sao_Paulo' }
