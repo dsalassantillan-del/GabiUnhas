@@ -460,23 +460,33 @@
 
         // Función interna para insertar el evento en Google Calendar
         async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
-            const event = {
-                'summary': `${nombre}`,
-                'description': `Serviço de Nails: ${servicio}`,
-                'coloId': '3',
-                'start': { 'dateTime': `${fecha}T${horaInicio}:00`, 'timeZone': 'America/Sao_Paulo' },
-                'end': { 'dateTime': `${fecha}T${horaFin}:00`, 'timeZone': 'America/Sao_Paulo' }
-            };
-
-            try {
-                await gapi.client.calendar.events.insert({ 'calendarId': 'primary', 'resource': event });
-                return true;
-            } catch (err) {
-                console.error('Error al crear evento en Calendar:', err);
-                alert('Error al agendar en Google Calendar. Verifica los permisos.');
-                return false;
-            }
+    const event = {
+        'summary': `${nombre}`,
+        'description': `Serviço de Nails: ${servicio}`,
+        'colorId': '11', // ID oficial de la API para el tono Flamingo / Rosa Pastel
+        'start': { 
+            'dateTime': `${fecha}T${horaInicio}:00`, 
+            'timeZone': 'America/Sao_Paulo' 
+        },
+        'end': { 
+            'dateTime': `${fecha}T${horaFin}:00`, 
+            'timeZone': 'America/Sao_Paulo' 
         }
+    };
+
+    try {
+        // Forzamos la inserción con los parámetros de recursos limpios
+        await gapi.client.calendar.events.insert({ 
+            'calendarId': 'primary', 
+            'resource': event 
+        });
+        return true;
+    } catch (err) {
+        console.error('Error al crear evento en Calendar:', err);
+        alert('Error al agendar en Google Calendar. Verifica los permisos.');
+        return false;
+    }
+}
 
         // Función para enviar los datos por POST a Google Sheets
         async function enviarAGoogleSheets(datosCita) {
