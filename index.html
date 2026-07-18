@@ -392,7 +392,7 @@
         });
 
         // REEMPLAZA ESTA LÍNEA CON LA URL DE GOOGLE APPS SCRIPT QUE COPIASTE
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZa5N6xKsikqttjiTbsOXqPUZmZhbcOyno2D1XjdP10SVJSce5QQLsFng-sjLYwrW4/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIEsClJTy1gZhubfKoKR1IyJNRwvENHX9sivjaBAX3gTW9SObyRZZs4832iSsxybnF/exec';
 
         // Guardar datos al enviar el formulario
         const formulario = document.getElementById('appointmentForm');
@@ -449,15 +449,13 @@
         // Función para obtener y calcular los totales en el Dashboard
         // Função para obter e calcular os totais no Dashboard de forma segura
         // Função para obter e calcular os totais no Dashboard de forma segura (Evitando bloqueos de CORS)
-async function obtenerGananciasYClientes() {
+        async function obtenerGananciasYClientes() {
     const listaClientes = document.getElementById('clientList');
     listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
 
     try {
-        // Añadimos configuración de redirección para que Google Apps Script responda sin bloquear el navegador
         const response = await fetch(APPS_SCRIPT_URL, {
             method: 'GET',
-            mode: 'cors',
             redirect: 'follow'
         });
         
@@ -478,45 +476,30 @@ async function obtenerGananciasYClientes() {
         const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
 
         citas.forEach(cita => {
-            // Limpiar y convertir el valor de ingreso de forma segura
-            let ingresoTexto = String(cita.Ingreso || cita.ingreso || "0");
-            ingresoTexto = ingresoTexto.replace('R$', '').replace('$', '').trim();
-            const valor = parseFloat(ingresoTexto) || 0;
+            const valor = parseFloat(cita.Ingreso) || 0;
 
-            // Procesar la fecha de forma segura (soporta formatos ISO y texto local dd/mm/yyyy)
-            let fechaCita;
-            if (cita.Fecha) {
-                const partesFecha = String(cita.Fecha).split(' ')[0];
-                if (partesFecha.includes('/')) {
-                    const partes = partesFecha.split('/');
-                    fechaCita = new Date(partes[2], partes[1] - 1, partes[0]);
-                } else {
-                    fechaCita = new Date(partesFecha + "T00:00:00");
-                }
-            } else {
-                fechaCita = new Date();
+            // Procesar el formato exacto de tu hoja (DD/MM/YYYY)
+            let fechaCita = new Date();
+            if (cita.Fecha && String(cita.Fecha).includes('/')) {
+                const partes = String(cita.Fecha).split('/');
+                // Crear la fecha usando año, mes (0-11), día
+                fechaCita = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
             }
 
-            // Sumar al total del mes
+            // Sumas lógicas del Dashboard
             if (fechaCita >= primerDiaMes) {
                 totalMes += valor;
             }
-
-            // Sumar al total de la semana (últimos 7 días)
             if (fechaCita >= haceSieteDias && fechaCita <= hoy) {
                 totalSemana += valor;
             }
 
-            // Formatear la fecha para mostrar en la lista
-            let dia = String(fechaCita.getDate()).padStart(2, '0');
-            let mes = String(fechaCita.getMonth() + 1).padStart(2, '0');
-            let fechaMostrar = `${dia}/${mes}`;
-
-            // Nombre de la clienta (Guardada en tu columna "Descripcion")
+            // Nombre de la clienta en tu columna 'Descripcion' (ej. Gabi, Daniel)
             const nombreCliente = cita.Descripcion || "Cliente";
-
-            // Servicio realizado y hora (Guardado en tu columna "FEV")
-            const servicioRealizado = cita.FEV || "Serviço";
+            // Horario en tu columna 'FEV'
+            const horarioCita = cita.FEV || "";
+            // Formato corto de fecha para el celular
+            const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
 
             htmlClientes += `
                 <li class="client-item">
@@ -524,7 +507,7 @@ async function obtenerGananciasYClientes() {
                         <h4>${nombreCliente}</h4>
                         <div class="client-meta">
                             <span class="badge">Nails</span>
-                            <span>🕒 ${fechaMostrar} | ${servicioRealizado}</span>
+                            <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
                         </div>
                     </div>
                     <div class="client-price">R$ ${valor.toFixed(2)}</div>
@@ -532,14 +515,13 @@ async function obtenerGananciasYClientes() {
             `;
         });
 
-        // Mostrar totales calculados en la pantalla
         document.getElementById('weeklyEarnings').innerText = `R$ ${totalSemana.toFixed(2)}`;
         document.getElementById('monthlyEarnings').innerText = `R$ ${totalMes.toFixed(2)}`;
         document.getElementById('clientList').innerHTML = htmlClientes;
 
     } catch (error) {
         console.error('Error al cargar los datos en el Dashboard:', error);
-        document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro de conexão com o servidor.</p>';
+        document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro de conexão com a planilha.</p>';
     }
 }
 
