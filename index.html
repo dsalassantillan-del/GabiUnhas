@@ -437,70 +437,98 @@
         });
 
         // Función para obtener y calcular los totales en el Dashboard
-        async function obtenerGananciasYClientes() {
-            const listaClientes = document.getElementById('clientList');
-            listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
+        // Função para obter e calcular os totais no Dashboard de forma segura
+async function obtenerGananciasYClientes() {
+    const listaClientes = document.getElementById('clientList');
+    listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
 
-            try {
-                const response = await fetch(APPS_SCRIPT_URL);
-                const citas = await response.json();
-                
-                let totalMes = 0;
-                let totalSemana = 0;
-                let htmlClientes = '';
-
-                // Fechas de control para calcular semana y mes
-                const hoy = new Date();
-                const haceSieteDias = new Date();
-                haceSieteDias.setDate(hoy.getDate() - 7);
-                const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-
-                citas.forEach(cita => {
-                    const valor = parseFloat(cita.Ingreso) || 0;
-                    const fechaCita = new Date(cita.Fecha);
-
-                    // Suma del Mes actual
-                    if (fechaCita >= primerDiaMes) {
-                        totalMes += valor;
-                    }
-
-                    // Suma de la última semana (últimos 7 días)
-                    if (fechaCita >= haceSieteDias && fechaCita <= hoy) {
-                        totalSemana += valor;
-                    }
-
-                    // Formatear fecha para el listado (YYYY-MM-DD a DD/MM)
-                    let fechaCorta = '';
-                    if(cita.Fecha) {
-                        const partes = cita.Fecha.split('T')[0].split('-');
-                        fechaCorta = `${partes[2]}/${partes[1]}`;
-                    }
-
-                    // Crear el elemento visual para la lista de clientas
-                    htmlClientes += `
-                        <li class="client-item">
-                            <div class="client-info">
-                                <h4>${cita.Descripcion}</h4> <!-- Nombre de la clienta (Guardada en tu columna Descripcion) -->
-                                <div class="client-meta">
-                                    <span class="badge">${cita.Categoria}</span>
-                                    <span>🕒 ${fechaCorta} | ${cita.FEV || ''}</span>
-                                </div>
-                            </div>
-                            <div class="client-price">R$ ${valor.toFixed(2)}</div>
-                        </li>
-                    `;
-                });
-
-                // Actualizar el Dashboard en pantalla
-                document.getElementById('weeklyEarnings').innerText = `R$ ${totalSemana.toFixed(2)}`;
-                document.getElementById('monthlyEarnings').innerText = `R$ ${totalMes.toFixed(2)}`;
-                document.getElementById('clientList').innerHTML = htmlClientes || '<p style="text-align:center; color:var(--text-light);">Nenhuma cliente agendada.</p>';
-
-            } catch (error) {
-                console.error('Error al cargar los datos en el Dashboard:', error);
-                document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro ao carregar dados.</p>';
-            }
+    try {
+        const response = await fetch(APPS_SCRIPT_URL);
+        const citas = await response.json();
+        
+        // Si Google nos devuelve un error o viene vacío
+        if (!citas || citas.error) {
+            listaClientes.innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro ao carregar dados do Google.</p>';
+            return;
         }
+
+        let totalMes = 0;
+        let totalSemana = 0;
+        let htmlClientes = '';
+
+        const hoy = new Date();
+        const haceSieteDias = new Date();
+        haceSieteDias.setDate(hoy.getDate() - 7);
+        const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+        citas.forEach(cita => {
+            // Limpiar y convertir el valor de ingreso (R$ 140.00 o $140.00)
+            let ingresoTexto = String(cita.Ingreso || cita.ingreso || "0");
+            ingresoTexto = ingresoTexto.replace('R$', '').replace('$', '').trim();
+            const valor = parseFloat(ingresoTexto) || 0;
+
+            // Procesar la fecha de forma segura (soporta formatos ISO y texto local dd/mm/yyyy)
+            let fechaCita;
+            if (cita.Fecha) {
+                const partesFecha = String(cita.Fecha).split(' ')[0]; // Quita la hora si viene junta
+                if (partesFecha.includes('/')) {
+                    // Formato dd/mm/yyyy
+                    const partes = partesFecha.split('/');
+                    fechaCita = new Date(partes[2], partes[1] - 1, partes[0]);
+                } else {
+                    // Formato YYYY-MM-DD
+                    fechaCita = new Date(partesFecha + "T00:00:00");
+                }
+            } else {
+                fechaCita = new Date();
+            }
+
+            // Sumar al total del mes
+            if (fechaCita >= primerDiaMes) {
+                totalMes += valor;
+            }
+
+            // Sumar al total de la semana (últimos 7 días)
+            if (fechaCita >= haceSieteDias && fechaCita <= hoy) {
+                totalSemana += valor;
+            }
+
+            // Formatear la fecha para mostrar en la lista
+            let dia = String(fechaCita.getDate()).padStart(2, '0');
+            let mes = String(fechaCita.getMonth() + 1).padStart(2, '0');
+            let fechaMostrar = `${dia}/${mes}`;
+
+            // Nombre de la clienta (Suele guardarse en tu columna "Descripcion")
+            const nombreCliente = cita.Descripcion || "Cliente";
+
+            // Servicio realizado (Guardado en tu columna "FEV" o "Categoria")
+            const servicioRealizado = cita.FEV || "Serviço";
+
+            htmlClientes += `
+                <li class="client-item">
+                    <div class="client-info">
+                        <h4>${nombreCliente}</h4>
+                        <div class="client-meta">
+                            <span class="badge">${servicioRealizado}</span>
+                            <span>🕒 ${fechaMostrar}</span>
+                        </div>
+                    </div>
+                    <div class="client-price">R$ ${valor.toFixed(2)}</div>
+                </li>
+            `;
+        });
+
+        // Mostrar totales en la pantalla
+        document.getElementById('weeklyEarnings').innerText = `R$ ${totalSemana.toFixed(2)}`;
+        document.getElementById('monthlyEarnings').innerText = `R$ ${totalMes.toFixed(2)}`;
+        document.getElementById('clientList').innerHTML = htmlClientes || '<p style="text-align:center; color:var(--text-light); padding: 10px;">Nenhum agendamento recente.</p>';
+
+    } catch (error) {
+        console.error('Error al cargar los datos en el Dashboard:', error);
+        document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro ao carregar dados.</p>';
+    }
+}
+
 
         // Configurações ao carregar a página
         window.addEventListener('DOMContentLoaded', () => {
