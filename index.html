@@ -416,6 +416,7 @@
         });
 
         // Guardar datos al enviar el formulario
+        // Guardar datos al enviar el formulario
         const formulario = document.getElementById('appointmentForm');
         formulario.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -431,30 +432,34 @@
                 Fecha: fecha, Nombre: nombre, Descripcion: servicio, Ingreso: valor, Hora: `${horaInicio} - ${horaFin}`
             };
 
-            // 1. Intentar crear primero el evento en Google Calendar
-            if (!gapiInited || !gisInited) {
-                alert('Las librerías de Google aún se están cargando. Intenta de nuevo en 3 segundos.');
+            if (!gapiInited || !isInited) {
+                alert('As bibliotecas do Google ainda estão carregando. Tente novamente en 3 segundos.');
                 return;
             }
 
-            // Definir qué pasa cuando Google nos da el permiso de acceso temporal
-            tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) { throw (resp); }
-                
-                // Si el permiso es exitoso, creamos el evento en Calendar
+            // Definimos la acción que se ejecutará una vez que tengamos un token válido
+            const procesarAgendamiento = async () => {
                 const eventoCreado = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
-                
                 if (eventoCreado) {
-                    // 2. Si se guardó en el calendario, procedemos a guardarlo en la hoja de cálculo de Google Sheets
                     enviarAGoogleSheets(datosCita);
                 }
             };
 
-            // Solicitar el token de acceso (Abre ventana emergente de inicio de sesión si es necesario)
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
+            // TRUCO CLAVE: Verificar si ya tenemos un token guardado en la sesión activa
+            const tokenActual = gapi.client.getToken();
+
+            if (tokenActual !== null) {
+                // Si el token ya existe y está activo, procesamos la cita DIRECTAMENTE sin pedir login de nuevo
+                await procesarAgendamiento();
             } else {
-                tokenClient.requestAccessToken({prompt: ''});
+                // Si es la primera vez del día o expiró, definimos el callback y pedimos acceso una sola vez
+                tokenClient.callback = async (resp) => {
+                    if (resp.error !== undefined) { throw (resp); }
+                    await procesarAgendamiento();
+                };
+
+                // Abre la ventana de Google pidiendo consentimiento
+                tokenClient.requestAccessToken({prompt: 'consent'});
             }
         });
 
