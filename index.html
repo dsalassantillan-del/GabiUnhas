@@ -364,7 +364,205 @@
     </div>
 
     <!-- --- JAVASCRIPT: LÓGICA DE FUNCIONAMIENTO --- -->
+    <!-- Librerías Oficiales de Google API (gapi) y Google Identity Services (gis) -->
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
     <script>
+        // Configuración de credenciales de Google (¡Coloca las tuyas aquí!)
+        const CLIENT_ID = '19004282784-e0277e8qmi3tubcdg2a71spqlorull2t.apps.googleusercontent.com';
+        const API_KEY = 'AIzaSyDCu4FtYLx9fZ7dllqhFZU7-OLKVq9XYxA';
+        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
+        const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
+
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIEsClJTy1gZhubfKoKR1IyJNRwvENHX9sivjaBAX3gTW9SObyRZZs4832iSsxybnF/exec';
+
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        // Cargar librerías de Google al abrir la página
+        function gapiLoaded() { gapi.load('client', intializeGapiClient); }
+        async function intializeGapiClient() {
+            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+            gapiInited = true;
+        }
+        function gisLoaded() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID, scope: SCOPES, callback: '', // se define dinámicamente al agendar
+            });
+            gisInited = true;
+        }
+
+        // Función para alternar entre abas
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+
+            if (tabName === 'agendamento') {
+                document.querySelector('button[onclick="switchTab(\'agendamento\')"]').classList.add('active');
+                document.getElementById('agendamento-view').classList.add('active');
+            } else if (tabName === 'resumo') {
+                document.querySelector('button[onclick="switchTab(\'resumo\')"]').classList.add('active');
+                document.getElementById('resumo-view').classList.add('active');
+                obtenerGananciasYClientes();
+            }
+        }
+
+        // Lógica de actualizar precio sugerido automáticamente
+        const serviceSelect = document.getElementById('serviceType');
+        const valueInput = document.getElementById('serviceValue');
+        serviceSelect.addEventListener('change', (e) => {
+            valueInput.value = e.target.options[e.target.selectedIndex].getAttribute('data-price');
+        });
+
+        // Guardar datos al enviar el formulario
+        const formulario = document.getElementById('appointmentForm');
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fecha = document.getElementById('appointmentDate').value;
+            const nombre = document.getElementById('clientName').value;
+            const servicio = serviceSelect.value;
+            const valor = document.getElementById('serviceValue').value;
+            const horaInicio = document.getElementById('startTime').value;
+            const horaFin = document.getElementById('endTime').value;
+
+            const datosCita = {
+                Fecha: fecha, Nombre: nombre, Descripcion: servicio, Ingreso: valor, Hora: `${horaInicio} - ${horaFin}`
+            };
+
+            // 1. Intentar crear primero el evento en Google Calendar
+            if (!gapiInited || !gisInited) {
+                alert('Las librerías de Google aún se están cargando. Intenta de nuevo en 3 segundos.');
+                return;
+            }
+
+            // Definir qué pasa cuando Google nos da el permiso de acceso temporal
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) { throw (resp); }
+                
+                // Si el permiso es exitoso, creamos el evento en Calendar
+                const eventoCreado = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
+                
+                if (eventoCreado) {
+                    // 2. Si se guardó en el calendario, procedemos a guardarlo en la hoja de cálculo de Google Sheets
+                    enviarAGoogleSheets(datosCita);
+                }
+            };
+
+            // Solicitar el token de acceso (Abre ventana emergente de inicio de sesión si es necesario)
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        });
+
+        // Función interna para insertar el evento en Google Calendar
+        async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
+            const event = {
+                'summary': `💅 Cita: ${nombre}`,
+                'description': `Serviço de Nails: ${servicio}`,
+                'start': { 'dateTime': `${fecha}T${horaInicio}:00`, 'timeZone': 'America/Sao_Paulo' },
+                'end': { 'dateTime': `${fecha}T${horaFin}:00`, 'timeZone': 'America/Sao_Paulo' }
+            };
+
+            try {
+                await gapi.client.calendar.events.insert({ 'calendarId': 'primary', 'resource': event });
+                return true;
+            } catch (err) {
+                console.error('Error al crear evento en Calendar:', err);
+                alert('Error al agendar en Google Calendar. Verifica los permisos.');
+                return false;
+            }
+        }
+
+        // Función para enviar los datos por POST a Google Sheets
+        async function enviarAGoogleSheets(datosCita) {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(datosCita)
+                });
+                const resultado = await response.json();
+
+                if (resultado.status === 'success') {
+                    alert('¡Agendamento guardado en Google Calendar y Sheets con éxito! 🎉');
+                    formulario.reset();
+                    valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
+                    switchTab('resumo');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Cita guardada en calendario. Sincronizando con la planilla.');
+            }
+        }
+
+        // Función para obtener y calcular los totales en el Dashboard de forma segura
+        async function obtenerGananciasYClientes() {
+            const listaClientes = document.getElementById('clientList');
+            listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', redirect: 'follow' });
+                const citas = await response.json();
+                
+                if (!citas || citas.error || citas.length === 0) {
+                    listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Nenhum agendamento recente cadastrado.</p>';
+                    return;
+                }
+
+                let totalMes = 0; let totalSemana = 0; let htmlClientes = '';
+                const hoy = new Date();
+                const haceSieteDias = new Date(); haceSieteDias.setDate(hoy.getDate() - 7);
+                const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+                citas.forEach(cita => {
+                    const valor = parseFloat(cita.Ingreso) || 0;
+                    let fechaCita = new Date();
+                    if (cita.Fecha && String(cita.Fecha).includes('/')) {
+                        const partes = String(cita.Fecha).split('/');
+                        fechaCita = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+                    }
+
+                    if (fechaCita >= primerDiaMes) { totalMes += valor; }
+                    if (fechaCita >= haceSieteDias && fechaCita <= hoy) { totalSemana += valor; }
+
+                    const nombreCliente = cita.Descripcion || "Cliente";
+                    const horarioCita = cita.FEV || "";
+                    const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
+
+                    htmlClientes += `
+                        <li class="client-item">
+                            <div class="client-info">
+                                <h4>${nombreCliente}</h4>
+                                <div class="client-meta">
+                                    <span class="badge">Nails</span>
+                                    <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
+                                </div>
+                            </div>
+                            <div class="client-price">R$ ${valor.toFixed(2)}</div>
+                        </li>
+                    `;
+                });
+
+                document.getElementById('weeklyEarnings').innerText = `R$ ${totalSemana.toFixed(2)}`;
+                document.getElementById('monthlyEarnings').innerText = `R$ ${totalMes.toFixed(2)}`;
+                document.getElementById('clientList').innerHTML = htmlClientes;
+
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+                document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro de conexão com a planilha.</p>';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
+            document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
+        });
+        /*
+        //CODIGO FUNCIOANDO HASTA LA PARTE DE JALAR INFROMACION DESDE GOOGLE SHEET
         // Lógica de alternar entre abas
         function switchTab(tabName) {
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -532,7 +730,7 @@
             valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('appointmentDate').value = today;
-        });
+        });*/
     </script>
 </body>
 </html>
