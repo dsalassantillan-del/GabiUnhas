@@ -59,13 +59,12 @@
 }
 
 /* Estilos de la imagen del logo */
+/* Estilos de la imagen del logo (versión cuadrada y sin borde) */
 .app-logo {
     width: 50px;           /* Ancho del logo */
     height: 50px;          /* Alto del logo */
-    border-radius: 50%;    /* Lo hace circular para verse más elegante */
-    object-fit: cover;     /* Ajusta la imagen sin deformarla */
-    border: 2px solid #fff;/* Borde blanco sutil */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* Sombra suave */
+    border-radius: 8px;    /* Bordes ligeramente redondeados (o usa 0px si lo quieres 100% recto) */
+    object-fit: contain;   /* Mantiene las proporciones exactas de tu logo */
 }
 
 /* Ajuste del bloque de texto */
