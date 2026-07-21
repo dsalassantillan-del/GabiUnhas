@@ -48,7 +48,39 @@
         }
 
         /* --- CABEÇALHO --- */
-        header {
+        /* Contenedor del encabezado en formato horizontal */
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espacio entre el logo y el texto */
+    padding: 15px 20px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #c49a79, #e0b899); /* O el gradiente que ya tengas */
+}
+
+/* Estilos de la imagen del logo */
+.app-logo {
+    width: 50px;           /* Ancho del logo */
+    height: 50px;          /* Alto del logo */
+    border-radius: 50%;    /* Lo hace circular para verse más elegante */
+    object-fit: cover;     /* Ajusta la imagen sin deformarla */
+    border: 2px solid #fff;/* Borde blanco sutil */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* Sombra suave */
+}
+
+/* Ajuste del bloque de texto */
+.header-title h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #ffffff;
+}
+
+.header-title p {
+    margin: 2px 0 0 0;
+    font-size: 0.85rem;
+    color: #f3e8e0;
+}
+        /*header {
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
             padding: 20px 15px;
@@ -66,7 +98,7 @@
         header p {
             font-size: 0.85rem;
             opacity: 0.9;
-        }
+        }*/
 
         /* --- ABAS DE NAVEGAÇÃO (TABS) --- */
         .tab-navigation {
@@ -275,9 +307,14 @@
     <div class="phone-wrapper">
         
         <!-- CABEÇALHO -->
-        <header>
-            <h1>💅 Gabriela Alves Nails</h1>
-            <p>Controle de Ganhos & Agendamentos</p>
+        <header class="app-header">
+    <!-- Logo alineado a la izquierda -->
+    <img src="logo.png" alt="Logo" class="app-logo">
+    
+    <div class="header-title">
+        <h1>💅 Gabriela Alves Nails</h1>
+        <p>Controle de Ganhos & Agendamentos</p>
+    </div>
         </header>
 
         <!-- NAVEGAÇÃO DE ABAS -->
