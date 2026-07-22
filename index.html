@@ -589,7 +589,8 @@ if (spinner) spinner.style.display = 'block';
 
                 // Variables recibidas de tu planilla
                 const nombreCliente = cita.Descripcion || 'Cliente';
-                const fechaMostrar = cita.Fecha || '';
+                const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
+                //cita.Fecha || '';
                 const horarioCita = cita.FEV || '';
                 const eventIdCalendar = cita.eventId || '';
 
