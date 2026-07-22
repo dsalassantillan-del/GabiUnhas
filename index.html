@@ -588,9 +588,9 @@ if (spinner) spinner.style.display = 'block';
                 totalGanancias += valor;
 
                 // Variables recibidas de tu planilla
-                const nombreCliente = cita.Nombre || cita.Descripcion || 'Cliente';
+                const nombreCliente = cita.Descripcion || 'Cliente';
                 const fechaMostrar = cita.Fecha || '';
-                const horarioCita = cita.Hora || '';
+                const horarioCita = cita.FEV || '';
                 const eventIdCalendar = cita.eventId || '';
 
                 htmlClientes += `
