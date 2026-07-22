@@ -299,6 +299,26 @@
             font-weight: 700;
             color: var(--primary);
         }
+
+        .client-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-delete {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.btn-delete:hover {
+    background: #ffe6e6;
+}
     </style>
 </head>
 <body>
@@ -411,7 +431,7 @@
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIEsClJTy1gZhubfKoKR1IyJNRwvENHX9sivjaBAX3gTW9SObyRZZs4832iSsxybnF/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHFTKZiprXG5oyKvZN_tgG1NLDhN4aY0ELuovthW7o3l81m1GP_vZv1GW5R9bcv7gx/exec';
 
         let tokenClient;
         let gapiInited = false;
@@ -558,6 +578,104 @@
 
         // Función para obtener y calcular los totales en el Dashboard de forma segura
         async function obtenerGananciasYClientes() {
+    const listaClientes = document.getElementById('lista-clientes');
+    if (!listaClientes) return;
+
+    try {
+        // Obtenemos los datos cargados desde la planilla
+        const respuesta = await fetch(APPS_SCRIPT_URL);
+        const citas = await respuesta.json();
+
+        let htmlClientes = '';
+        let totalGanancias = 0;
+
+        if (citas && citas.length > 0) {
+            citas.forEach((cita, index) => {
+                const valor = parseFloat(cita.Ingreso) || 0;
+                totalGanancias += valor;
+
+                // Variables recibidas de tu planilla
+                const nombreCliente = cita.Nombre || cita.Descripcion || 'Cliente';
+                const fechaMostrar = cita.Fecha || '';
+                const horarioCita = cita.Hora || '';
+                const eventIdCalendar = cita.eventId || '';
+
+                htmlClientes += `
+                    <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                        <div class="client-info">
+                            <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
+                            <div class="client-meta" style="font-size: 0.85rem; color: #666;">
+                                <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
+                            </div>
+                        </div>
+                        <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
+                            <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
+                            
+                            <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
+                                🗑️
+                            </button>
+                        </div>
+                    </li>
+                `;
+            });
+
+            listaClientes.innerHTML = htmlClientes;
+        } else {
+            listaClientes.innerHTML = '<li style="padding: 10px; color: #888;">Nenhum atendimento registrado.</li>';
+        }
+
+        // Actualizar total de ganancias si existe el elemento
+        const elTotal = document.getElementById('total-ganancias');
+        if (elTotal) {
+            elTotal.innerText = `R$ ${totalGanancias.toFixed(2)}`;
+        }
+
+    } catch (error) {
+        console.error("Erro ao carregar clientes:", error);
+        listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
+    }
+}
+
+        async function borrarAtendimento(nombre, fecha, eventId) {
+    // ❓ Cuadro de confirmación en portugués
+    const confirmacion = confirm("Desmarcar essa cliente?");
+    
+    if (!confirmacion) {
+        return; // Si la usuaria presiona "Cancelar", no hace nada
+    }
+
+    try {
+        // 1. Borrar en Google Calendar (si existe el ID del evento)
+        if (eventId && gapi.client.calendar) {
+            await gapi.client.calendar.events.delete({
+                'calendarId': 'primary',
+                'eventId': eventId
+            });
+        }
+
+        // 2. Borrar en Google Sheets
+        await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                accion: "eliminar",
+                Nombre: nombre,
+                Fecha: fecha
+            })
+        });
+
+        alert("Atendimento desmarcado com sucesso! 🗑️");
+        
+        // Recargar la lista en la app
+        obtenerGananciasYClientes();
+
+    } catch (error) {
+        console.error("Erro ao desmarcar:", error);
+        alert("Erro ao tentar desmarcar a cliente.");
+    }
+}
+        /*AQUI TODO ESTA FUNCIONANDO ANTES DEL BOTON ELIMINAR
+        /*async function obtenerGananciasYClientes() {
             const listaClientes = document.getElementById('clientList');
             listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
 
@@ -612,7 +730,7 @@
                 console.error('Error al cargar datos:', error);
                 document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro de conexão com a planilha.</p>';
             }
-        }
+        }*/
 
         window.addEventListener('DOMContentLoaded', () => {
             valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
