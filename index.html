@@ -589,7 +589,20 @@ if (spinner) spinner.style.display = 'block';
 
                 // Variables recibidas de tu planilla
                 const nombreCliente = cita.Descripcion || 'Cliente';
-                const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
+                let fechaMostrar = "";
+                if (cita.Fecha) {
+                const d = new Date(cita.Fecha);
+                if (!isNaN(d.getTime())) {
+                // Formatea la fecha a día/mes (ej: 22/07)
+                const dia = String(d.getDate()).padStart(2, '0');
+                const mes = String(d.getMonth() + 1).padStart(2, '0');
+                fechaMostrar = `${dia}/${mes}`;
+                } else {
+                // Si no se puede transformar, intenta mostrar los primeros caracteres
+                fechaMostrar = cita.Fecha;
+                }
+            }
+                //const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
                 //cita.Fecha || '';
                 const horarioCita = cita.FEV || '';
                 const eventIdCalendar = cita.eventId || '';
