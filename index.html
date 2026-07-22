@@ -571,6 +571,9 @@
     const listaClientes = document.getElementById('lista-clientes');
     if (!listaClientes) return;
 
+    const spinner = document.getElementById('loading-spinner');
+if (spinner) spinner.style.display = 'block';
+
     try {
         // Obtenemos los datos cargados desde la planilla
         const respuesta = await fetch(APPS_SCRIPT_URL);
@@ -619,6 +622,8 @@
         if (elTotal) {
             elTotal.innerText = `R$ ${totalGanancias.toFixed(2)}`;
         }
+
+        if (spinner) spinner.style.display = 'none';
 
     } catch (error) {
         console.error("Erro ao carregar clientes:", error);
