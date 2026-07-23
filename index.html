@@ -477,6 +477,15 @@
 .salida-history-item:last-child {
   border-bottom: none;
 }
+
+        input[type="date"]::-webkit-date-and-time-value {
+  text-align: center;
+  margin: 0;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0;
+  padding: 0;
         
     </style>
 </head>
@@ -617,7 +626,7 @@
         <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
             <div style="margin-bottom: 12px;">
                 <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Fecha de Registro:</label>
-                <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; box-sizing: border-box;" required>
+                <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none; min-width: 0; display: block;" required>
             </div>
 
             <button type="submit" class="btn-save-salida">
