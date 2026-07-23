@@ -621,7 +621,8 @@ if (spinner) spinner.style.display = 'block';
                 //const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
                 //cita.Fecha || '';
                 const horarioCita = cita.FEV || '';
-                const eventIdCalendar = cita.eventId || '';
+                // 🔍 Búsqueda flexible del ID del evento
+                const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || cita.eventId_ || '';
 
                 htmlClientes += `
                     <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
