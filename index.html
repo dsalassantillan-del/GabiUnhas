@@ -375,9 +375,13 @@
   display: flex;
   gap: 10px;
   margin-bottom: 12px;
+  width: 100%;                  /* 📐 Ocupa máximo el 100% de la tarjeta */
+  box-sizing: border-box;        /* 🛡️ Evita que crezca de más */
 }
 
 .calc-input-field {
+  width: 100%;                  /* 📐 Asegura que ocupe el ancho disponible */
+  box-sizing: border-box;       /* 🛡️ INCLUYE el padding y el borde dentro del ancho total */
   flex: 1;
   font-size: 1.1rem;
   padding: 10px 14px;
