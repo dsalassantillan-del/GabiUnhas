@@ -421,7 +421,7 @@
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxw5SE_lx57q6QSPwLJfG4UkftthKWFOT_WhnEecl8qIAglz5pBtRpcXQ2PnW1c1p1Z/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJWzP6HfCWQ-xABo_2yv-jsS1TFgdfAAfVw8yKbgTJoPf1Sl6T5FFHsV7BmvZWG_np/exec';
 
         let tokenClient;
         let gapiInited = false;
@@ -535,6 +535,21 @@
         'resource': event
         });
         const eventId = respuestaCalendar.result.id;
+        
+        await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+            accion: "agendar",
+            Nombre: nombreCliente,
+            Fecha: fechaCliente,
+            Hora: horaCliente,
+            Ingreso: valorCliente,
+            eventId: eventId // 👈 ¡Súper necesario para poder borrarlo después!
+        })
+    });
+
+        
         return true;
     } catch (err) {
         console.error('Error al crear evento en Calendar:', err);
