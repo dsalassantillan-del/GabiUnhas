@@ -530,10 +530,11 @@
 
     try {
         // Forzamos la inserción con los parámetros de recursos limpios
-        await gapi.client.calendar.events.insert({ 
-            'calendarId': 'primary', 
-            'resource': event 
+        const respuestaCalendar = await gapi.client.calendar.events.insert({ 
+        'calendarId': 'primary', 
+        'resource': event
         });
+        const eventId = respuestaCalendar.result.id;
         return true;
     } catch (err) {
         console.error('Error al crear evento en Calendar:', err);
