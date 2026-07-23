@@ -489,11 +489,18 @@
 
                 // Función que procesa el guardado en ambas plataformas
                 const procesarAgendamiento = async () => {
+                const eventIdObtenido = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
+                if (eventIdObtenido) {
+                datosCita.eventId = eventIdObtenido; // 👈 Guarda el ID devuelto por Calendar
+                await enviarAGoogleSheets(datosCita);
+                }
+            };
+                /*const procesarAgendamiento = async () => {
                     const eventoCreado = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
                     if (eventoCreado) {
                         await enviarAGoogleSheets(datosCita);
                     }
-                };
+                };*/
 
                 // Revisamos si el navegador ya retiene la sesión activa de Google
                 if (gapi.client.getToken() !== null) {
@@ -513,7 +520,64 @@
         }
 
         // Función interna para insertar el evento en Google Calendar
+        // Función interna para insertar el evento en Google Calendar y obtener su ID
         async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
+            const event = {
+                'summary': `${nombre}`,
+                'description': `Serviço de Nails: ${servicio}`,
+                'colorId': '4', // ID oficial de la API para el tono Flamingo / Rosa Pastel
+                'start': { 
+                    'dateTime': `${fecha}T${horaInicio}:00`, 
+                    'timeZone': 'America/Sao_Paulo' 
+                },
+                'end': { 
+                    'dateTime': `${fecha}T${horaFin}:00`, 
+                    'timeZone': 'America/Sao_Paulo' 
+                }
+            };
+
+            try {
+                // Inserción en Google Calendar
+                const respuestaCalendar = await gapi.client.calendar.events.insert({ 
+                    'calendarId': 'primary', 
+                    'resource': event
+                });
+                
+                // Retornamos el ID del evento creado
+                return respuestaCalendar.result.id;
+            } catch (err) {
+                console.error('Error al crear evento en Calendar:', err);
+                gapi.client.setToken(null);
+                alert('Error al agendar en Google Calendar. Verifica los permisos.');
+                return null;
+            }
+        }
+
+        // Función para enviar los datos por POST a Google Sheets
+        async function enviarAGoogleSheets(datosCita) {
+            try {
+                // Aseguramos que la acción sea "agendar" para Apps Script
+                datosCita.accion = "agendar";
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(datosCita)
+                });
+                const resultado = await response.json();
+
+                if (resultado.status === 'success') {
+                    alert('¡Agendamento guardado en Google Calendar y Sheets con éxito! 🎉');
+                    formulario.reset();
+                    valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
+                    switchTab('resumo');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Cita guardada en calendario. Sincronizando con la planilla.');
+            }
+        }
+        /*async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
     const event = {
         'summary': `${nombre}`,
         'description': `Serviço de Nails: ${servicio}`,
@@ -580,7 +644,7 @@
                 console.error('Error:', error);
                 alert('Cita guardada en calendario. Sincronizando con la planilla.');
             }
-        }
+        }*/
 
         // Función para obtener y calcular los totales en el Dashboard de forma segura
         async function obtenerGananciasYClientes() {
@@ -700,238 +764,11 @@ if (spinner) spinner.style.display = 'block';
         alert("Erro ao tentar desmarcar a cliente.");
     }
 }
-        /*AQUI TODO ESTA FUNCIONANDO ANTES DEL BOTON ELIMINAR
-        /*async function obtenerGananciasYClientes() {
-            const listaClientes = document.getElementById('clientList');
-            listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
-
-            try {
-                const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', redirect: 'follow' });
-                const citas = await response.json();
-                
-                if (!citas || citas.error || citas.length === 0) {
-                    listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Nenhum agendamento recente cadastrado.</p>';
-                    return;
-                }
-
-                let totalMes = 0; let totalSemana = 0; let htmlClientes = '';
-                const hoy = new Date();
-                const haceSieteDias = new Date(); haceSieteDias.setDate(hoy.getDate() - 7);
-                const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-
-                citas.forEach(cita => {
-                    const valor = parseFloat(cita.Ingreso) || 0;
-                    let fechaCita = new Date();
-                    if (cita.Fecha && String(cita.Fecha).includes('/')) {
-                        const partes = String(cita.Fecha).split('/');
-                        fechaCita = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
-                    }
-
-                    if (fechaCita >= primerDiaMes) { totalMes += valor; }
-                    if (fechaCita >= haceSieteDias && fechaCita <= hoy) { totalSemana += valor; }
-
-                    const nombreCliente = cita.Descripcion || "Cliente";
-                    const horarioCita = cita.FEV || "";
-                    const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
-
-                    htmlClientes += `
-                        <li class="client-item">
-                            <div class="client-info">
-                                <h4>${nombreCliente}</h4>
-                                <div class="client-meta">
-                                    <span class="badge">Nails</span>
-                                    <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
-                                </div>
-                            </div>
-                            <div class="client-price">R$ ${valor.toFixed(2)}</div>
-                        </li>
-                    `;
-                });
-
-                document.getElementById('weeklyEarnings').innerText = `R$ ${totalSemana.toFixed(2)}`;
-                document.getElementById('monthlyEarnings').innerText = `R$ ${totalMes.toFixed(2)}`;
-                document.getElementById('clientList').innerHTML = htmlClientes;
-
-            } catch (error) {
-                console.error('Error al cargar datos:', error);
-                document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro de conexão com a planilha.</p>';
-            }
-        }*/
 
         window.addEventListener('DOMContentLoaded', () => {
             valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
             document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
         });
-        /*
-        //CODIGO FUNCIOANDO HASTA LA PARTE DE JALAR INFROMACION DESDE GOOGLE SHEET
-        // Lógica de alternar entre abas
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-
-            if (tabName === 'agendamento') {
-                document.querySelector('button[onclick="switchTab(\'agendamento\')"]').classList.add('active');
-                document.getElementById('agendamento-view').classList.add('active');
-            } else if (tabName === 'resumo') {
-                document.querySelector('button[onclick="switchTab(\'resumo\')"]').classList.add('active');
-                document.getElementById('resumo-view').classList.add('active');
-                // Cargar datos en el Dashboard automáticamente al entrar en Resumen
-                obtenerGananciasYClientes();
-            }
-        }
-
-        // Lógica de actualizar precio sugerido automáticamente
-        const serviceSelect = document.getElementById('serviceType');
-        const valueInput = document.getElementById('serviceValue');
-
-        serviceSelect.addEventListener('change', (e) => {
-            const selectedOption = e.target.options[e.target.selectedIndex];
-            const price = selectedOption.getAttribute('data-price');
-            valueInput.value = price;
-        });
-
-        // REEMPLAZA ESTA LÍNEA CON LA URL DE GOOGLE APPS SCRIPT QUE COPIASTE
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIEsClJTy1gZhubfKoKR1IyJNRwvENHX9sivjaBAX3gTW9SObyRZZs4832iSsxybnF/exec';
-
-        // Guardar datos al enviar el formulario
-        const formulario = document.getElementById('appointmentForm');
-        formulario.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evitar que recargue la página
-
-            // Capturar valores del formulario
-            const fecha = document.getElementById('appointmentDate').value;
-            const nombre = document.getElementById('clientName').value;
-            const servicio = serviceSelect.value;
-            const valor = document.getElementById('serviceValue').value;
-            const horaInicio = document.getElementById('startTime').value;
-            const horaFin = document.getElementById('endTime').value;
-
-            // Crear objeto de datos
-            const datosCita = {
-                Fecha: fecha,
-                Nombre: nombre,
-                Descripcion: servicio,
-                Ingreso: valor,
-                Hora: `${horaInicio} - ${horaFin}`
-            };
-
-            try {
-                // Enviar datos por POST a Google Apps Script
-                const response = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8' // Necesario para evitar bloqueos CORS con Apps Script
-                    },
-                    body: JSON.stringify(datosCita)
-                });
-
-                const resultado = await response.json();
-
-                if (resultado.status === 'success') {
-                    alert('¡Agendamento guardado con éxito en Google Sheets! 🎉');
-                    formulario.reset(); // Limpiar campos
-                    
-                    // Restaurar valor predeterminado del primer servicio
-                    valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
-                    
-                    // Redirigir a pestaña de Resumen
-                    switchTab('resumo');
-                } else {
-                    alert('Erro ao salvar: ' + resultado.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Conexão estabelecida! Cita salva na planilha.');
-            }
-        });
-
-        // Función para obtener y calcular los totales en el Dashboard
-        // Função para obter e calcular os totais no Dashboard de forma segura
-        // Função para obter e calcular os totais no Dashboard de forma segura (Evitando bloqueos de CORS)
-        async function obtenerGananciasYClientes() {
-    const listaClientes = document.getElementById('clientList');
-    listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Carregando...</p>';
-
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'GET',
-            redirect: 'follow'
-        });
-        
-        const citas = await response.json();
-        
-        if (!citas || citas.error || citas.length === 0) {
-            listaClientes.innerHTML = '<p style="text-align:center; color:var(--text-light); padding: 10px;">Nenhum agendamento recente cadastrado.</p>';
-            return;
-        }
-
-        let totalMes = 0;
-        let totalSemana = 0;
-        let htmlClientes = '';
-
-        const hoy = new Date();
-        const haceSieteDias = new Date();
-        haceSieteDias.setDate(hoy.getDate() - 7);
-        const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-
-        citas.forEach(cita => {
-            const valor = parseFloat(cita.Ingreso) || 0;
-
-            // Procesar el formato exacto de tu hoja (DD/MM/YYYY)
-            let fechaCita = new Date();
-            if (cita.Fecha && String(cita.Fecha).includes('/')) {
-                const partes = String(cita.Fecha).split('/');
-                // Crear la fecha usando año, mes (0-11), día
-                fechaCita = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
-            }
-
-            // Sumas lógicas del Dashboard
-            if (fechaCita >= primerDiaMes) {
-                totalMes += valor;
-            }
-            if (fechaCita >= haceSieteDias && fechaCita <= hoy) {
-                totalSemana += valor;
-            }
-
-            // Nombre de la clienta en tu columna 'Descripcion' (ej. Gabi, Daniel)
-            const nombreCliente = cita.Descripcion || "Cliente";
-            // Horario en tu columna 'FEV'
-            const horarioCita = cita.FEV || "";
-            // Formato corto de fecha para el celular
-            const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
-
-            htmlClientes += `
-                <li class="client-item">
-                    <div class="client-info">
-                        <h4>${nombreCliente}</h4>
-                        <div class="client-meta">
-                            <span class="badge">Nails</span>
-                            <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
-                        </div>
-                    </div>
-                    <div class="client-price">R$ ${valor.toFixed(2)}</div>
-                </li>
-            `;
-        });
-
-        document.getElementById('weeklyEarnings').innerText = `R$ ${totalSemana.toFixed(2)}`;
-        document.getElementById('monthlyEarnings').innerText = `R$ ${totalMes.toFixed(2)}`;
-        document.getElementById('clientList').innerHTML = htmlClientes;
-
-    } catch (error) {
-        console.error('Error al cargar los datos en el Dashboard:', error);
-        document.getElementById('clientList').innerHTML = '<p style="text-align:center; color:red; padding: 10px;">Erro de conexão com a planilha.</p>';
-    }
-}
-
-
-
-        // Configurações ao carregar a página
-        window.addEventListener('DOMContentLoaded', () => {
-            valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('appointmentDate').value = today;
-        });*/
     </script>
 </body>
 </html>
