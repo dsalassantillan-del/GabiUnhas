@@ -319,6 +319,196 @@
 .btn-delete:hover {
     background: #ffe6e6;
 }
+
+/* ==========================================
+   📦 ESTILOS: PESTAÑA SALIDAS DE MATERIAL
+   ========================================== */
+
+/* Contenedor principal de la tarjeta de salidas */
+.salidas-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Tarjeta resumen del gasto semanal */
+.weekly-summary-card {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-left: 5px solid #e53935;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.weekly-summary-info h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #c62828;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.weekly-summary-info p {
+  margin: 3px 0 0 0;
+  font-size: 0.75rem;
+  color: #b71c1c;
+}
+
+.weekly-summary-amount {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #b71c1c;
+}
+
+/* Pantalla / Display de la Calculadora */
+.calc-display {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  text-align: right;
+}
+
+.calc-current-input {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #212529;
+  min-height: 40px;
+  word-break: break-all;
+}
+
+.calc-total-preview {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-top: 5px;
+}
+
+/* Teclado / Controles de la Calculadora */
+.calc-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.calc-input-field {
+  flex: 1;
+  font-size: 1.2rem;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.calc-input-field:focus {
+  border-color: #e91e63;
+}
+
+.btn-calc-equal {
+  background: #e91e63;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 22px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-calc-equal:active {
+  transform: scale(0.96);
+  background: #d81b60;
+}
+
+/* Desglose de ítems ingresados */
+.calc-items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+  max-height: 150px;
+  overflow-y: auto;
+  border-top: 1px dashed #e0e0e0;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.calc-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 5px;
+  font-size: 0.95rem;
+  color: #424242;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.calc-item-row:last-child {
+  border-bottom: none;
+}
+
+.btn-remove-item {
+  background: transparent;
+  border: none;
+  color: #ef5350;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.btn-remove-item:hover {
+  background: #ffebee;
+}
+
+/* Acciones finales (Limpiar y Guardar) */
+.calc-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-clear-calc {
+  background: transparent;
+  color: #757575;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-clear-calc:hover {
+  background: #f5f5f5;
+  color: #212121;
+}
+
+.btn-save-salida {
+  background: #2196f3;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-save-salida:active {
+  transform: scale(0.98);
+  background: #1e88e5;
+}
+        
     </style>
 </head>
 <body>
@@ -340,6 +530,7 @@
         <div class="tab-navigation">
             <button class="tab-button active" onclick="switchTab('agendamento')">Agendamento</button>
             <button class="tab-button" onclick="switchTab('resumo')">Resumo</button>
+            <button class="tab-button" onclick="switchTab('salidas')">Saidas</button>
         </div>
 
         <!-- ABA 1: AGENDAMENTO -->
@@ -411,6 +602,64 @@
             </ul>
             <div id="loading-spinner" style="text-align: center; color: #888; display: none;">Carregando...</div>
         </section>
+
+        <!-- ABA 3 PESTAÑA: SALIDAS DE MATERIAL -->
+<section id="salidas-view" class="view-section">
+    <div class="salidas-card">
+        
+        <!-- 🔴 Tarjeta: Gastos Registrados de la Semana Actual -->
+        <div class="weekly-summary-card">
+            <div class="weekly-summary-info">
+                <h4>📊 Gastos da Semana</h4>
+                <p>Segunda a Domingo (Semana Atual)</p>
+            </div>
+            <div id="gastos-semana-total" class="weekly-summary-amount">R$ 0,00</div>
+        </div>
+
+        <h3>🧮 Calculadora de Salidas</h3>
+        
+        <!-- Campo para ingresar montos y botón de igual (=) -->
+        <div class="calc-controls" style="margin-top: 15px;">
+            <input type="number" id="calcInput" class="calc-input-field" placeholder="Monto R$" step="0.01" inputmode="decimal">
+            <button type="button" class="btn-calc-equal" onclick="procesarEntradaMonto()">=</button>
+        </div>
+
+        <!-- Lista donde se desglosan las entradas sumadas -->
+        <ul id="listaTempCalc" class="calc-items-list">
+            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 10px 0;">
+                No hay montos ingresados.
+            </li>
+        </ul>
+
+        <!-- Muestra el total acumulado de la calculadora -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-weight: bold;">
+            <span>Total a Registrar:</span>
+            <span id="totalCalc" style="font-size: 1.3rem; color: #e91e63;">R$ 0,00</span>
+        </div>
+
+        <!-- Botón para limpiar la calculadora -->
+        <button type="button" class="btn-clear-calc" onclick="limpiarSumadora()">
+            🧹 Limpiar Calculadora
+        </button>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+        <!-- Formulario para enviar a Sheets -->
+        <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
+            <div style="margin-bottom: 15px;">
+                <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px;">Fecha de Registro:</label>
+                <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+
+            <div class="calc-actions">
+                <button type="submit" class="btn-save-salida">
+                    💾 Guardar Salida en Sheets
+                </button>
+            </div>
+        </form>
+
+    </div>
+</section>
     </div>
 
     <!-- --- JAVASCRIPT: LÓGICA DE FUNCIONAMIENTO --- -->
@@ -424,7 +673,7 @@
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw98sENmP_SBgXPayQOHON906jNBcR3w1bMhQGqILR6wvyuTqJurctqmd5Z6Q5C_4Zk/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxeuaPDubykxQF6J--0UiGbPrt5ABvQocA0iSPqIB9AAUq05uYa_9smlYB8yPNeawKx/exec';
 
         let tokenClient;
         let gapiInited = false;
@@ -704,6 +953,190 @@ if (spinner) spinner.style.display = 'block';
             valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
             document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
         });
+
+        // ==========================================
+// 🧮 LÓGICA DE LA CALCULADORA Y SALIDAS
+// ==========================================
+
+let listaMontos = [];
+let totalAcumuladoSalida = 0;
+
+// 1. Alternar entre pestañas de la App
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+
+    if (tabName === 'agendamento') {
+        const btnAgendar = document.querySelector('button[onclick="switchTab(\'agendamento\')"]');
+        if (btnAgendar) btnAgendar.classList.add('active');
+        document.getElementById('agendamento-view').classList.add('active');
+    } else if (tabName === 'resumo') {
+        const btnResumo = document.querySelector('button[onclick="switchTab(\'resumo\')"]');
+        if (btnResumo) btnResumo.classList.add('active');
+        document.getElementById('resumo-view').classList.add('active');
+        obtenerGananciasYClientes();
+    } else if (tabName === 'salidas') {
+        const btnSalidas = document.querySelector('button[onclick="switchTab(\'salidas\')"]');
+        if (btnSalidas) btnSalidas.classList.add('active');
+        document.getElementById('salidas-view').classList.add('active');
+        
+        // Asignar fecha actual por defecto
+        document.getElementById('salidaFecha').value = new Date().toISOString().split('T')[0];
+        
+        // Cargar el total de gastos de la semana
+        obtenerGastosSemana();
+    }
+}
+
+// 2. Procesar la entrada al presionar el botón '='
+function procesarEntradaMonto() {
+    const input = document.getElementById('calcInput');
+    const valor = parseFloat(input.value);
+
+    if (isNaN(valor) || valor <= 0) {
+        return;
+    }
+
+    listaMontos.push(valor);
+    totalAcumuladoSalida += valor;
+
+    actualizarVistaCalculadora();
+    input.value = '';
+    input.focus();
+}
+
+// 3. Renderizar la lista de entradas y el total acumulado
+function actualizarVistaCalculadora() {
+    const ul = document.getElementById('listaTempCalc');
+
+    if (listaMontos.length === 0) {
+        ul.innerHTML = `
+            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 10px 0;">
+                No hay montos ingresados.
+            </li>`;
+    } else {
+        ul.innerHTML = listaMontos.map((monto, index) => 
+            `<li class="calc-item-row">
+                <span>Entrada ${index + 1}: <strong>R$ ${monto.toFixed(2)}</strong></span>
+                <button type="button" class="btn-remove-item" onclick="eliminarEntradaIndividual(${index})">
+                    ✖️
+                </button>
+            </li>`
+        ).join('');
+    }
+
+    document.getElementById('totalCalc').innerText = `R$ ${totalAcumuladoSalida.toFixed(2)}`;
+}
+
+// 4. Eliminar un monto individual de la calculadora
+function eliminarEntradaIndividual(index) {
+    totalAcumuladoSalida -= listaMontos[index];
+    listaMontos.splice(index, 1);
+
+    if (totalAcumuladoSalida < 0) totalAcumuladoSalida = 0;
+
+    actualizarVistaCalculadora();
+}
+
+// 5. Limpiar toda la calculadora
+function limpiarSumadora() {
+    listaMontos = [];
+    totalAcumuladoSalida = 0;
+    actualizarVistaCalculadora();
+    document.getElementById('calcInput').value = '';
+}
+
+// 6. Guardar la salida en Google Sheets
+async function guardarSalidaSheets(e) {
+    e.preventDefault();
+
+    if (totalAcumuladoSalida <= 0) {
+        alert("⚠️ Ingresa al menos un monto en la calculadora usando el botón '=' antes de guardar.");
+        return;
+    }
+
+    const fecha = document.getElementById('salidaFecha').value;
+
+    try {
+        const response = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+                accion: "registrar_salida",
+                Fecha: fecha,
+                Monto: totalAcumuladoSalida
+            })
+        });
+
+        const res = await response.json();
+
+        if (res.status === "success") {
+            alert("¡Salida registrada con éxito en Sheets! 📦✨");
+            limpiarSumadora();
+            obtenerGastosSemana(); // Recargar el total de la semana
+        } else {
+            alert("❌ Ocurrió un error al intentar registrar la salida.");
+        }
+    } catch (error) {
+        console.error("Error al registrar salida:", error);
+        alert("❌ Error al conectar con la planilla.");
+    }
+}
+
+// 7. Obtener gastos de la semana (Lunes 00:00 a Domingo 23:59)
+async function obtenerGastosSemana() {
+    const elGastosSemana = document.getElementById('gastos-semana-total');
+    if (!elGastosSemana) return;
+
+    try {
+        const response = await fetch(APPS_SCRIPT_URL + "?hoja=Salidas");
+        const salidas = await response.json();
+
+        // Calcular rango de la semana actual (Lunes a Domingo)
+        const ahora = new Date();
+        const diaSemana = ahora.getDay(); // 0 = Domingo, 1 = Lunes...
+        const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+
+        const inicioSemana = new Date(ahora.setDate(diffLunes));
+        inicioSemana.setHours(0, 0, 0, 0); // Lunes 00:00:00
+
+        const finSemana = new Date(inicioSemana);
+        finSemana.setDate(inicioSemana.getDate() + 6);
+        finSemana.setHours(23, 59, 59, 999); // Domingo 23:59:59
+
+        let totalSemana = 0;
+
+        if (Array.isArray(salidas)) {
+            salidas.forEach(item => {
+                if (item.Fecha) {
+                    // Convertir dd/mm/yyyy o yyyy-mm-dd a objeto Date
+                    let partes = item.Fecha.split('/');
+                    let fechaItem;
+                    if (partes.length === 3) {
+                        fechaItem = new Date(partes[2], partes[1] - 1, partes[0]);
+                    } else {
+                        fechaItem = new Date(item.Fecha);
+                    }
+
+                    // Verificar si la fecha cae dentro del rango de esta semana
+                    if (fechaItem >= inicioSemana && fechaItem <= finSemana) {
+                        totalSemana += parseFloat(item.Monto) || 0;
+                    }
+                }
+            });
+        }
+
+        elGastosSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+
+    } catch (error) {
+        console.error("Error al calcular gastos de la semana:", error);
+        elGastosSemana.innerText = "R$ 0,00";
+    }
+}
+
+
+        
+        
     </script>
 </body>
 </html>
