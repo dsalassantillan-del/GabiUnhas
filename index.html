@@ -325,6 +325,42 @@
    ========================================== */
 
 /* Contenedor principal de la tarjeta de salidas */
+/* ==========================================
+   📦 REDISEÑO: PESTAÑA SALIDAS DE MATERIAL
+   ========================================== */
+
+/* Cuadrícula para las dos tarjetas superiores (Semana / Mes) */
+.dashboard-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card-summary {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #e53935;
+}
+
+.card-summary h4 {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #c62828;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-summary .amount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #b71c1c;
+  margin-top: 5px;
+}
+
+/* Tarjeta principal para Calculadora e Historial */
 .salidas-card {
   background: #ffffff;
   border-radius: 16px;
@@ -334,77 +370,20 @@
   margin: 0 auto;
 }
 
-/* Tarjeta resumen del gasto semanal */
-.weekly-summary-card {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-  border-left: 5px solid #e53935;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.weekly-summary-info h4 {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #c62828;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.weekly-summary-info p {
-  margin: 3px 0 0 0;
-  font-size: 0.75rem;
-  color: #b71c1c;
-}
-
-.weekly-summary-amount {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #b71c1c;
-}
-
-/* Pantalla / Display de la Calculadora */
-.calc-display {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 15px;
-  text-align: right;
-}
-
-.calc-current-input {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #212529;
-  min-height: 40px;
-  word-break: break-all;
-}
-
-.calc-total-preview {
-  font-size: 0.9rem;
-  color: #6c757d;
-  margin-top: 5px;
-}
-
-/* Teclado / Controles de la Calculadora */
+/* Teclado y Controles de Calculadora */
 .calc-controls {
   display: flex;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
 .calc-input-field {
   flex: 1;
-  font-size: 1.2rem;
-  padding: 12px 15px;
+  font-size: 1.1rem;
+  padding: 10px 14px;
   border: 2px solid #e0e0e0;
   border-radius: 10px;
   outline: none;
-  transition: border-color 0.2s ease;
 }
 
 .calc-input-field:focus {
@@ -416,24 +395,18 @@
   color: #ffffff;
   border: none;
   border-radius: 10px;
-  padding: 0 22px;
-  font-size: 1.5rem;
+  padding: 0 20px;
+  font-size: 1.4rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.btn-calc-equal:active {
-  transform: scale(0.96);
-  background: #d81b60;
-}
-
-/* Desglose de ítems ingresados */
+/* Desglose temporal de la sumadora */
 .calc-items-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 15px 0;
-  max-height: 150px;
+  margin: 0 0 12px 0;
+  max-height: 120px;
   overflow-y: auto;
   border-top: 1px dashed #e0e0e0;
   border-bottom: 1px dashed #e0e0e0;
@@ -443,36 +416,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 5px;
-  font-size: 0.95rem;
+  padding: 6px 4px;
+  font-size: 0.9rem;
   color: #424242;
-  border-bottom: 1px solid #f5f5f5;
-}
-
-.calc-item-row:last-child {
-  border-bottom: none;
 }
 
 .btn-remove-item {
   background: transparent;
   border: none;
   color: #ef5350;
-  font-size: 1.1rem;
+  font-size: 1rem;
   cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.btn-remove-item:hover {
-  background: #ffebee;
-}
-
-/* Acciones finales (Limpiar y Guardar) */
-.calc-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 15px;
 }
 
 .btn-clear-calc {
@@ -480,15 +434,10 @@
   color: #757575;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 8px;
-  font-size: 0.85rem;
+  padding: 6px;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-clear-calc:hover {
-  background: #f5f5f5;
-  color: #212121;
+  width: 100%;
 }
 
 .btn-save-salida {
@@ -496,17 +445,32 @@
   color: #ffffff;
   border: none;
   border-radius: 10px;
-  padding: 14px;
+  padding: 12px;
   font-size: 1rem;
   font-weight: bold;
   cursor: pointer;
+  width: 100%;
   box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
-  transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.btn-save-salida:active {
-  transform: scale(0.98);
-  background: #1e88e5;
+/* Lista de registros históricos agrupados */
+.salidas-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+}
+
+.salida-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+.salida-history-item:last-child {
+  border-bottom: none;
 }
         
     </style>
@@ -604,61 +568,67 @@
         </section>
 
         <!-- ABA 3 PESTAÑA: SALIDAS DE MATERIAL -->
+<!-- PESTAÑA: SALIDAS DE MATERIAL -->
 <section id="salidas-view" class="view-section">
-    <div class="salidas-card">
-        
-        <!-- 🔴 Tarjeta: Gastos Registrados de la Semana Actual -->
-        <div class="weekly-summary-card">
-            <div class="weekly-summary-info">
-                <h4>📊 Gastos da Semana</h4>
-                <p>Segunda a Domingo (Semana Atual)</p>
-            </div>
-            <div id="gastos-semana-total" class="weekly-summary-amount">R$ 0,00</div>
+    
+    <!-- 🔴 Cuadrícula Doble: Gastos da Semana y Gastos do Mês -->
+    <div class="dashboard-cards-grid">
+        <div class="card-summary">
+            <h4>📊 Saídas da Semana</h4>
+            <div id="gastos-semana-total" class="amount">R$ 0,00</div>
         </div>
+        <div class="card-summary">
+            <h4>📅 Saídas do Mês</h4>
+            <div id="gastos-mes-total" class="amount">R$ 0,00</div>
+        </div>
+    </div>
 
+    <!-- 🧮 Tarjeta Calculadora -->
+    <div class="salidas-card" style="margin-bottom: 20px;">
         <h3>🧮 Calculadora de Salidas</h3>
         
-        <!-- Campo para ingresar montos y botón de igual (=) -->
         <div class="calc-controls" style="margin-top: 15px;">
             <input type="number" id="calcInput" class="calc-input-field" placeholder="Monto R$" step="0.01" inputmode="decimal">
             <button type="button" class="btn-calc-equal" onclick="procesarEntradaMonto()">=</button>
         </div>
 
-        <!-- Lista donde se desglosan las entradas sumadas -->
         <ul id="listaTempCalc" class="calc-items-list">
-            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 10px 0;">
+            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
                 No hay montos ingresados.
             </li>
         </ul>
 
-        <!-- Muestra el total acumulado de la calculadora -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-weight: bold;">
             <span>Total a Registrar:</span>
-            <span id="totalCalc" style="font-size: 1.3rem; color: #e91e63;">R$ 0,00</span>
+            <span id="totalCalc" style="font-size: 1.2rem; color: #e91e63;">R$ 0,00</span>
         </div>
 
-        <!-- Botón para limpiar la calculadora -->
         <button type="button" class="btn-clear-calc" onclick="limpiarSumadora()">
             🧹 Limpiar Calculadora
         </button>
 
-        <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
 
-        <!-- Formulario para enviar a Sheets -->
         <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
-            <div style="margin-bottom: 15px;">
-                <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px;">Fecha de Registro:</label>
+            <div style="margin-bottom: 12px;">
+                <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Fecha de Registro:</label>
                 <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; box-sizing: border-box;" required>
             </div>
 
-            <div class="calc-actions">
-                <button type="submit" class="btn-save-salida">
-                    💾 Guardar Salida en Sheets
-                </button>
-            </div>
+            <button type="submit" class="btn-save-salida">
+                💾 Guardar Salida en Sheets
+            </button>
         </form>
-
     </div>
+
+    <!-- 📋 Historial Agrupado por Semanas -->
+    <div class="salidas-card">
+        <h3>📋 Histórico de Saídas</h3>
+        <ul id="lista-salidas-historial" class="salidas-history-list">
+            <li style="color: #888; padding: 10px 0; text-align: center;">Carregando saídas...</li>
+        </ul>
+    </div>
+
 </section>
     </div>
 
@@ -953,49 +923,45 @@ if (spinner) spinner.style.display = 'block';
             valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
             document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
         });
-
-        // ==========================================
-// 🧮 LÓGICA DE LA CALCULADORA Y SALIDAS
+// ==========================================
+// 🧮 LÓGICA DE SALIDAS CON HISTORIAL SEMANAL
 // ==========================================
 
 let listaMontos = [];
 let totalAcumuladoSalida = 0;
 
-// 1. Alternar entre pestañas de la App
+// 1. Cambiar de Pestaña
 function switchTab(tabName) {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
 
     if (tabName === 'agendamento') {
-        const btnAgendar = document.querySelector('button[onclick="switchTab(\'agendamento\')"]');
-        if (btnAgendar) btnAgendar.classList.add('active');
+        const btn = document.querySelector('button[onclick="switchTab(\'agendamento\')"]');
+        if (btn) btn.classList.add('active');
         document.getElementById('agendamento-view').classList.add('active');
     } else if (tabName === 'resumo') {
-        const btnResumo = document.querySelector('button[onclick="switchTab(\'resumo\')"]');
-        if (btnResumo) btnResumo.classList.add('active');
+        const btn = document.querySelector('button[onclick="switchTab(\'resumo\')"]');
+        if (btn) btn.classList.add('active');
         document.getElementById('resumo-view').classList.add('active');
         obtenerGananciasYClientes();
     } else if (tabName === 'salidas') {
-        const btnSalidas = document.querySelector('button[onclick="switchTab(\'salidas\')"]');
-        if (btnSalidas) btnSalidas.classList.add('active');
+        const btn = document.querySelector('button[onclick="switchTab(\'salidas\')"]');
+        if (btn) btn.classList.add('active');
         document.getElementById('salidas-view').classList.add('active');
         
-        // Asignar fecha actual por defecto
         document.getElementById('salidaFecha').value = new Date().toISOString().split('T')[0];
         
-        // Cargar el total de gastos de la semana
-        obtenerGastosSemana();
+        // Cargar métricas y lista histórica
+        obtenerMétricasYListaSalidas();
     }
 }
 
-// 2. Procesar la entrada al presionar el botón '='
+// 2. Calculadora: Entrada con '='
 function procesarEntradaMonto() {
     const input = document.getElementById('calcInput');
     const valor = parseFloat(input.value);
 
-    if (isNaN(valor) || valor <= 0) {
-        return;
-    }
+    if (isNaN(valor) || valor <= 0) return;
 
     listaMontos.push(valor);
     totalAcumuladoSalida += valor;
@@ -1005,13 +971,12 @@ function procesarEntradaMonto() {
     input.focus();
 }
 
-// 3. Renderizar la lista de entradas y el total acumulado
 function actualizarVistaCalculadora() {
     const ul = document.getElementById('listaTempCalc');
 
     if (listaMontos.length === 0) {
         ul.innerHTML = `
-            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 10px 0;">
+            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
                 No hay montos ingresados.
             </li>`;
     } else {
@@ -1028,17 +993,13 @@ function actualizarVistaCalculadora() {
     document.getElementById('totalCalc').innerText = `R$ ${totalAcumuladoSalida.toFixed(2)}`;
 }
 
-// 4. Eliminar un monto individual de la calculadora
 function eliminarEntradaIndividual(index) {
     totalAcumuladoSalida -= listaMontos[index];
     listaMontos.splice(index, 1);
-
     if (totalAcumuladoSalida < 0) totalAcumuladoSalida = 0;
-
     actualizarVistaCalculadora();
 }
 
-// 5. Limpiar toda la calculadora
 function limpiarSumadora() {
     listaMontos = [];
     totalAcumuladoSalida = 0;
@@ -1046,7 +1007,7 @@ function limpiarSumadora() {
     document.getElementById('calcInput').value = '';
 }
 
-// 6. Guardar la salida en Google Sheets
+// 3. Guardar en Google Sheets
 async function guardarSalidaSheets(e) {
     e.preventDefault();
 
@@ -1071,9 +1032,9 @@ async function guardarSalidaSheets(e) {
         const res = await response.json();
 
         if (res.status === "success") {
-            alert("¡Salida registrada con éxito en Sheets! 📦✨");
+            alert("¡Salida registrada con éxito! 📦✨");
             limpiarSumadora();
-            obtenerGastosSemana(); // Recargar el total de la semana
+            obtenerMétricasYListaSalidas();
         } else {
             alert("❌ Ocurrió un error al intentar registrar la salida.");
         }
@@ -1083,33 +1044,43 @@ async function guardarSalidaSheets(e) {
     }
 }
 
-// 7. Obtener gastos de la semana (Lunes 00:00 a Domingo 23:59)
-async function obtenerGastosSemana() {
-    const elGastosSemana = document.getElementById('gastos-semana-total');
-    if (!elGastosSemana) return;
+// 4. Procesar Métricas (Semana/Mes) e Historial Agrupado por Semana
+async function obtenerMétricasYListaSalidas() {
+    const elSemana = document.getElementById('gastos-semana-total');
+    const elMes = document.getElementById('gastos-mes-total');
+    const elLista = document.getElementById('lista-salidas-historial');
+
+    if (!elSemana || !elMes || !elLista) return;
 
     try {
         const response = await fetch(APPS_SCRIPT_URL + "?hoja=Salidas");
         const salidas = await response.json();
 
-        // Calcular rango de la semana actual (Lunes a Domingo)
         const ahora = new Date();
-        const diaSemana = ahora.getDay(); // 0 = Domingo, 1 = Lunes...
+        const mesActual = ahora.getMonth();
+        const anioActual = ahora.getFullYear();
+
+        // Rango de la semana actual (Lunes 00:00 a Domingo 23:59)
+        const diaSemana = ahora.getDay();
         const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+        
+        const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
+        inicioSemanaActual.setHours(0, 0, 0, 0);
 
-        const inicioSemana = new Date(ahora.setDate(diffLunes));
-        inicioSemana.setHours(0, 0, 0, 0); // Lunes 00:00:00
-
-        const finSemana = new Date(inicioSemana);
-        finSemana.setDate(inicioSemana.getDate() + 6);
-        finSemana.setHours(23, 59, 59, 999); // Domingo 23:59:59
+        const finSemanaActual = new Date(inicioSemanaActual);
+        finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
+        finSemanaActual.setHours(23, 59, 59, 999);
 
         let totalSemana = 0;
+        let totalMes = 0;
+        let semanasAgrupadas = {};
 
-        if (Array.isArray(salidas)) {
+        if (Array.isArray(salidas) && salidas.length > 0) {
             salidas.forEach(item => {
-                if (item.Fecha) {
-                    // Convertir dd/mm/yyyy o yyyy-mm-dd a objeto Date
+                if (item.Fecha && item.Monto) {
+                    let montoVal = parseFloat(item.Monto) || 0;
+                    
+                    // Parsear fecha dd/mm/yyyy o yyyy-mm-dd
                     let partes = item.Fecha.split('/');
                     let fechaItem;
                     if (partes.length === 3) {
@@ -1118,19 +1089,67 @@ async function obtenerGastosSemana() {
                         fechaItem = new Date(item.Fecha);
                     }
 
-                    // Verificar si la fecha cae dentro del rango de esta semana
-                    if (fechaItem >= inicioSemana && fechaItem <= finSemana) {
-                        totalSemana += parseFloat(item.Monto) || 0;
+                    if (isNaN(fechaItem.getTime())) return;
+
+                    // A) Total de la Semana Actual
+                    if (fechaItem >= inicioSemanaActual && fechaItem <= finSemanaActual) {
+                        totalSemana += montoVal;
                     }
+
+                    // B) Total del Mes Actual
+                    if (fechaItem.getMonth() === mesActual && fechaItem.getFullYear() === anioActual) {
+                        totalMes += montoVal;
+                    }
+
+                    // C) Agrupar por Rango Semanal para la Lista
+                    let dSem = fechaItem.getDay();
+                    let diffL = fechaItem.getDate() - dSem + (dSem === 0 ? -6 : 1);
+                    
+                    let lunesSemana = new Date(fechaItem);
+                    lunesSemana.setDate(diffL);
+                    
+                    let domingoSemana = new Date(lunesSemana);
+                    domingoSemana.setDate(lunesSemana.getDate() + 6);
+
+                    // Formato clave: "dd/mm al dd/mm"
+                    let fLunes = `${String(lunesSemana.getDate()).padStart(2, '0')}/${String(lunesSemana.getMonth() + 1).padStart(2, '0')}`;
+                    let fDomingo = `${String(domingoSemana.getDate()).padStart(2, '0')}/${String(domingoSemana.getMonth() + 1).padStart(2, '0')}`;
+                    let claveSemana = `Semana del ${fLunes} al ${fDomingo}`;
+
+                    if (!semanasAgrupadas[claveSemana]) {
+                        semanasAgrupadas[claveSemana] = 0;
+                    }
+                    semanasAgrupadas[claveSemana] += montoVal;
                 }
             });
+
+            // Renderizar totales superiores
+            elSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+            elMes.innerText = `R$ ${totalMes.toFixed(2)}`;
+
+            // Renderizar lista por semanas
+            let htmlHistorial = '';
+            for (let semana in semanasAgrupadas) {
+                htmlHistorial += `
+                    <li class="salida-history-item">
+                        <span>📅 <strong>${semana}</strong></span>
+                        <strong style="color: #d32f2f;">- R$ ${semanasAgrupadas[semana].toFixed(2)}</strong>
+                    </li>
+                `;
+            }
+            elLista.innerHTML = htmlHistorial || '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
+
+        } else {
+            elSemana.innerText = "R$ 0,00";
+            elMes.innerText = "R$ 0,00";
+            elLista.innerHTML = '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
         }
 
-        elGastosSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
-
     } catch (error) {
-        console.error("Error al calcular gastos de la semana:", error);
-        elGastosSemana.innerText = "R$ 0,00";
+        console.error("Error al procesar métricas de salidas:", error);
+        elSemana.innerText = "R$ 0,00";
+        elMes.innerText = "R$ 0,00";
+        elLista.innerHTML = '<li style="color: red; text-align: center; padding: 10px;">Erro ao carregar histórico.</li>';
     }
 }
 
