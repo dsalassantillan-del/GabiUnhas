@@ -602,9 +602,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
         <h3>🧮 Calculadora de Salidas</h3>
         
         <div class="calc-controls" style="margin-top: 15px;">
-            <input type="number" id="calcInput" class="calc-input-field" placeholder="Monto R$" step="0.01" inputmode="decimal">
-            <button type="button" class="btn-calc-equal" onclick="procesarEntradaMonto()">=</button>
-        </div>
+    <input type="text" id="calcInput" class="calc-input-field" placeholder="Monto R$" inputmode="decimal">
+    <button type="button" class="btn-calc-equal" onclick="procesarEntradaMonto()">=</button>
+</div>
 
         <ul id="listaTempCalc" class="calc-items-list">
             <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
@@ -973,7 +973,11 @@ function switchTab(tabName) {
 // 2. Calculadora: Entrada con '='
 function procesarEntradaMonto() {
     const input = document.getElementById('calcInput');
-    const valor = parseFloat(input.value);
+    // 1. Reemplazamos cualquier coma por un punto para que JS no dé error
+    const valorLimpio = input.value.replace(',', '.');
+    
+    // 2. Convertimos el texto ya corregido a un número decimal
+    const valor = parseFloat(valorLimpio);
 
     if (isNaN(valor) || valor <= 0) return;
 
