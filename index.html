@@ -630,7 +630,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
             </div>
 
             <button type="submit" class="btn-save-salida">
-                💾 Guardar Salida en Sheets
+                💾 Guardar Saida
             </button>
         </form>
     </div>
@@ -1151,7 +1151,7 @@ async function obtenerMétricasYListaSalidas() {
                 htmlHistorial += `
                     <li class="salida-history-item">
                         <span>📅 <strong>${semana}</strong></span>
-                        <strong style="color: #d32f2f;">- R$ ${semanasAgrupadas[semana].toFixed(2)}</strong>
+                        <strong style="color: #d32f2f;">| R$ ${semanasAgrupadas[semana].toFixed(2)}</strong>
                     </li>
                 `;
             }
