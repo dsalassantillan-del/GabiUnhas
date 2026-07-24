@@ -488,35 +488,42 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding: 0;
 
     /*ANIMACION DE BOTONES*/
-    /* 1. Transición para TODOS los botones sin excepción */
+/* 1. Base para TODOS los botones y pestañas de la app */
 button, 
 input[type="submit"], 
 input[type="button"], 
 .btn-save-salida, 
 .btn-calc-equal, 
 .btn-calc-action, 
-.calc-controls button {
+.tab-btn,
+.tab-button,
+.calc-controls button,
+.btn-limpiar {
   transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out !important;
   cursor: pointer !important;
   -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important; /* 📱 Optimiza la respuesta táctil en celulares */
 }
 
-/* 2. Animación de hundimiento al hacer clic / presionar */
+/* 2. Efecto al PRESIONAR (Tanto en Mouse como en Pantalla Táctil) */
 button:active, 
 input[type="submit"]:active, 
 input[type="button"]:active, 
 .btn-save-salida:active, 
 .btn-calc-equal:active, 
 .btn-calc-action:active, 
-.calc-controls button:active {
-  transform: scale(0.93) !important; /* 🤏 Se reduce un 7% al presionar */
+.tab-btn:active,
+.tab-button:active,
+.calc-controls button:active,
+.btn-limpiar:active {
+  transform: scale(0.92) !important; /* 🤏 Se reduce un 8% */
   filter: brightness(0.85) !important; /* 💡 Se oscurece ligeramente */
 }
         
     </style>
 </head>
 <body>
-
+    <body ontouchstart="">
     <div class="phone-wrapper">
         
         <!-- CABEÇALHO -->
