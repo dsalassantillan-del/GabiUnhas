@@ -618,7 +618,7 @@ button:active,
 
     <!-- 🧮 Tarjeta Calculadora -->
     <div class="salidas-card" style="margin-bottom: 20px;">
-        <h3>🧮 Calculadora de Salidas</h3>
+        <h3>🧮 Calculadora de Saídas</h3>
         
         <div class="calc-controls" style="margin-top: 15px;">
     <input type="text" id="calcInput" class="calc-input-field" placeholder="Monto R$" inputmode="decimal">
@@ -627,17 +627,17 @@ button:active,
 
         <ul id="listaTempCalc" class="calc-items-list">
             <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
-                No hay montos ingresados.
+                Não tem quantidades ingresadas
             </li>
         </ul>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-weight: bold;">
-            <span>Total a Registrar:</span>
+            <span>Total a cadastrar:</span>
             <span id="totalCalc" style="font-size: 1.2rem; color: #e91e63;">R$ 0,00</span>
         </div>
 
         <button type="button" class="btn-clear-calc" onclick="limpiarSumadora()">
-            🧹 Limpiar Calculadora
+            🧹 Limpar calculadora
         </button>
 
         <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
@@ -1019,7 +1019,7 @@ function actualizarVistaCalculadora() {
     } else {
         ul.innerHTML = listaMontos.map((monto, index) => 
             `<li class="calc-item-row">
-                <span>Entrada ${index + 1}: <strong>R$ ${monto.toFixed(2)}</strong></span>
+                <span>Item ${index + 1}: <strong>R$ ${monto.toFixed(2)}</strong></span>
                 <button type="button" class="btn-remove-item" onclick="eliminarEntradaIndividual(${index})">
                     ✖️
                 </button>
