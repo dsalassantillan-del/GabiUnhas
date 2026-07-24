@@ -486,6 +486,25 @@
 input[type="date"]::-webkit-calendar-picker-indicator {
   margin: 0;
   padding: 0;
+
+    /*ANIMACION DE BOTONES*/
+    /* 1. Transición suave para TODOS los botones de la app */
+button, 
+.btn-save-salida, 
+.btn-calc-equal, 
+.btn-calc-action {
+  transition: transform 0.1s ease, opacity 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent; /* Quita el recuadro feo de selección en iPhone */
+}
+
+/* 2. Efecto al PRESIONAR (Hacer clic / Tap en la pantalla) */
+button:active, 
+.btn-save-salida:active, 
+.btn-calc-equal:active {
+  transform: scale(0.92);
+  filter: brightness(0.9);
+}
         
     </style>
 </head>
