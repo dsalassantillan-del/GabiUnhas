@@ -488,32 +488,38 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding: 0;
 
     /*ANIMACION DE BOTONES*/
-/* 1. Transición para TODOS los botones, enlaces y elementos cliqueables */
+/* 1. Aplica a TODOS los elementos interactivos de todas las pestañas */
 button, 
 input[type="submit"], 
 input[type="button"], 
-form button,
+div[onclick],
+span[onclick],
+a,
 .btn,
-[class*="btn"], /* 👈 Esto atrapa CUALQUIER clase que tenga la palabra "btn" */
-.tab-button,
-.calc-btn {
+[class*="btn"],
+[class*="calc"],
+[class*="card"],
+[class*="tab"] {
   transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out !important;
   cursor: pointer !important;
   -webkit-tap-highlight-color: transparent !important;
   touch-action: manipulation !important;
 }
 
-/* 2. Efecto al presionar/tocar con el dedo en iPhone y Android */
+/* 2. Efecto de animación al presionar */
 button:active, 
 input[type="submit"]:active, 
 input[type="button"]:active, 
-form button:active,
+div[onclick]:active,
+span[onclick]:active,
+a:active,
 .btn:active,
 [class*="btn"]:active,
-.tab-button:active,
-.calc-btn:active {
-  transform: scale(0.92) !important; /* 🤏 Se encoge un 8% */
-  filter: brightness(0.85) !important; /* 💡 Se oscurece ligeramente */
+[class*="calc"]:active,
+[class*="card"]:active,
+[class*="tab"]:active {
+  transform: scale(0.93) !important;
+  filter: brightness(0.88) !important;
 }
         
     </style>
@@ -1200,7 +1206,24 @@ async function obtenerMétricasYListaSalidas() {
     }
 }
 
+// Forzar respuesta táctil en todos los elementos interactivos de la app
+document.addEventListener('touchstart', function(e) {
+  let target = e.target.closest('button, [onclick], .btn, [class*="btn"], [class*="calc"]');
+  if (target) {
+    target.style.transform = 'scale(0.93)';
+    target.style.filter = 'brightness(0.88)';
+  }
+}, { passive: true });
 
+document.addEventListener('touchend', function(e) {
+  let target = e.target.closest('button, [onclick], .btn, [class*="btn"], [class*="calc"]');
+  if (target) {
+    setTimeout(() => {
+      target.style.transform = 'none';
+      target.style.filter = 'none';
+    }, 100);
+  }
+}, { passive: true });
         
         
     </script>
