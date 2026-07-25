@@ -692,7 +692,7 @@ a:active,
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz-E3XOsoI2xQB_cS2aiMSIYfSfK9crwc3HgaP6dY06ndeKzkHN65odUQSnLr5XglvB/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdVJ5-eUhJ8l72J6FCdj5vm9Mqug6ckKGsMvQ02Y5Rsi8i4EiyZEy8cjEI6ClXmNxj/exec';
 
         let tokenClient;
         let gapiInited = false;
@@ -736,7 +736,69 @@ a:active,
         // Guardar datos al enviar el formulario
         // Guardar datos al enviar el formulario
         // Guardar datos al enviar el formulario
+        // Guardar datos al enviar el formulario (Con Validación de Horarios)
         const formulario = document.getElementById('appointmentForm');
+        if (formulario) {
+            formulario.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const fecha = document.getElementById('appointmentDate').value;
+                const nombre = document.getElementById('clientName').value;
+                const servicio = serviceSelect.value;
+                const valor = document.getElementById('serviceValue').value;
+                const horaInicio = document.getElementById('startTime').value;
+                const horaFin = document.getElementById('endTime').value;
+
+                // 1. Validar que la hora de inicio sea menor a la de término
+                if (horaAMinutos(horaInicio) >= horaAMinutos(horaFin)) {
+                    alert('⚠️ La hora de inicio debe ser anterior a la hora de término.');
+                    return;
+                }
+
+                // 2. Verificar disponibilidad de horario en Sheets antes de continuar
+                const verificacion = await verificarDisponibilidadHorario(fecha, horaInicio, horaFin);
+
+                if (!verificacion.disponible) {
+                    alert(`⚠️ Horario Ocupado:\n\nYa existe una cita agendada para ${verificacion.clienteConflicto} en el rango ${verificacion.horarioConflicto}.\n\nPor favor, selecciona otro horario.`);
+                    return; // Detiene el agendamiento si hay cruce
+                }
+
+                // 3. Objeto listo con los datos de la cita
+                const datosCita = {
+                    Fecha: fecha, 
+                    Nombre: nombre, 
+                    Descripcion: servicio, 
+                    Ingreso: valor, 
+                    Hora: `${horaInicio} - ${horaFin}`
+                };
+
+                if (!gapiInited || !gisInited) {
+                    alert('As bibliotecas do Google ainda estão carregando. Tente novamente em alguns segundos.');
+                    return;
+                }
+
+                // 4. Función que procesa el guardado en Calendar y Sheets
+                const procesarAgendamiento = async () => {
+                    const eventIdObtenido = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
+                    if (eventIdObtenido) {
+                        datosCita.eventId = eventIdObtenido; // Guarda el ID de Calendar
+                        await enviarAGoogleSheets(datosCita);
+                    }
+                };
+
+                // 5. Autenticación e inserción
+                if (gapi.client.getToken() !== null) {
+                    await procesarAgendamiento();
+                } else {
+                    tokenClient.callback = async (resp) => {
+                        if (resp.error !== undefined) { throw (resp); }
+                        await procesarAgendamiento();
+                    };
+                    tokenClient.requestAccessToken({ prompt: '' });
+                }
+            });
+        }
+        /*const formulario = document.getElementById('appointmentForm');
         if (formulario) {
             formulario.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -788,7 +850,7 @@ a:active,
                     tokenClient.requestAccessToken({ prompt: '' });
                 }
             });
-        }
+        }*/
 
         // Función interna para insertar el evento en Google Calendar
         // Función interna para insertar el evento en Google Calendar y obtener su ID
@@ -1224,6 +1286,70 @@ document.addEventListener('touchend', function(e) {
     }, 100);
   }
 }, { passive: true });
+
+        // ==========================================
+// 🕒 VALIDACIÓN DE DISPONIBILIDAD DE HORARIOS
+// ==========================================
+
+// Convierte "HH:MM" a minutos para facilitar la comparación
+function horaAMinutos(horaStr) {
+    if (!horaStr) return 0;
+    const [horas, minutos] = horaStr.split(':').map(Number);
+    return horas * 60 + minutos;
+}
+
+// Normaliza fechas en formatos "yyyy-mm-dd" o "dd/mm/yyyy" a "yyyy-mm-dd"
+function normalizarFecha(fechaStr) {
+    if (!fechaStr) return '';
+    if (fechaStr.includes('/')) {
+        const partes = fechaStr.split('/');
+        if (partes.length === 3) {
+            return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+        }
+    }
+    return fechaStr.split('T')[0];
+}
+
+// Verifica si existe solapamiento en Google Sheets
+async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
+    try {
+        const respuesta = await fetch(APPS_SCRIPT_URL);
+        const citas = await respuesta.json();
+
+        if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
+
+        const inicioNUEVO = horaAMinutos(horaInicioNue);
+        const finNUEVO = horaAMinutos(horaFinNue);
+        const fechaBuscada = normalizarFecha(fechaSeleccionada);
+
+        for (let cita of citas) {
+            // Se obtiene la fecha y el horario del objeto
+            const fechaCita = normalizarFecha(cita.Fecha);
+            const horarioCita = cita.FEV || cita.Hora || '';
+
+            if (fechaCita === fechaBuscada && horarioCita.includes('-')) {
+                const partesHorario = horarioCita.split('-');
+                const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
+                const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
+
+                // Regla de solapamiento de rangos de tiempo
+                if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
+                    const nombreCliente = cita.Descripcion || cita.Nombre || 'Cliente';
+                    return {
+                        disponible: false,
+                        clienteConflicto: nombreCliente,
+                        horarioConflicto: horarioCita
+                    };
+                }
+            }
+        }
+
+        return { disponible: true };
+    } catch (error) {
+        console.error("Error al verificar disponibilidad:", error);
+        return { disponible: true };
+    }
+}
         
         
     </script>
