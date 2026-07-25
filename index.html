@@ -586,6 +586,8 @@ a:active,
                     <div class="form-group">
                         <label for="endTime">Hora Fim</label>
                         <input type="time" id="endTime" class="form-control" required>
+                        <!-- 🟢/🔴 Mensaje de disponibilidad en vivo -->
+                        <small id="availability-status" style="display: block; margin-top: 5px; font-weight: bold; font-size: 0.85rem;"></small>
                     </div>
                 </div>
 
@@ -734,36 +736,85 @@ a:active,
         });
 
         // Guardar datos al enviar el formulario
-        // Guardar datos al enviar el formulario
-        // Guardar datos al enviar el formulario
-        // Guardar datos al enviar el formulario (Con Validación de Horarios)
+        // ==========================================
+        // 🕒 VALIDACIÓN EN TIEMPO REAL AL SELECCIONAR HORA
+        // ==========================================
+
+        const dateInput = document.getElementById('appointmentDate');
+        const startTimeInput = document.getElementById('startTime');
+        const endTimeInput = document.getElementById('endTime');
+        const statusLabel = document.getElementById('availability-status');
+
+        // Función que revisa si el rango seleccionado está libre u ocupado
+        async function comprobarDisponibilidadEnVivo() {
+            const fecha = dateInput ? dateInput.value : '';
+            const horaInicio = startTimeInput ? startTimeInput.value : '';
+            const horaFin = endTimeInput ? endTimeInput.value : '';
+
+            // Si faltan campos por llenar, resetea el mensaje
+            if (!fecha || !horaInicio || !horaFin) {
+                if (statusLabel) statusLabel.innerText = '';
+                return true;
+            }
+
+            // Validar que hora inicio sea menor a hora fin
+            if (horaAMinutos(horaInicio) >= horaAMinutos(horaFin)) {
+                if (statusLabel) {
+                    statusLabel.style.color = '#d32f2f';
+                    statusLabel.innerText = '⚠️ La hora de término debe ser posterior a la de inicio.';
+                }
+                return false;
+            }
+
+            if (statusLabel) {
+                statusLabel.style.color = '#666';
+                statusLabel.innerText = '🔍 Verificando disponibilidad...';
+            }
+
+            // Consultar cruzado en Sheets
+            const verificacion = await verificarDisponibilidadHorario(fecha, horaInicio, horaFin);
+
+            if (!verificacion.disponible) {
+                if (statusLabel) {
+                    statusLabel.style.color = '#d32f2f';
+                    statusLabel.innerText = `❌ Ocupado por ${verificacion.clienteConflicto} (${verificacion.horarioConflicto})`;
+                }
+                alert(`⚠️ Horario Ocupado:\n\nYa existe una cita para ${verificacion.clienteConflicto} en el rango ${verificacion.horarioConflicto}.\n\nPor favor, elige otra hora.`);
+                return false;
+            } else {
+                if (statusLabel) {
+                    statusLabel.style.color = '#2e7d32';
+                    statusLabel.innerText = '✅ Horario disponible';
+                }
+                return true;
+            }
+        }
+
+        // 🔔 Eventos en vivo: Se activan al cambiar la fecha, hora de inicio o fin
+        if (dateInput) dateInput.addEventListener('change', comprobarDisponibilidadEnVivo);
+        if (startTimeInput) startTimeInput.addEventListener('change', comprobarDisponibilidadEnVivo);
+        if (endTimeInput) endTimeInput.addEventListener('change', comprobarDisponibilidadEnVivo);
+
+
+        // ==========================================
+        // 💾 ENVÍO DEL FORMULARIO
+        // ==========================================
         const formulario = document.getElementById('appointmentForm');
         if (formulario) {
             formulario.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                const fecha = document.getElementById('appointmentDate').value;
+                // Re-verificar la disponibilidad al hacer submit por seguridad
+                const esValido = await comprobarDisponibilidadEnVivo();
+                if (!esValido) return;
+
+                const fecha = dateInput.value;
                 const nombre = document.getElementById('clientName').value;
                 const servicio = serviceSelect.value;
                 const valor = document.getElementById('serviceValue').value;
-                const horaInicio = document.getElementById('startTime').value;
-                const horaFin = document.getElementById('endTime').value;
+                const horaInicio = startTimeInput.value;
+                const horaFin = endTimeInput.value;
 
-                // 1. Validar que la hora de inicio sea menor a la de término
-                if (horaAMinutos(horaInicio) >= horaAMinutos(horaFin)) {
-                    alert('⚠️ La hora de inicio debe ser anterior a la hora de término.');
-                    return;
-                }
-
-                // 2. Verificar disponibilidad de horario en Sheets antes de continuar
-                const verificacion = await verificarDisponibilidadHorario(fecha, horaInicio, horaFin);
-
-                if (!verificacion.disponible) {
-                    alert(`⚠️ Horario Ocupado:\n\nYa existe una cita agendada para ${verificacion.clienteConflicto} en el rango ${verificacion.horarioConflicto}.\n\nPor favor, selecciona otro horario.`);
-                    return; // Detiene el agendamiento si hay cruce
-                }
-
-                // 3. Objeto listo con los datos de la cita
                 const datosCita = {
                     Fecha: fecha, 
                     Nombre: nombre, 
@@ -777,16 +828,14 @@ a:active,
                     return;
                 }
 
-                // 4. Función que procesa el guardado en Calendar y Sheets
                 const procesarAgendamiento = async () => {
                     const eventIdObtenido = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
                     if (eventIdObtenido) {
-                        datosCita.eventId = eventIdObtenido; // Guarda el ID de Calendar
+                        datosCita.eventId = eventIdObtenido;
                         await enviarAGoogleSheets(datosCita);
                     }
                 };
 
-                // 5. Autenticación e inserción
                 if (gapi.client.getToken() !== null) {
                     await procesarAgendamiento();
                 } else {
@@ -1286,72 +1335,6 @@ document.addEventListener('touchend', function(e) {
     }, 100);
   }
 }, { passive: true });
-
-        // ==========================================
-// 🕒 VALIDACIÓN DE DISPONIBILIDAD DE HORARIOS
-// ==========================================
-
-// Convierte "HH:MM" a minutos para facilitar la comparación
-function horaAMinutos(horaStr) {
-    if (!horaStr) return 0;
-    const [horas, minutos] = horaStr.split(':').map(Number);
-    return horas * 60 + minutos;
-}
-
-// Normaliza fechas en formatos "yyyy-mm-dd" o "dd/mm/yyyy" a "yyyy-mm-dd"
-function normalizarFecha(fechaStr) {
-    if (!fechaStr) return '';
-    if (fechaStr.includes('/')) {
-        const partes = fechaStr.split('/');
-        if (partes.length === 3) {
-            return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
-        }
-    }
-    return fechaStr.split('T')[0];
-}
-
-// Verifica si existe solapamiento en Google Sheets
-async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
-    try {
-        const respuesta = await fetch(APPS_SCRIPT_URL);
-        const citas = await respuesta.json();
-
-        if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
-
-        const inicioNUEVO = horaAMinutos(horaInicioNue);
-        const finNUEVO = horaAMinutos(horaFinNue);
-        const fechaBuscada = normalizarFecha(fechaSeleccionada);
-
-        for (let cita of citas) {
-            // Se obtiene la fecha y el horario del objeto
-            const fechaCita = normalizarFecha(cita.Fecha);
-            const horarioCita = cita.FEV || cita.Hora || '';
-
-            if (fechaCita === fechaBuscada && horarioCita.includes('-')) {
-                const partesHorario = horarioCita.split('-');
-                const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
-                const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
-
-                // Regla de solapamiento de rangos de tiempo
-                if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
-                    const nombreCliente = cita.Descripcion || cita.Nombre || 'Cliente';
-                    return {
-                        disponible: false,
-                        clienteConflicto: nombreCliente,
-                        horarioConflicto: horarioCita
-                    };
-                }
-            }
-        }
-
-        return { disponible: true };
-    } catch (error) {
-        console.error("Error al verificar disponibilidad:", error);
-        return { disponible: true };
-    }
-}
-        
-        
     </script>
 </body>
 </html>
