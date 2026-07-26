@@ -736,7 +736,7 @@
 }
 
         // Verifica si existe solapamiento en Google Sheets (Sincronizado con la planilla Registros)
-        async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
+        /*async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
     try {
         const respuesta = await fetch(APPS_SCRIPT_URL);
         const citas = await respuesta.json();
@@ -786,8 +786,8 @@
         console.error("Error al verificar disponibilidad:", error);
         return { disponible: true };
     }
-}
-        /*async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
+}*/
+        async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
         try {
         const respuesta = await fetch(APPS_SCRIPT_URL);
         const citas = await respuesta.json();
@@ -832,7 +832,7 @@
         console.error("Error al verificar disponibilidad:", error);
         return { disponible: true };
     }
-}*/
+}
 
         const dateInput = document.getElementById('appointmentDate');
         const startTimeInput = document.getElementById('startTime');
@@ -869,7 +869,7 @@
                     statusLabel.style.color = '#d32f2f';
                     statusLabel.innerText = `❌ Ocupado por ${verificacion.clienteConflicto} (${verificacion.horarioConflicto})`;
                 }
-                alert(`⚠️ Horario Ocupado:\n\nYa existe una cita para ${verificacion.clienteConflicto} en el rango ${verificacion.horarioConflicto}.\n\nPor favor, elige otra hora.`);
+                alert(`⚠️ Horário Indisponível:\n\nJá tem agendamento para ${verificacion.clienteConflicto} de ${verificacion.horarioConflicto}`);
                 return false;
             } else {
                 if (statusLabel) {
