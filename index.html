@@ -616,9 +616,9 @@
                 <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
 
                 <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
-                    <div style="margin-bottom: 12px;">
-                        <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Data do Cadastro:</label>
-                        <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; box-sizing: border-box;" required>
+                    <div style="margin-bottom: 12px; width: 100%; box-sizing: border-box; overflow: hidden;">
+                        <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Fecha de Registro:</label>
+                        <input type="date" id="salidaFecha" class="form-control" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;" required>
                     </div>
 
                     <button type="submit" class="btn-save-salida">
