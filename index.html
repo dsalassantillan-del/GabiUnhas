@@ -48,56 +48,33 @@
         }
 
         /* --- CABEÇALHO --- */
-        /* Contenedor del encabezado en formato horizontal */
-.app-header {
-    display: flex;
-    align-items: center;
-    gap: 15px; /* Espacio entre el logo y el texto */
-    padding: 15px 20px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #c49a79, #e0b899); /* O el gradiente que ya tengas */
-}
-
-/* Estilos de la imagen del logo */
-/* Estilos de la imagen del logo (versión cuadrada y sin borde) */
-.app-logo {
-    width: 50px;           /* Ancho del logo */
-    height: 50px;          /* Alto del logo */
-    border-radius: 8px;    /* Bordes ligeramente redondeados (o usa 0px si lo quieres 100% recto) */
-    object-fit: contain;   /* Mantiene las proporciones exactas de tu logo */
-}
-
-/* Ajuste del bloque de texto */
-.header-title h1 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #ffffff;
-}
-
-.header-title p {
-    margin: 2px 0 0 0;
-    font-size: 0.85rem;
-    color: #f3e8e0;
-}
-        /*header {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white;
-            padding: 20px 15px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(140, 94, 88, 0.15);
+        .app-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #c49a79, #e0b899);
         }
 
-        header h1 {
-            font-size: 1.4rem;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
+        .app-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: contain;
         }
 
-        header p {
+        .header-title h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #ffffff;
+        }
+
+        .header-title p {
+            margin: 2px 0 0 0;
             font-size: 0.85rem;
-            opacity: 0.9;
-        }*/
+            color: #f3e8e0;
+        }
 
         /* --- ABAS DE NAVEGAÇÃO (TABS) --- */
         .tab-navigation {
@@ -301,242 +278,214 @@
         }
 
         .client-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-.btn-delete {
-    background: transparent;
-    border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 5px;
-    border-radius: 6px;
-    transition: background 0.2s;
-}
+        .btn-delete {
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
 
-.btn-delete:hover {
-    background: #ffe6e6;
-}
+        .btn-delete:hover {
+            background: #ffe6e6;
+        }
 
-/* ==========================================
-   📦 ESTILOS: PESTAÑA SALIDAS DE MATERIAL
-   ========================================== */
+        /* --- PESTAÑA SALIDAS --- */
+        .dashboard-cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-/* Contenedor principal de la tarjeta de salidas */
-/* ==========================================
-   📦 REDISEÑO: PESTAÑA SALIDAS DE MATERIAL
-   ========================================== */
+        .card-summary {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #e53935;
+        }
 
-/* Cuadrícula para las dos tarjetas superiores (Semana / Mes) */
-.dashboard-cards-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
-}
+        .card-summary h4 {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #c62828;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-.card-summary {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-left: 4px solid #e53935;
-}
+        .card-summary .amount {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #b71c1c;
+            margin-top: 5px;
+        }
 
-.card-summary h4 {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #c62828;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+        .salidas-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            margin: 0 auto;
+        }
 
-.card-summary .amount {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #b71c1c;
-  margin-top: 5px;
-}
+        .calc-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
 
-/* Tarjeta principal para Calculadora e Historial */
-.salidas-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  max-width: 500px;
-  margin: 0 auto;
-}
+        .calc-input-field {
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            flex: 1;
+            font-size: 1.1rem;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+        }
 
-/* Teclado y Controles de Calculadora */
-.calc-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-  width: 100%;                  /* 📐 Ocupa máximo el 100% de la tarjeta */
-  box-sizing: border-box;        /* 🛡️ Evita que crezca de más */
-}
+        .calc-input-field:focus {
+            border-color: #e91e63;
+        }
 
-.calc-input-field {
-  width: 100%;        /* 📐 Asegura que ocupe el ancho disponible */
-  min-with: 0;
-  box-sizing: border-box;       /* 🛡️ INCLUYE el padding y el borde dentro del ancho total */
-  flex: 1;
-  font-size: 1.1rem;
-  padding: 10px 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 10px;
-  outline: none;
-}
+        .btn-calc-equal {
+            background: #e91e63;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 0 20px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-.calc-input-field:focus {
-  border-color: #e91e63;
-}
+        .calc-items-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px 0;
+            max-height: 120px;
+            overflow-y: auto;
+            border-top: 1px dashed #e0e0e0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
 
-.btn-calc-equal {
-  background: #e91e63;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  padding: 0 20px;
-  font-size: 1.4rem;
-  font-weight: bold;
-  cursor: pointer;
-}
+        .calc-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 4px;
+            font-size: 0.9rem;
+            color: #424242;
+        }
 
-/* Desglose temporal de la sumadora */
-.calc-items-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 12px 0;
-  max-height: 120px;
-  overflow-y: auto;
-  border-top: 1px dashed #e0e0e0;
-  border-bottom: 1px dashed #e0e0e0;
-}
+        .btn-remove-item {
+            background: transparent;
+            border: none;
+            color: #ef5350;
+            font-size: 1rem;
+            cursor: pointer;
+        }
 
-.calc-item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 4px;
-  font-size: 0.9rem;
-  color: #424242;
-}
+        .btn-clear-calc {
+            background: transparent;
+            color: #757575;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            width: 100%;
+        }
 
-.btn-remove-item {
-  background: transparent;
-  border: none;
-  color: #ef5350;
-  font-size: 1rem;
-  cursor: pointer;
-}
+        .btn-save-salida {
+            background: #2196f3;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        }
 
-.btn-clear-calc {
-  background: transparent;
-  color: #757575;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  width: 100%;
-}
+        .salidas-history-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
 
-.btn-save-salida {
-  background: #2196f3;
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  width: 100%;
-  box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
-}
+        .salida-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
 
-/* Lista de registros históricos agrupados */
-.salidas-history-list {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-}
+        .salida-history-item:last-child {
+            border-bottom: none;
+        }
 
-.salida-history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95rem;
-}
+        /* ANIMACION DE BOTONES */
+        button, 
+        input[type="submit"], 
+        input[type="button"], 
+        div[onclick],
+        span[onclick],
+        a,
+        .btn,
+        [class*="btn"],
+        [class*="calc"],
+        [class*="card"],
+        [class*="tab"] {
+            transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out !important;
+            cursor: pointer !important;
+            -webkit-tap-highlight-color: transparent !important;
+            touch-action: manipulation !important;
+        }
 
-.salida-history-item:last-child {
-  border-bottom: none;
-}
-
-        input[type="date"]::-webkit-date-and-time-value {
-  text-align: center;
-  margin: 0;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  margin: 0;
-  padding: 0;
-
-    /*ANIMACION DE BOTONES*/
-/* 1. Aplica a TODOS los elementos interactivos de todas las pestañas */
-button, 
-input[type="submit"], 
-input[type="button"], 
-div[onclick],
-span[onclick],
-a,
-.btn,
-[class*="btn"],
-[class*="calc"],
-[class*="card"],
-[class*="tab"] {
-  transition: transform 0.1s ease-in-out, filter 0.1s ease-in-out !important;
-  cursor: pointer !important;
-  -webkit-tap-highlight-color: transparent !important;
-  touch-action: manipulation !important;
-}
-
-/* 2. Efecto de animación al presionar */
-button:active, 
-input[type="submit"]:active, 
-input[type="button"]:active, 
-div[onclick]:active,
-span[onclick]:active,
-a:active,
-.btn:active,
-[class*="btn"]:active,
-[class*="calc"]:active,
-[class*="card"]:active,
-[class*="tab"]:active {
-  transform: scale(0.93) !important;
-  filter: brightness(0.88) !important;
-}
-        
+        button:active, 
+        input[type="submit"]:active, 
+        input[type="button"]:active, 
+        div[onclick]:active,
+        span[onclick]:active,
+        a:active,
+        .btn:active,
+        [class*="btn"]:active,
+        [class*="calc"]:active,
+        [class*="card"]:active,
+        [class*="tab"]:active {
+            transform: scale(0.93) !important;
+            filter: brightness(0.88) !important;
+        }
     </style>
 </head>
-<body>
-    <body ontouchstart="">
+<body ontouchstart="">
     <div class="phone-wrapper">
         
         <!-- CABEÇALHO -->
         <header class="app-header">
-    <!-- Logo alineado a la izquierda -->
-    <img src="logo2.png" alt="Logo" class="app-logo">
-    
-    <div class="header-title">
-        <h1>💅 Gabriela Alves Nails</h1>
-        <p>Controle de Ganhos & Agendamentos</p>
-    </div>
+            <img src="logo2.png" alt="Logo" class="app-logo">
+            <div class="header-title">
+                <h1>💅 Gabriela Alves Nails</h1>
+                <p>Controle de Ganhos & Agendamentos</p>
+            </div>
         </header>
 
         <!-- NAVEGAÇÃO DE ABAS -->
@@ -586,7 +535,6 @@ a:active,
                     <div class="form-group">
                         <label for="endTime">Hora Fim</label>
                         <input type="time" id="endTime" class="form-control" required>
-                        <!-- 🟢/🔴 Mensaje de disponibilidad en vivo -->
                         <small id="availability-status" style="display: block; margin-top: 5px; font-weight: bold; font-size: 0.85rem;"></small>
                     </div>
                 </div>
@@ -595,7 +543,7 @@ a:active,
             </form>
         </section>
 
-        <!-- ABA 2: RESUMO (DASHBOARD) -->
+        <!-- ABA 2: RESUMO -->
         <section id="resumo-view" class="view-section">
             <h2 class="section-title">📊 Faturamento Estimado</h2>
             
@@ -611,84 +559,74 @@ a:active,
             </div>
 
             <h2 class="section-title" style="border-bottom: none; margin-bottom: 10px; padding-bottom: 0;">📋 Próximas Clientes</h2>
-            <ul class="client-list" id="lista-clientes">
-                <!-- Se llenará dinámicamente -->
-                
-            </ul>
+            <ul class="client-list" id="lista-clientes"></ul>
             <div id="loading-spinner" style="text-align: center; color: #888; display: none;">Carregando...</div>
         </section>
 
-        <!-- ABA 3 PESTAÑA: SALIDAS DE MATERIAL -->
-<!-- PESTAÑA: SALIDAS DE MATERIAL -->
-<section id="salidas-view" class="view-section">
-    
-    <!-- 🔴 Cuadrícula Doble: Gastos da Semana y Gastos do Mês -->
-    <div class="dashboard-cards-grid">
-        <div class="card-summary">
-            <h4>📊 Saídas da Semana</h4>
-            <div id="gastos-semana-total" class="amount">R$ 0,00</div>
-        </div>
-        <div class="card-summary">
-            <h4>📅 Saídas do Mês</h4>
-            <div id="gastos-mes-total" class="amount">R$ 0,00</div>
-        </div>
-    </div>
-
-    <!-- 🧮 Tarjeta Calculadora -->
-    <div class="salidas-card" style="margin-bottom: 20px;">
-        <h3>🧮 Calculadora de Saídas</h3>
-        
-        <div class="calc-controls" style="margin-top: 15px;">
-    <input type="text" id="calcInput" class="calc-input-field" placeholder="Monto R$" inputmode="decimal">
-    <button type="button" class="btn-calc-equal" onclick="procesarEntradaMonto()">=</button>
-</div>
-
-        <ul id="listaTempCalc" class="calc-items-list">
-            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
-                Não tem quantidades ingresadas
-            </li>
-        </ul>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-weight: bold;">
-            <span>Total a cadastrar:</span>
-            <span id="totalCalc" style="font-size: 1.2rem; color: #e91e63;">R$ 0,00</span>
-        </div>
-
-        <button type="button" class="btn-clear-calc" onclick="limpiarSumadora()">
-            🧹 Limpar calculadora
-        </button>
-
-        <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
-
-        <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
-            <div style="margin-bottom: 12px;">
-                <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Fecha de Registro:</label>
-                <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; max-width: 100%; box-sizing: border-box; -webkit-appearance: none; appearance: none; min-width: 0; display: block;" required>
+        <!-- ABA 3: SALIDAS DE MATERIAL -->
+        <section id="salidas-view" class="view-section">
+            <div class="dashboard-cards-grid">
+                <div class="card-summary">
+                    <h4>📊 Saídas da Semana</h4>
+                    <div id="gastos-semana-total" class="amount">R$ 0,00</div>
+                </div>
+                <div class="card-summary">
+                    <h4>📅 Saídas do Mês</h4>
+                    <div id="gastos-mes-total" class="amount">R$ 0,00</div>
+                </div>
             </div>
 
-            <button type="submit" class="btn-save-salida">
-                💾 Guardar Saída
-            </button>
-        </form>
+            <div class="salidas-card" style="margin-bottom: 20px;">
+                <h3>🧮 Calculadora de Saídas</h3>
+                
+                <div class="calc-controls" style="margin-top: 15px;">
+                    <input type="text" id="calcInput" class="calc-input-field" placeholder="Monto R$" inputmode="decimal">
+                    <button type="button" class="btn-calc-equal" onclick="procesarEntradaMonto()">=</button>
+                </div>
+
+                <ul id="listaTempCalc" class="calc-items-list">
+                    <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
+                        Não tem quantidades ingresadas
+                    </li>
+                </ul>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-weight: bold;">
+                    <span>Total a cadastrar:</span>
+                    <span id="totalCalc" style="font-size: 1.2rem; color: #e91e63;">R$ 0,00</span>
+                </div>
+
+                <button type="button" class="btn-clear-calc" onclick="limpiarSumadora()">
+                    🧹 Limpar calculadora
+                </button>
+
+                <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
+
+                <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
+                    <div style="margin-bottom: 12px;">
+                        <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Fecha de Registro:</label>
+                        <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; box-sizing: border-box;" required>
+                    </div>
+
+                    <button type="submit" class="btn-save-salida">
+                        💾 Guardar Saída
+                    </button>
+                </form>
+            </div>
+
+            <div class="salidas-card">
+                <h3>📋 Histórico de Saídas</h3>
+                <ul id="lista-salidas-historial" class="salidas-history-list">
+                    <li style="color: #888; padding: 10px 0; text-align: center;">Carregando saídas...</li>
+                </ul>
+            </div>
+        </section>
+
     </div>
 
-    <!-- 📋 Historial Agrupado por Semanas -->
-    <div class="salidas-card">
-        <h3>📋 Histórico de Saídas</h3>
-        <ul id="lista-salidas-historial" class="salidas-history-list">
-            <li style="color: #888; padding: 10px 0; text-align: center;">Carregando saídas...</li>
-        </ul>
-    </div>
-
-</section>
-    </div>
-
-    <!-- --- JAVASCRIPT: LÓGICA DE FUNCIONAMIENTO --- -->
-    <!-- Librerías Oficiales de Google API (gapi) y Google Identity Services (gis) -->
+    <!-- JAVASCRIPT: LÓGICA DE FUNCIONAMIENTO -->
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
     <script>
-        // Configuración de credenciales de Google (¡Coloca las tuyas aquí!)
         const CLIENT_ID = '19004282784-e0277e8qmi3tubcdg2a71spqlorull2t.apps.googleusercontent.com';
         const API_KEY = 'AIzaSyDCu4FtYLx9fZ7dllqhFZU7-OLKVq9XYxA';
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
@@ -700,7 +638,6 @@ a:active,
         let gapiInited = false;
         let gisInited = false;
 
-        // Cargar librerías de Google al abrir la página
         function gapiLoaded() { gapi.load('client', intializeGapiClient); }
         async function intializeGapiClient() {
             await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
@@ -708,82 +645,124 @@ a:active,
         }
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID, scope: SCOPES, callback: '', // se define dinámicamente al agendar
+                client_id: CLIENT_ID, scope: SCOPES, callback: '',
             });
             gisInited = true;
         }
 
-       // ==========================================
-// 🔄 NAVEGACIÓN ENTRE PESTAÑAS (COMPLETA)
-// ==========================================
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+        // --- 🔄 NAVEGACIÓN ENTRE PESTAÑAS ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
 
-    const tab = tabName.toLowerCase();
+            const tab = tabName.toLowerCase();
 
-    if (tab === 'agendamento') {
-        const btn = document.querySelector('button[onclick*="agendamento"]');
-        if (btn) btn.classList.add('active');
-        const view = document.getElementById('agendamento-view');
-        if (view) view.classList.add('active');
+            if (tab === 'agendamento') {
+                const btn = document.querySelector('button[onclick*="agendamento"]');
+                if (btn) btn.classList.add('active');
+                const view = document.getElementById('agendamento-view');
+                if (view) view.classList.add('active');
 
-    } else if (tab === 'resumo') {
-        const btn = document.querySelector('button[onclick*="resumo"]');
-        if (btn) btn.classList.add('active');
-        const view = document.getElementById('resumo-view');
-        if (view) view.classList.add('active');
-        if (typeof obtenerGananciasYClientes === 'function') obtenerGananciasYClientes();
+            } else if (tab === 'resumo') {
+                const btn = document.querySelector('button[onclick*="resumo"]');
+                if (btn) btn.classList.add('active');
+                const view = document.getElementById('resumo-view');
+                if (view) view.classList.add('active');
+                obtenerGananciasYClientes();
 
-    } else if (tab === 'salidas' || tab === 'saidas') { // 👈 AHORA SÍ INCLUYE SALIDAS
-        const btn = document.querySelector('button[onclick*="salidas"], button[onclick*="saidas"]');
-        if (btn) btn.classList.add('active');
-        const view = document.getElementById('salidas-view');
-        if (view) view.classList.add('active');
-        
-        const inputFecha = document.getElementById('salidaFecha');
-        if (inputFecha) inputFecha.value = new Date().toISOString().split('T')[0];
-        
-        if (typeof obtenerMétricasYListaSalidas === 'function') obtenerMétricasYListaSalidas();
-    }
-}
+            } else if (tab === 'salidas' || tab === 'saidas') {
+                const btn = document.querySelector('button[onclick*="salidas"], button[onclick*="saidas"]');
+                if (btn) btn.classList.add('active');
+                const view = document.getElementById('salidas-view');
+                if (view) view.classList.add('active');
+                
+                const inputFecha = document.getElementById('salidaFecha');
+                if (inputFecha) inputFecha.value = new Date().toISOString().split('T')[0];
+                
+                obtenerMétricasYListaSalidas();
+            }
+        }
 
-// ==========================================
-// 💰 LÓGICA DE PRECIO SUGERIDO
-// ==========================================
-const serviceSelect = document.getElementById('serviceType');
-const valueInput = document.getElementById('serviceValue');
+        // --- 💰 PRECIO SUGERIDO ---
+        const serviceSelect = document.getElementById('serviceType');
+        const valueInput = document.getElementById('serviceValue');
 
-if (serviceSelect && valueInput) {
-    // Al cambiar la selección manualmente
-    serviceSelect.addEventListener('change', (e) => {
-        valueInput.value = e.target.options[e.target.selectedIndex].getAttribute('data-price') || '';
-    });
-}
+        if (serviceSelect && valueInput) {
+            serviceSelect.addEventListener('change', (e) => {
+                valueInput.value = e.target.options[e.target.selectedIndex].getAttribute('data-price') || '';
+            });
+        }
 
-        // Guardar datos al enviar el formulario
-        // ==========================================
-        // 🕒 VALIDACIÓN EN TIEMPO REAL AL SELECCIONAR HORA
-        // ==========================================
+        // --- 🕒 AUXILIARES Y VERIFICACIÓN EN VIVO ---
+        function horaAMinutos(horaStr) {
+            if (!horaStr) return 0;
+            const [horas, minutos] = horaStr.split(':').map(Number);
+            return horas * 60 + minutos;
+        }
+
+        function normalizarFecha(fechaStr) {
+            if (!fechaStr) return '';
+            if (fechaStr.includes('/')) {
+                const partes = fechaStr.split('/');
+                if (partes.length === 3) {
+                    return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+                }
+            }
+            return fechaStr.split('T')[0];
+        }
+
+        async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
+            try {
+                const respuesta = await fetch(APPS_SCRIPT_URL);
+                const citas = await respuesta.json();
+
+                if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
+
+                const inicioNUEVO = horaAMinutos(horaInicioNue);
+                const finNUEVO = horaAMinutos(horaFinNue);
+                const fechaBuscada = normalizarFecha(fechaSeleccionada);
+
+                for (let cita of citas) {
+                    const fechaCita = normalizarFecha(cita.Fecha);
+                    const horarioCita = cita.FEV || cita.Hora || '';
+
+                    if (fechaCita === fechaBuscada && horarioCita.includes('-')) {
+                        const partesHorario = horarioCita.split('-');
+                        const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
+                        const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
+
+                        if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
+                            return {
+                                disponible: false,
+                                clienteConflicto: cita.Descripcion || cita.Nombre || 'Cliente',
+                                horarioConflicto: horarioCita
+                            };
+                        }
+                    }
+                }
+
+                return { disponible: true };
+            } catch (error) {
+                console.error("Error al verificar disponibilidad:", error);
+                return { disponible: true };
+            }
+        }
 
         const dateInput = document.getElementById('appointmentDate');
         const startTimeInput = document.getElementById('startTime');
         const endTimeInput = document.getElementById('endTime');
         const statusLabel = document.getElementById('availability-status');
 
-        // Función que revisa si el rango seleccionado está libre u ocupado
         async function comprobarDisponibilidadEnVivo() {
             const fecha = dateInput ? dateInput.value : '';
             const horaInicio = startTimeInput ? startTimeInput.value : '';
             const horaFin = endTimeInput ? endTimeInput.value : '';
 
-            // Si faltan campos por llenar, resetea el mensaje
             if (!fecha || !horaInicio || !horaFin) {
                 if (statusLabel) statusLabel.innerText = '';
                 return true;
             }
 
-            // Validar que hora inicio sea menor a hora fin
             if (horaAMinutos(horaInicio) >= horaAMinutos(horaFin)) {
                 if (statusLabel) {
                     statusLabel.style.color = '#d32f2f';
@@ -797,7 +776,6 @@ if (serviceSelect && valueInput) {
                 statusLabel.innerText = '🔍 Verificando disponibilidad...';
             }
 
-            // Consultar cruzado en Sheets
             const verificacion = await verificarDisponibilidadHorario(fecha, horaInicio, horaFin);
 
             if (!verificacion.disponible) {
@@ -816,21 +794,16 @@ if (serviceSelect && valueInput) {
             }
         }
 
-        // 🔔 Eventos en vivo: Se activan al cambiar la fecha, hora de inicio o fin
         if (dateInput) dateInput.addEventListener('change', comprobarDisponibilidadEnVivo);
         if (startTimeInput) startTimeInput.addEventListener('change', comprobarDisponibilidadEnVivo);
         if (endTimeInput) endTimeInput.addEventListener('change', comprobarDisponibilidadEnVivo);
 
-
-        // ==========================================
-        // 💾 ENVÍO DEL FORMULARIO
-        // ==========================================
+        // --- 💾 AGENDAR ---
         const formulario = document.getElementById('appointmentForm');
         if (formulario) {
             formulario.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // Re-verificar la disponibilidad al hacer submit por seguridad
                 const esValido = await comprobarDisponibilidadEnVivo();
                 if (!esValido) return;
 
@@ -873,67 +846,12 @@ if (serviceSelect && valueInput) {
                 }
             });
         }
-        /*const formulario = document.getElementById('appointmentForm');
-        if (formulario) {
-            formulario.addEventListener('submit', async (e) => {
-                e.preventDefault();
 
-                const fecha = document.getElementById('appointmentDate').value;
-                const nombre = document.getElementById('clientName').value;
-                const servicio = serviceSelect.value;
-                const valor = document.getElementById('serviceValue').value;
-                const horaInicio = document.getElementById('startTime').value;
-                const horaFin = document.getElementById('endTime').value;
-
-                const datosCita = {
-                    Fecha: fecha, Nombre: nombre, Descripcion: servicio, Ingreso: valor, Hora: `${horaInicio} - ${horaFin}`
-                };
-
-                // Corregido: Usamos solo las variables de inicialización que tu app ya tiene configuradas
-                if (!gapiInited || !gisInited) {
-                    alert('As bibliotecas do Google ainda estão carregando. Tente novamente em alguns segundos.');
-                    return;
-                }
-
-                // Función que procesa el guardado en ambas plataformas
-                const procesarAgendamiento = async () => {
-                const eventIdObtenido = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
-                if (eventIdObtenido) {
-                datosCita.eventId = eventIdObtenido; // 👈 Guarda el ID devuelto por Calendar
-                await enviarAGoogleSheets(datosCita);
-                }
-            };
-                /*const procesarAgendamiento = async () => {
-                    const eventoCreado = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
-                    if (eventoCreado) {
-                        await enviarAGoogleSheets(datosCita);
-                    }
-                };*/
-
-                // Revisamos si el navegador ya retiene la sesión activa de Google
-                if (gapi.client.getToken() !== null) {
-                    // Si ya está aprobada, guarda directo sin abrir ventanas molestas
-                    await procesarAgendamiento();
-                } else {
-                    // Si la sesión expiró o es la primera cita, configuramos el receptor limpio
-                    tokenClient.callback = async (resp) => {
-                        if (resp.error !== undefined) { throw (resp); }
-                        await procesarAgendamiento();
-                    };
-                    
-                    // SOLUCIÓN AL ERROR DE PERMISOS: Pedimos el token de forma fluida sin forzar la pantalla de bloqueo
-                    tokenClient.requestAccessToken({ prompt: '' });
-                }
-            });
-        }*/
-
-        // Función interna para insertar el evento en Google Calendar
-        // Función interna para insertar el evento en Google Calendar y obtener su ID
         async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
             const event = {
                 'summary': `${nombre}`,
                 'description': `Serviço de Nails: ${servicio}`,
-                'colorId': '4', // ID oficial de la API para el tono Flamingo / Rosa Pastel
+                'colorId': '4',
                 'start': { 
                     'dateTime': `${fecha}T${horaInicio}:00`, 
                     'timeZone': 'America/Sao_Paulo' 
@@ -945,13 +863,10 @@ if (serviceSelect && valueInput) {
             };
 
             try {
-                // Inserción en Google Calendar
                 const respuestaCalendar = await gapi.client.calendar.events.insert({ 
                     'calendarId': 'primary', 
                     'resource': event
                 });
-                
-                // Retornamos el ID del evento creado
                 return respuestaCalendar.result.id;
             } catch (err) {
                 console.error('Error al crear evento en Calendar:', err);
@@ -961,10 +876,8 @@ if (serviceSelect && valueInput) {
             }
         }
 
-        // Función para enviar los datos por POST a Google Sheets
         async function enviarAGoogleSheets(datosCita) {
             try {
-                // Aseguramos que la acción sea "agendar" para Apps Script
                 datosCita.accion = "agendar";
 
                 const response = await fetch(APPS_SCRIPT_URL, {
@@ -978,6 +891,8 @@ if (serviceSelect && valueInput) {
                     alert('¡Agendamento guardado en Google Calendar y Sheets con éxito! 🎉');
                     formulario.reset();
                     valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
+                    dateInput.value = new Date().toISOString().split('T')[0];
+                    statusLabel.innerText = '';
                     switchTab('resumo');
                 }
             } catch (error) {
@@ -986,394 +901,309 @@ if (serviceSelect && valueInput) {
             }
         }
 
-        // Función para obtener y calcular los totales en el Dashboard de forma segura
+        // --- 📊 DASHBOARD & RESUMO ---
         async function obtenerGananciasYClientes() {
-    const listaClientes = document.getElementById('lista-clientes');
-    if (!listaClientes) return;
+            const listaClientes = document.getElementById('lista-clientes');
+            if (!listaClientes) return;
 
-    const spinner = document.getElementById('loading-spinner');
-if (spinner) spinner.style.display = 'block';
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) spinner.style.display = 'block';
 
-    try {
-        // Obtenemos los datos cargados desde la planilla
-        const respuesta = await fetch(APPS_SCRIPT_URL);
-        const citas = await respuesta.json();
+            try {
+                const respuesta = await fetch(APPS_SCRIPT_URL);
+                const citas = await respuesta.json();
 
-        let htmlClientes = '';
-        let totalGanancias = 0;
+                let htmlClientes = '';
+                let totalGanancias = 0;
 
-        if (citas && citas.length > 0) {
-            citas.forEach((cita, index) => {
-                const valor = parseFloat(cita.Ingreso) || 0;
-                totalGanancias += valor;
+                if (citas && citas.length > 0) {
+                    citas.forEach((cita, index) => {
+                        const valor = parseFloat(cita.Ingreso) || 0;
+                        totalGanancias += valor;
 
-                // Variables recibidas de tu planilla
-                const nombreCliente = cita.Descripcion || 'Cliente';
-                let fechaMostrar = "";
-                if (cita.Fecha) {
-                const d = new Date(cita.Fecha);
-                if (!isNaN(d.getTime())) {
-                // Formatea la fecha a día/mes (ej: 22/07)
-                const dia = String(d.getDate()).padStart(2, '0');
-                const mes = String(d.getMonth() + 1).padStart(2, '0');
-                fechaMostrar = `${dia}/${mes}`;
+                        const nombreCliente = cita.Descripcion || 'Cliente';
+                        let fechaMostrar = "";
+                        if (cita.Fecha) {
+                            const d = new Date(cita.Fecha);
+                            if (!isNaN(d.getTime())) {
+                                const dia = String(d.getDate()).padStart(2, '0');
+                                const mes = String(d.getMonth() + 1).padStart(2, '0');
+                                fechaMostrar = `${dia}/${mes}`;
+                            } else {
+                                fechaMostrar = cita.Fecha;
+                            }
+                        }
+                        const horarioCita = cita.FEV || '';
+                        const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
+
+                        htmlClientes += `
+                            <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div class="client-info">
+                                    <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
+                                    <div class="client-meta" style="font-size: 0.85rem; color: #666;">
+                                        <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
+                                    </div>
+                                </div>
+                                <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
+                                    <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </li>
+                        `;
+                    });
+
+                    listaClientes.innerHTML = htmlClientes;
                 } else {
-                // Si no se puede transformar, intenta mostrar los primeros caracteres
-                fechaMostrar = cita.Fecha;
+                    listaClientes.innerHTML = '<li style="padding: 10px; color: #888;">Nenhum atendimento registrado.</li>';
                 }
+
+                const elTotalSemana = document.getElementById('weeklyEarnings');
+                const elTotalMes = document.getElementById('monthlyEarnings');
+                if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalGanancias.toFixed(2)}`;
+                if (elTotalMes) elTotalMes.innerText = `R$ ${totalGanancias.toFixed(2)}`;
+
+                if (spinner) spinner.style.display = 'none';
+
+            } catch (error) {
+                console.error("Erro ao carregar clientes:", error);
+                listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
             }
-                //const fechaMostrar = cita.Fecha ? cita.Fecha.substring(0, 5) : "";
-                //cita.Fecha || '';
-                const horarioCita = cita.FEV || '';
-                // 🔍 Búsqueda flexible del ID del evento
-                const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || cita.eventId_ || '';
-
-                htmlClientes += `
-                    <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
-                        <div class="client-info">
-                            <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
-                            <div class="client-meta" style="font-size: 0.85rem; color: #666;">
-                                <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
-                            </div>
-                        </div>
-                        <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
-                            <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
-                            
-                            <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
-                                🗑️
-                            </button>
-                        </div>
-                    </li>
-                `;
-            });
-
-            listaClientes.innerHTML = htmlClientes;
-        } else {
-            listaClientes.innerHTML = '<li style="padding: 10px; color: #888;">Nenhum atendimento registrado.</li>';
         }
-
-        // Actualizar total de ganancias si existe el elemento
-        const elTotal = document.getElementById('total-ganancias');
-        if (elTotal) {
-            elTotal.innerText = `R$ ${totalGanancias.toFixed(2)}`;
-        }
-
-        if (spinner) spinner.style.display = 'none';
-
-    } catch (error) {
-        console.error("Erro ao carregar clientes:", error);
-        listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
-    }
-}
 
         async function borrarAtendimento(nombre, fecha, eventId) {
-    // ❓ Cuadro de confirmación en portugués
-    const confirmacion = confirm("Desmarcar essa cliente?");
-    
-    if (!confirmacion) {
-        return; // Si la usuaria presiona "Cancelar", no hace nada
-    }
+            const confirmacion = confirm("Desmarcar essa cliente?");
+            if (!confirmacion) return;
 
-    try {
-        // 1. Borrar en Google Calendar (si existe el ID del evento)
-        if (eventId && gapi.client.calendar) {
-            await gapi.client.calendar.events.delete({
-                'calendarId': 'primary',
-                'eventId': eventId
-            });
-        }
-
-        // 2. Borrar en Google Sheets
-        await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-                accion: "eliminar",
-                Nombre: nombre,
-                Fecha: fecha
-            })
-        });
-
-        alert("Atendimento desmarcado com sucesso! 🗑️");
-        
-        // Recargar la lista en la app
-        obtenerGananciasYClientes();
-
-    } catch (error) {
-        console.error("Erro ao desmarcar:", error);
-        alert("Erro ao tentar desmarcar a cliente.");
-    }
-}
-
-        window.addEventListener('DOMContentLoaded', () => {
-            valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price');
-            document.getElementById('appointmentDate').value = new Date().toISOString().split('T')[0];
-        });
-// ==========================================
-// 🧮 LÓGICA DE SALIDAS CON HISTORIAL SEMANAL
-// ==========================================
-
-let listaMontos = [];
-let totalAcumuladoSalida = 0;
-
-// 1. Cambiar de Pestaña
-function switchTab(tabName) {
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-
-    if (tabName === 'agendamento') {
-        const btn = document.querySelector('button[onclick="switchTab(\'agendamento\')"]');
-        if (btn) btn.classList.add('active');
-        document.getElementById('agendamento-view').classList.add('active');
-    } else if (tabName === 'resumo') {
-        const btn = document.querySelector('button[onclick="switchTab(\'resumo\')"]');
-        if (btn) btn.classList.add('active');
-        document.getElementById('resumo-view').classList.add('active');
-        obtenerGananciasYClientes();
-    } else if (tabName === 'salidas') {
-        const btn = document.querySelector('button[onclick="switchTab(\'salidas\')"]');
-        if (btn) btn.classList.add('active');
-        document.getElementById('salidas-view').classList.add('active');
-        
-        document.getElementById('salidaFecha').value = new Date().toISOString().split('T')[0];
-        
-        // Cargar métricas y lista histórica
-        obtenerMétricasYListaSalidas();
-    }
-}
-
-// 2. Calculadora: Entrada con '='
-function procesarEntradaMonto() {
-    const input = document.getElementById('calcInput');
-    // 1. Reemplazamos cualquier coma por un punto para que JS no dé error
-    const valorLimpio = input.value.replace(',', '.');
-    
-    // 2. Convertimos el texto ya corregido a un número decimal
-    const valor = parseFloat(valorLimpio);
-
-    if (isNaN(valor) || valor <= 0) return;
-
-    listaMontos.push(valor);
-    totalAcumuladoSalida += valor;
-
-    actualizarVistaCalculadora();
-    input.value = '';
-    input.focus();
-}
-
-function actualizarVistaCalculadora() {
-    const ul = document.getElementById('listaTempCalc');
-
-    if (listaMontos.length === 0) {
-        ul.innerHTML = `
-            <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
-                No hay montos ingresados.
-            </li>`;
-    } else {
-        ul.innerHTML = listaMontos.map((monto, index) => 
-            `<li class="calc-item-row">
-                <span>Item ${index + 1}: <strong>R$ ${monto.toFixed(2)}</strong></span>
-                <button type="button" class="btn-remove-item" onclick="eliminarEntradaIndividual(${index})">
-                    ✖️
-                </button>
-            </li>`
-        ).join('');
-    }
-
-    document.getElementById('totalCalc').innerText = `R$ ${totalAcumuladoSalida.toFixed(2)}`;
-}
-
-function eliminarEntradaIndividual(index) {
-    totalAcumuladoSalida -= listaMontos[index];
-    listaMontos.splice(index, 1);
-    if (totalAcumuladoSalida < 0) totalAcumuladoSalida = 0;
-    actualizarVistaCalculadora();
-}
-
-function limpiarSumadora() {
-    listaMontos = [];
-    totalAcumuladoSalida = 0;
-    actualizarVistaCalculadora();
-    document.getElementById('calcInput').value = '';
-}
-
-// 3. Guardar en Google Sheets
-async function guardarSalidaSheets(e) {
-    e.preventDefault();
-
-    if (totalAcumuladoSalida <= 0) {
-        alert("⚠️ Ingresa al menos un monto en la calculadora usando el botón '=' antes de guardar.");
-        return;
-    }
-
-    const fecha = document.getElementById('salidaFecha').value;
-
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({
-                accion: "registrar_salida",
-                Fecha: fecha,
-                Monto: totalAcumuladoSalida
-            })
-        });
-
-        const res = await response.json();
-
-        if (res.status === "success") {
-            alert("¡Salida registrada con éxito! 📦✨");
-            limpiarSumadora();
-            obtenerMétricasYListaSalidas();
-        } else {
-            alert("❌ Ocurrió un error al intentar registrar la salida.");
-        }
-    } catch (error) {
-        console.error("Error al registrar salida:", error);
-        alert("❌ Error al conectar con la planilla.");
-    }
-}
-
-// 4. Procesar Métricas (Semana/Mes) e Historial Agrupado por Semana
-async function obtenerMétricasYListaSalidas() {
-    const elSemana = document.getElementById('gastos-semana-total');
-    const elMes = document.getElementById('gastos-mes-total');
-    const elLista = document.getElementById('lista-salidas-historial');
-
-    if (!elSemana || !elMes || !elLista) return;
-
-    try {
-        const response = await fetch(APPS_SCRIPT_URL + "?hoja=Salidas");
-        const salidas = await response.json();
-
-        const ahora = new Date();
-        const mesActual = ahora.getMonth();
-        const anioActual = ahora.getFullYear();
-
-        // Rango de la semana actual (Lunes 00:00 a Domingo 23:59)
-        const diaSemana = ahora.getDay();
-        const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
-        
-        const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
-        inicioSemanaActual.setHours(0, 0, 0, 0);
-
-        const finSemanaActual = new Date(inicioSemanaActual);
-        finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
-        finSemanaActual.setHours(23, 59, 59, 999);
-
-        let totalSemana = 0;
-        let totalMes = 0;
-        let semanasAgrupadas = {};
-
-        if (Array.isArray(salidas) && salidas.length > 0) {
-            salidas.forEach(item => {
-                if (item.Fecha && item.Monto) {
-                    let montoVal = parseFloat(item.Monto) || 0;
-                    
-                    // Parsear fecha dd/mm/yyyy o yyyy-mm-dd
-                    let partes = item.Fecha.split('/');
-                    let fechaItem;
-                    if (partes.length === 3) {
-                        fechaItem = new Date(partes[2], partes[1] - 1, partes[0]);
-                    } else {
-                        fechaItem = new Date(item.Fecha);
-                    }
-
-                    if (isNaN(fechaItem.getTime())) return;
-
-                    // A) Total de la Semana Actual
-                    if (fechaItem >= inicioSemanaActual && fechaItem <= finSemanaActual) {
-                        totalSemana += montoVal;
-                    }
-
-                    // B) Total del Mes Actual
-                    if (fechaItem.getMonth() === mesActual && fechaItem.getFullYear() === anioActual) {
-                        totalMes += montoVal;
-                    }
-
-                    // C) Agrupar por Rango Semanal para la Lista
-                    let dSem = fechaItem.getDay();
-                    let diffL = fechaItem.getDate() - dSem + (dSem === 0 ? -6 : 1);
-                    
-                    let lunesSemana = new Date(fechaItem);
-                    lunesSemana.setDate(diffL);
-                    
-                    let domingoSemana = new Date(lunesSemana);
-                    domingoSemana.setDate(lunesSemana.getDate() + 6);
-
-                    // Formato clave: "dd/mm al dd/mm"
-                    let fLunes = `${String(lunesSemana.getDate()).padStart(2, '0')}/${String(lunesSemana.getMonth() + 1).padStart(2, '0')}`;
-                    let fDomingo = `${String(domingoSemana.getDate()).padStart(2, '0')}/${String(domingoSemana.getMonth() + 1).padStart(2, '0')}`;
-                    let claveSemana = `Semana del ${fLunes} al ${fDomingo}`;
-
-                    if (!semanasAgrupadas[claveSemana]) {
-                        semanasAgrupadas[claveSemana] = 0;
-                    }
-                    semanasAgrupadas[claveSemana] += montoVal;
+            try {
+                if (eventId && gapi.client.calendar) {
+                    await gapi.client.calendar.events.delete({
+                        'calendarId': 'primary',
+                        'eventId': eventId
+                    });
                 }
-            });
 
-            // Renderizar totales superiores
-            elSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
-            elMes.innerText = `R$ ${totalMes.toFixed(2)}`;
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        accion: "eliminar",
+                        Nombre: nombre,
+                        Fecha: fecha
+                    })
+                });
 
-            // Renderizar lista por semanas
-            let htmlHistorial = '';
-            for (let semana in semanasAgrupadas) {
-                htmlHistorial += `
-                    <li class="salida-history-item">
-                        <span>📅 <strong>${semana}</strong></span>
-                        <strong style="color: #d32f2f;">| R$ ${semanasAgrupadas[semana].toFixed(2)}</strong>
-                    </li>
-                `;
+                alert("Atendimento desmarcado com sucesso! 🗑️");
+                obtenerGananciasYClientes();
+
+            } catch (error) {
+                console.error("Erro ao desmarcar:", error);
+                alert("Erro ao tentar desmarcar a cliente.");
             }
-            elLista.innerHTML = htmlHistorial || '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
-
-        } else {
-            elSemana.innerText = "R$ 0,00";
-            elMes.innerText = "R$ 0,00";
-            elLista.innerHTML = '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
         }
 
-    } catch (error) {
-        console.error("Error al procesar métricas de salidas:", error);
-        elSemana.innerText = "R$ 0,00";
-        elMes.innerText = "R$ 0,00";
-        elLista.innerHTML = '<li style="color: red; text-align: center; padding: 10px;">Erro ao carregar histórico.</li>';
-    }
-}
+        // --- 🧮 SALIDAS DE MATERIAL ---
+        let listaMontos = [];
+        let totalAcumuladoSalida = 0;
 
-// Forzar respuesta táctil en todos los elementos interactivos de la app
-document.addEventListener('touchstart', function(e) {
-  let target = e.target.closest('button, [onclick], .btn, [class*="btn"], [class*="calc"]');
-  if (target) {
-    target.style.transform = 'scale(0.93)';
-    target.style.filter = 'brightness(0.88)';
-  }
-}, { passive: true });
+        function procesarEntradaMonto() {
+            const input = document.getElementById('calcInput');
+            const valorLimpio = input.value.replace(',', '.');
+            const valor = parseFloat(valorLimpio);
 
-document.addEventListener('touchend', function(e) {
-  let target = e.target.closest('button, [onclick], .btn, [class*="btn"], [class*="calc"]');
-  if (target) {
-    setTimeout(() => {
-      target.style.transform = 'none';
-      target.style.filter = 'none';
-    }, 100);
-  }
-}, { passive: true });
+            if (isNaN(valor) || valor <= 0) return;
 
+            listaMontos.push(valor);
+            totalAcumuladoSalida += valor;
+
+            actualizarVistaCalculadora();
+            input.value = '';
+            input.focus();
+        }
+
+        function actualizarVistaCalculadora() {
+            const ul = document.getElementById('listaTempCalc');
+
+            if (listaMontos.length === 0) {
+                ul.innerHTML = `
+                    <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
+                        Não tem quantidades ingresadas
+                    </li>`;
+            } else {
+                ul.innerHTML = listaMontos.map((monto, index) => 
+                    `<li class="calc-item-row">
+                        <span>Item ${index + 1}: <strong>R$ ${monto.toFixed(2)}</strong></span>
+                        <button type="button" class="btn-remove-item" onclick="eliminarEntradaIndividual(${index})">
+                            ✖️
+                        </button>
+                    </li>`
+                ).join('');
+            }
+
+            document.getElementById('totalCalc').innerText = `R$ ${totalAcumuladoSalida.toFixed(2)}`;
+        }
+
+        function eliminarEntradaIndividual(index) {
+            totalAcumuladoSalida -= listaMontos[index];
+            listaMontos.splice(index, 1);
+            if (totalAcumuladoSalida < 0) totalAcumuladoSalida = 0;
+            actualizarVistaCalculadora();
+        }
+
+        function limpiarSumadora() {
+            listaMontos = [];
+            totalAcumuladoSalida = 0;
+            actualizarVistaCalculadora();
+            document.getElementById('calcInput').value = '';
+        }
+
+        async function guardarSalidaSheets(e) {
+            e.preventDefault();
+
+            if (totalAcumuladoSalida <= 0) {
+                alert("⚠️ Ingresa al menos un monto en la calculadora usando el botón '=' antes de guardar.");
+                return;
+            }
+
+            const fecha = document.getElementById('salidaFecha').value;
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        accion: "registrar_salida",
+                        Fecha: fecha,
+                        Monto: totalAcumuladoSalida
+                    })
+                });
+
+                const res = await response.json();
+
+                if (res.status === "success") {
+                    alert("¡Salida registrada con éxito! 📦✨");
+                    limpiarSumadora();
+                    obtenerMétricasYListaSalidas();
+                } else {
+                    alert("❌ Ocurrió un error al intentar registrar la salida.");
+                }
+            } catch (error) {
+                console.error("Error al registrar salida:", error);
+                alert("❌ Error al conectar con la planilla.");
+            }
+        }
+
+        async function obtenerMétricasYListaSalidas() {
+            const elSemana = document.getElementById('gastos-semana-total');
+            const elMes = document.getElementById('gastos-mes-total');
+            const elLista = document.getElementById('lista-salidas-historial');
+
+            if (!elSemana || !elMes || !elLista) return;
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL + "?hoja=Salidas");
+                const salidas = await response.json();
+
+                const ahora = new Date();
+                const mesActual = ahora.getMonth();
+                const anioActual = ahora.getFullYear();
+
+                const diaSemana = ahora.getDay();
+                const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+                
+                const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
+                inicioSemanaActual.setHours(0, 0, 0, 0);
+
+                const finSemanaActual = new Date(inicioSemanaActual);
+                finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
+                finSemanaActual.setHours(23, 59, 59, 999);
+
+                let totalSemana = 0;
+                let totalMes = 0;
+                let semanasAgrupadas = {};
+
+                if (Array.isArray(salidas) && salidas.length > 0) {
+                    salidas.forEach(item => {
+                        if (item.Fecha && item.Monto) {
+                            let montoVal = parseFloat(item.Monto) || 0;
+                            
+                            let partes = item.Fecha.split('/');
+                            let fechaItem;
+                            if (partes.length === 3) {
+                                fechaItem = new Date(partes[2], partes[1] - 1, partes[0]);
+                            } else {
+                                fechaItem = new Date(item.Fecha);
+                            }
+
+                            if (isNaN(fechaItem.getTime())) return;
+
+                            if (fechaItem >= inicioSemanaActual && fechaItem <= finSemanaActual) {
+                                totalSemana += montoVal;
+                            }
+
+                            if (fechaItem.getMonth() === mesActual && fechaItem.getFullYear() === anioActual) {
+                                totalMes += montoVal;
+                            }
+
+                            let dSem = fechaItem.getDay();
+                            let diffL = fechaItem.getDate() - dSem + (dSem === 0 ? -6 : 1);
+                            
+                            let lunesSemana = new Date(fechaItem);
+                            lunesSemana.setDate(diffL);
+                            
+                            let domingoSemana = new Date(lunesSemana);
+                            domingoSemana.setDate(lunesSemana.getDate() + 6);
+
+                            let fLunes = `${String(lunesSemana.getDate()).padStart(2, '0')}/${String(lunesSemana.getMonth() + 1).padStart(2, '0')}`;
+                            let fDomingo = `${String(domingoSemana.getDate()).padStart(2, '0')}/${String(domingoSemana.getMonth() + 1).padStart(2, '0')}`;
+                            let claveSemana = `Semana del ${fLunes} al ${fDomingo}`;
+
+                            if (!semanasAgrupadas[claveSemana]) {
+                                semanasAgrupadas[claveSemana] = 0;
+                            }
+                            semanasAgrupadas[claveSemana] += montoVal;
+                        }
+                    });
+
+                    elSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+                    elMes.innerText = `R$ ${totalMes.toFixed(2)}`;
+
+                    let htmlHistorial = '';
+                    for (let semana in semanasAgrupadas) {
+                        htmlHistorial += `
+                            <li class="salida-history-item">
+                                <span>📅 <strong>${semana}</strong></span>
+                                <strong style="color: #d32f2f;">| R$ ${semanasAgrupadas[semana].toFixed(2)}</strong>
+                            </li>
+                        `;
+                    }
+                    elLista.innerHTML = htmlHistorial || '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
+
+                } else {
+                    elSemana.innerText = "R$ 0,00";
+                    elMes.innerText = "R$ 0,00";
+                    elLista.innerHTML = '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
+                }
+
+            } catch (error) {
+                console.error("Error al procesar métricas de salidas:", error);
+                elSemana.innerText = "R$ 0,00";
+                elMes.innerText = "R$ 0,00";
+                elLista.innerHTML = '<li style="color: red; text-align: center; padding: 10px;">Erro ao carregar histórico.</li>';
+            }
+        }
+
+        // --- 🚀 CARGA INICIAL ---
         window.addEventListener('DOMContentLoaded', () => {
-    // 1. Cargar el precio del servicio visible por defecto
-    if (serviceSelect && valueInput && serviceSelect.options[serviceSelect.selectedIndex]) {
-        valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price') || '';
-    }
-    
-    // 2. Cargar fecha actual por defecto en Agendamento
-    const dateInput = document.getElementById('appointmentDate');
-    if (dateInput) {
-        dateInput.value = new Date().toISOString().split('T')[0];
-    }
-});
+            if (serviceSelect && valueInput && serviceSelect.options[serviceSelect.selectedIndex]) {
+                valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price') || '';
+            }
+            
+            if (dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+        });
     </script>
 </body>
 </html>
