@@ -572,11 +572,28 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h3 style="margin: 0; font-size: 1.1rem; color: var(--primary);">📋 Próximas Clientes</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+        📋 Próximas Clientes
+    </h3>
     
-            <!-- 📅 Selector de Mes -->
-            <select id="filtroMesResumo" onchange="obtenerGananciasYClientes()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc; background: white; font-size: 0.85rem; outline: none; cursor: pointer; color: #444;">
+    <!-- 📅 Selector con Estilo Custom Mapeado a la App -->
+    <div style="position: relative; display: inline-block;">
+        <select id="filtroMesResumo" onchange="obtenerGananciasYClientes()" 
+                style="appearance: none;
+                       -webkit-appearance: none;
+                       -moz-appearance: none;
+                       background-color: #fff;
+                       color: #5d4037;
+                       font-weight: 700;
+                       font-size: 0.88rem;
+                       padding: 8px 32px 8px 14px;
+                       border: 2px solid #e2cfc4;
+                       border-radius: 20px;
+                       cursor: pointer;
+                       outline: none;
+                       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+                       transition: all 0.2s ease;">
             <option value="0">Janeiro</option>
             <option value="1">Fevereiro</option>
             <option value="2">Março</option>
@@ -589,8 +606,14 @@
             <option value="9">Outubro</option>
             <option value="10">Novembro</option>
             <option value="11">Dezembro</option>
-         </select>
-        </div>
+        </select>
+        <!-- 🔽 Flechita estilizada en tono café -->
+        <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8c5e58; font-size: 0.75rem;">
+            ▼
+        </span>
+    </div>
+</div>
+            
             <ul class="client-list" id="lista-clientes"></ul>
             <div id="loading-spinner" style="text-align: center; color: #888; display: none;">Carregando...</div>
         </section>
