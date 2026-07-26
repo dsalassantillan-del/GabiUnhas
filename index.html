@@ -882,7 +882,7 @@
                     statusLabel.style.color = '#d32f2f';
                     statusLabel.innerText = `❌ Ocupado por ${verificacion.clienteConflicto} (${verificacion.horarioConflicto})`;
                 }
-                alert(`⚠️ HORÁRIO INDISPONÍVEL:\n\nJá tem agendamento para ${verificacion.clienteConflicto} de ${verificacion.horarioConflicto}`);
+                alert(`⚠️ HORÁRIO INDISPONÍVEL:\n\nJá tem agendamento para ${verificacion.clienteConflicto}\n\nDe ${verificacion.horarioConflicto}`);
                 
                 if (startTimeInput) startTimeInput.value = '';
                 if (endTimeInput) endTimeInput.value = '';
