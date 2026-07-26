@@ -713,27 +713,53 @@ a:active,
             gisInited = true;
         }
 
-        // Función para alternar entre abas
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+       // ==========================================
+// 🔄 NAVEGACIÓN ENTRE PESTAÑAS (COMPLETA)
+// ==========================================
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
 
-            if (tabName === 'agendamento') {
-                document.querySelector('button[onclick="switchTab(\'agendamento\')"]').classList.add('active');
-                document.getElementById('agendamento-view').classList.add('active');
-            } else if (tabName === 'resumo') {
-                document.querySelector('button[onclick="switchTab(\'resumo\')"]').classList.add('active');
-                document.getElementById('resumo-view').classList.add('active');
-                obtenerGananciasYClientes();
-            }
-        }
+    const tab = tabName.toLowerCase();
 
-        // Lógica de actualizar precio sugerido automáticamente
-        const serviceSelect = document.getElementById('serviceType');
-        const valueInput = document.getElementById('serviceValue');
-        serviceSelect.addEventListener('change', (e) => {
-            valueInput.value = e.target.options[e.target.selectedIndex].getAttribute('data-price');
-        });
+    if (tab === 'agendamento') {
+        const btn = document.querySelector('button[onclick*="agendamento"]');
+        if (btn) btn.classList.add('active');
+        const view = document.getElementById('agendamento-view');
+        if (view) view.classList.add('active');
+
+    } else if (tab === 'resumo') {
+        const btn = document.querySelector('button[onclick*="resumo"]');
+        if (btn) btn.classList.add('active');
+        const view = document.getElementById('resumo-view');
+        if (view) view.classList.add('active');
+        if (typeof obtenerGananciasYClientes === 'function') obtenerGananciasYClientes();
+
+    } else if (tab === 'salidas' || tab === 'saidas') { // 👈 AHORA SÍ INCLUYE SALIDAS
+        const btn = document.querySelector('button[onclick*="salidas"], button[onclick*="saidas"]');
+        if (btn) btn.classList.add('active');
+        const view = document.getElementById('salidas-view');
+        if (view) view.classList.add('active');
+        
+        const inputFecha = document.getElementById('salidaFecha');
+        if (inputFecha) inputFecha.value = new Date().toISOString().split('T')[0];
+        
+        if (typeof obtenerMétricasYListaSalidas === 'function') obtenerMétricasYListaSalidas();
+    }
+}
+
+// ==========================================
+// 💰 LÓGICA DE PRECIO SUGERIDO
+// ==========================================
+const serviceSelect = document.getElementById('serviceType');
+const valueInput = document.getElementById('serviceValue');
+
+if (serviceSelect && valueInput) {
+    // Al cambiar la selección manualmente
+    serviceSelect.addEventListener('change', (e) => {
+        valueInput.value = e.target.options[e.target.selectedIndex].getAttribute('data-price') || '';
+    });
+}
 
         // Guardar datos al enviar el formulario
         // ==========================================
@@ -1335,6 +1361,19 @@ document.addEventListener('touchend', function(e) {
     }, 100);
   }
 }, { passive: true });
+
+        window.addEventListener('DOMContentLoaded', () => {
+    // 1. Cargar el precio del servicio visible por defecto
+    if (serviceSelect && valueInput && serviceSelect.options[serviceSelect.selectedIndex]) {
+        valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price') || '';
+    }
+    
+    // 2. Cargar fecha actual por defecto en Agendamento
+    const dateInput = document.getElementById('appointmentDate');
+    if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
+});
     </script>
 </body>
 </html>
