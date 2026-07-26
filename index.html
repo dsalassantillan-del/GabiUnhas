@@ -721,42 +721,53 @@
     return str.split('T')[0];
 }
 
+        // Verifica si existe solapamiento en Google Sheets (Sincronizado con la planilla Registros)
         async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
-            try {
-                const respuesta = await fetch(APPS_SCRIPT_URL);
-                const citas = await respuesta.json();
+        try {
+        const respuesta = await fetch(APPS_SCRIPT_URL);
+        const citas = await respuesta.json();
 
-                if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
+        if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
 
-                const inicioNUEVO = horaAMinutos(horaInicioNue);
-                const finNUEVO = horaAMinutos(horaFinNue);
-                const fechaBuscada = normalizarFecha(fechaSeleccionada);
+        const inicioNUEVO = horaAMinutos(horaInicioNue);
+        const finNUEVO = horaAMinutos(horaFinNue);
+        const fechaBuscada = normalizarFecha(fechaSeleccionada);
 
-                for (let cita of citas) {
-                    const fechaCita = normalizarFecha(cita.Fecha);
-                    const horarioCita = cita.FEV || cita.Hora || '';
+        for (let cita of citas) {
+            // Se obtiene la fecha (Columna A)
+            const fechaCita = normalizarFecha(cita.Fecha || cita.FECHA || '');
 
-                    if (fechaCita === fechaBuscada && horarioCita.includes('-')) {
-                        const partesHorario = horarioCita.split('-');
-                        const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
-                        const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
+            // Se obtiene el horario (Columna H "FEV")
+            const horarioCita = (cita.FEV || cita.Hora || '').toString().trim();
 
-                        if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
-                            return {
-                                disponible: false,
-                                clienteConflicto: cita.Descripcion || cita.Nombre || 'Cliente',
-                                horarioConflicto: horarioCita
-                            };
-                        }
+            if (fechaCita === fechaBuscada && horarioCita) {
+                // Reemplaza guiones especiales y normaliza separadores
+                const horarioLimpio = horarioCita.replace('–', '-').replace('a', '-');
+                
+                if (horarioLimpio.includes('-')) {
+                    const partesHorario = horarioLimpio.split('-');
+                    const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
+                    const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
+
+                    // FÓRMULA MATEMÁTICA DE INTERSECCIÓN DE HORARIOS
+                    if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
+                        const nombreCliente = cita.Descripcion || cita.Nombre || 'Cliente';
+                        return {
+                            disponible: false,
+                            clienteConflicto: nombreCliente,
+                            horarioConflicto: horarioCita
+                        };
                     }
                 }
-
-                return { disponible: true };
-            } catch (error) {
-                console.error("Error al verificar disponibilidad:", error);
-                return { disponible: true };
             }
         }
+
+        return { disponible: true };
+        } catch (error) {
+        console.error("Error al verificar disponibilidad:", error);
+        return { disponible: true };
+    }
+}
 
         const dateInput = document.getElementById('appointmentDate');
         const startTimeInput = document.getElementById('startTime');
