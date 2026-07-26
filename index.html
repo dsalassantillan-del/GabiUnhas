@@ -700,16 +700,26 @@
             return horas * 60 + minutos;
         }
 
+        // Normaliza cualquier formato de fecha a "YYYY-MM-DD" para una comparación exacta
         function normalizarFecha(fechaStr) {
-            if (!fechaStr) return '';
-            if (fechaStr.includes('/')) {
-                const partes = fechaStr.split('/');
-                if (partes.length === 3) {
-                    return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
-                }
-            }
-            return fechaStr.split('T')[0];
+        if (!fechaStr) return '';
+    
+        let str = fechaStr.toString().trim();
+
+        // Si viene en formato "dd/mm/yyyy" desde Sheets
+        if (str.includes('/')) {
+        const partes = str.split('/');
+        if (partes.length === 3) {
+            const dia = partes[0].padStart(2, '0');
+            const mes = partes[1].padStart(2, '0');
+            const anio = partes[2].length === 2 ? `20${partes[2]}` : partes[2];
+            return `${anio}-${mes}-${dia}`;
         }
+    }
+
+    // Si viene en formato "yyyy-mm-dd" o ISO con tiempo ("yyyy-mm-ddT...")
+    return str.split('T')[0];
+}
 
         async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
             try {
