@@ -357,8 +357,18 @@
             outline: none;
         }
 
-        .calc-input-field:focus {
-            border-color: #e91e63;
+            .calc-input-field {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            font-size: 1rem;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            -webkit-appearance: none; /* 🛡️ Elimina estilos nativos forzados en iPhone */
+            appearance: none;
+            display: block;
         }
 
         .btn-calc-equal {
@@ -607,7 +617,7 @@
 
                 <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
                     <div style="margin-bottom: 12px;">
-                        <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Fecha de Registro:</label>
+                        <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Data do Cadastro:</label>
                         <input type="date" id="salidaFecha" class="calc-input-field" style="width: 100%; box-sizing: border-box;" required>
                     </div>
 
@@ -946,7 +956,92 @@
         }
 
         // --- 📊 DASHBOARD & RESUMO ---
+        // Función para obtener, ordenar cronológicamente y calcular los totales en el Dashboard
         async function obtenerGananciasYClientes() {
+            const listaClientes = document.getElementById('lista-clientes');
+            if (!listaClientes) return;
+
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) spinner.style.display = 'block';
+
+            try {
+                const respuesta = await fetch(APPS_SCRIPT_URL);
+                let citas = await respuesta.json();
+
+                let htmlClientes = '';
+                let totalGanancias = 0;
+
+                if (citas && citas.length > 0) {
+
+                    // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora de Inicio)
+                    citas.sort((a, b) => {
+                        const fechaA = normalizarFecha(a.Fecha);
+                        const fechaB = normalizarFecha(b.Fecha);
+
+                        // Si las fechas son diferentes, ordena por fecha
+                        if (fechaA !== fechaB) {
+                            return fechaA.localeCompare(fechaB);
+                        }
+
+                        // Si son del mismo día, ordena por la hora de inicio
+                        const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
+                        const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
+                        return horaAMinutos(horaA) - horaAMinutos(horaB);
+                    });
+
+                    citas.forEach((cita, index) => {
+                        const valor = parseFloat(cita.Ingreso) || 0;
+                        totalGanancias += valor;
+
+                        const nombreCliente = cita.Descripcion || 'Cliente';
+                        let fechaMostrar = "";
+                        if (cita.Fecha) {
+                            const partes = normalizarFecha(cita.Fecha).split('-');
+                            if (partes.length === 3) {
+                                fechaMostrar = `${partes[2]}/${partes[1]}`; // Formato dd/mm
+                            } else {
+                                fechaMostrar = cita.Fecha;
+                            }
+                        }
+                        const horarioCita = cita.FEV || cita.Hora || '';
+                        const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
+
+                        htmlClientes += `
+                            <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div class="client-info">
+                                    <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
+                                    <div class="client-meta" style="font-size: 0.85rem; color: #666;">
+                                        <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
+                                    </div>
+                                </div>
+                                <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
+                                    <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </li>
+                        `;
+                    });
+
+                    listaClientes.innerHTML = htmlClientes;
+                } else {
+                    listaClientes.innerHTML = '<li style="padding: 10px; color: #888;">Nenhum atendimento registrado.</li>';
+                }
+
+                const elTotalSemana = document.getElementById('weeklyEarnings');
+                const elTotalMes = document.getElementById('monthlyEarnings');
+                if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalGanancias.toFixed(2)}`;
+                if (elTotalMes) elTotalMes.innerText = `R$ ${totalGanancias.toFixed(2)}`;
+
+                if (spinner) spinner.style.display = 'none';
+
+            } catch (error) {
+                console.error("Erro ao carregar clientes:", error);
+                listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
+            }
+        }
+        /*async function obtenerGananciasYClientes() {
             const listaClientes = document.getElementById('lista-clientes');
             if (!listaClientes) return;
 
@@ -1014,7 +1109,7 @@
                 console.error("Erro ao carregar clientes:", error);
                 listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
             }
-        }
+        }*/
 
         async function borrarAtendimento(nombre, fecha, eventId) {
             const confirmacion = confirm("Desmarcar essa cliente?");
