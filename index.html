@@ -535,8 +535,12 @@
                     <div class="form-group">
                         <label for="endTime">Hora Fim</label>
                         <input type="time" id="endTime" class="form-control" required>
-                        <small id="availability-status" style="display: block; margin-top: 5px; font-weight: bold; font-size: 0.85rem;"></small>
                     </div>
+                </div>
+
+                <!-- 🟢/🔴 Mensaje de disponibilidad centrado con espacio fijo (Evita saltos del botón) -->
+                <div style="min-height: 24px; margin: 8px 0 12px 0; text-align: center;">
+                    <small id="availability-status" style="display: inline-block; font-weight: bold; font-size: 0.88rem;"></small>
                 </div>
 
                 <button type="submit" class="btn-submit">Salvar e Sincronizar</button>
@@ -801,14 +805,14 @@
             if (horaAMinutos(horaInicio) >= horaAMinutos(horaFin)) {
                 if (statusLabel) {
                     statusLabel.style.color = '#d32f2f';
-                    statusLabel.innerText = '⚠️ La hora de término debe ser posterior a la de inicio.';
+                    statusLabel.innerText = '⚠️ Hora de inicio deve anteceder hora de fim';
                 }
                 return false;
             }
 
             if (statusLabel) {
                 statusLabel.style.color = '#666';
-                statusLabel.innerText = '🔍 Verificando disponibilidad...';
+                statusLabel.innerText = '🔍 Validando...';
             }
 
             const verificacion = await verificarDisponibilidadHorario(fecha, horaInicio, horaFin);
@@ -828,7 +832,7 @@
             } else {
                 if (statusLabel) {
                     statusLabel.style.color = '#2e7d32';
-                    statusLabel.innerText = '✅ Horario disponible';
+                    statusLabel.innerText = '✅ Horário disponível';
                 }
                 return true;
             }
