@@ -701,12 +701,13 @@
         }
 
         // Normaliza cualquier formato de fecha a "YYYY-MM-DD" para una comparación exacta
+        // Normaliza CUALQUIER formato de fecha (incluyendo "Sat Aug 01 2026...") a "YYYY-MM-DD"
         function normalizarFecha(fechaStr) {
         if (!fechaStr) return '';
-    
-        let str = fechaStr.toString().trim();
 
-        // Si viene en formato "dd/mm/yyyy" desde Sheets
+        let str = fechaStr.toString().trim();
+    
+        // 1. Si viene en formato "dd/mm/yyyy"
         if (str.includes('/')) {
         const partes = str.split('/');
         if (partes.length === 3) {
@@ -717,63 +718,21 @@
         }
     }
 
-    // Si viene en formato "yyyy-mm-dd" o ISO con tiempo ("yyyy-mm-ddT...")
-    return str.split('T')[0];
+        // 2. Si viene como objeto de fecha o texto largo tipo "Sat Aug 01 2026..."
+        const d = new Date(str);
+        if (!isNaN(d.getTime())) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+        // 3. Resguardo tipo "yyyy-mm-ddT..."
+        return str.split('T')[0];
 }
 
         // Verifica si existe solapamiento en Google Sheets (Sincronizado con la planilla Registros)
         async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
-    try {
-        const respuesta = await fetch(APPS_SCRIPT_URL);
-        const citas = await respuesta.json();
-
-        console.log("📌 1. CITAS RECIBIDAS DESDE SHEETS:", citas);
-
-        if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
-
-        const inicioNUEVO = horaAMinutos(horaInicioNue);
-        const finNUEVO = horaAMinutos(horaFinNue);
-        const fechaBuscada = normalizarFecha(fechaSeleccionada);
-
-        console.log(`📌 2. BUSCANDO FECHA: "${fechaBuscada}" | NUEVO RANGO: ${inicioNUEVO}m - ${finNUEVO}m`);
-
-        for (let cita of citas) {
-            const fechaCita = normalizarFecha(cita.Fecha || cita.FECHA || '');
-            const horarioCita = (cita.FEV || cita.Hora || cita.Horario || '').toString().trim();
-
-            console.log(`   🔎 Comparando con cita: Fecha="${fechaCita}" | Horario="${horarioCita}" | Nombre="${cita.Descripcion || cita.Nombre}"`);
-
-            if (fechaCita === fechaBuscada && horarioCita) {
-                const horarioLimpio = horarioCita.replace('–', '-').replace('a', '-');
-                
-                if (horarioLimpio.includes('-')) {
-                    const partesHorario = horarioLimpio.split('-');
-                    const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
-                    const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
-
-                    console.log(`   ⏱️ Minutos Existentes: ${inicioEXISTENTE}m a ${finEXISTENTE}m`);
-
-                    if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
-                        console.log("   ❌ SOLAPAMIENTO DETECTADO!");
-                        const nombreCliente = cita.Descripcion || cita.Nombre || 'Cliente';
-                        return {
-                            disponible: false,
-                            clienteConflicto: nombreCliente,
-                            horarioConflicto: horarioCita
-                        };
-                    }
-                }
-            }
-        }
-
-        console.log("   ✅ NINGÚN SOLAPAMIENTO. HORARIO LIBRE.");
-        return { disponible: true };
-    } catch (error) {
-        console.error("Error al verificar disponibilidad:", error);
-        return { disponible: true };
-    }
-}
-        /*async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
         try {
         const respuesta = await fetch(APPS_SCRIPT_URL);
         const citas = await respuesta.json();
@@ -818,7 +777,7 @@
         console.error("Error al verificar disponibilidad:", error);
         return { disponible: true };
     }
-}*/
+}
 
         const dateInput = document.getElementById('appointmentDate');
         const startTimeInput = document.getElementById('startTime');
