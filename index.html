@@ -572,7 +572,25 @@
                 </div>
             </div>
 
-            <h2 class="section-title" style="border-bottom: none; margin-bottom: 10px; padding-bottom: 0;">📋 Próximas Clientes</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 1.1rem; color: var(--primary);">📋 Próximas Clientes</h3>
+    
+            <!-- 📅 Selector de Mes -->
+            <select id="filtroMesResumo" onchange="obtenerGananciasYClientes()" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc; background: white; font-size: 0.85rem; outline: none; cursor: pointer; color: #444;">
+            <option value="0">Janeiro</option>
+            <option value="1">Fevereiro</option>
+            <option value="2">Março</option>
+            <option value="3">Abril</option>
+            <option value="4">Maio</option>
+            <option value="5">Junho</option>
+            <option value="6">Julho</option>
+            <option value="7">Agosto</option>
+            <option value="8">Setembro</option>
+            <option value="9">Outubro</option>
+            <option value="10">Novembro</option>
+            <option value="11">Dezembro</option>
+         </select>
+        </div>
             <ul class="client-list" id="lista-clientes"></ul>
             <div id="loading-spinner" style="text-align: center; color: #888; display: none;">Carregando...</div>
         </section>
@@ -956,9 +974,147 @@
         }
 
         // --- 📊 DASHBOARD & RESUMO ---
-        // Función para obtener, ordenar cronológicamente y calcular los totales en el Dashboard
-        // Función para obtener ganancias (Semana/Mes actuales) y listar clientes ordenados
+        // Establecer el mes actual en el filtro al cargar la página por primera vez
+        document.addEventListener("DOMContentLoaded", () => {
+        const selectorMes = document.getElementById('filtroMesResumo');
+        if (selectorMes) {
+        const mesActual = new Date().getMonth(); // 0-11
+        selectorMes.value = mesActual;
+        }
+    });
+
+        // Función para obtener ganancias (Semana/Mes) y filtrar clientas por el mes seleccionado
         async function obtenerGananciasYClientes() {
+        const listaClientes = document.getElementById('lista-clientes');
+        if (!listaClientes) return;
+
+        const spinner = document.getElementById('loading-spinner');
+        if (spinner) spinner.style.display = 'block';
+
+        const selectorMes = document.getElementById('filtroMesResumo');
+        // Si el selector existe toma su valor, si no, toma el mes actual
+        const mesSeleccionado = selectorMes ? parseInt(selectorMes.value) : new Date().getMonth();
+
+        try {
+            const respuesta = await fetch(APPS_SCRIPT_URL);
+            let citas = await respuesta.json();
+    
+            let htmlClientes = '';
+            let totalSemana = 0;
+            let totalMes = 0;
+
+        // 🗓️ RANGOS DE FECHA EN TIEMPO REAL
+        const ahora = new Date();
+        const mesActual = ahora.getMonth();
+        const anioActual = ahora.getFullYear();
+
+        // Lunes de la semana actual
+        const diaSemana = ahora.getDay();
+        const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+        const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
+        inicioSemanaActual.setHours(0, 0, 0, 0);
+
+        // Domingo de la semana actual
+        const finSemanaActual = new Date(inicioSemanaActual);
+        finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
+        finSemanaActual.setHours(23, 59, 59, 999);
+
+        if (citas && citas.length > 0) {
+
+            // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora)
+            citas.sort((a, b) => {
+                const fechaA = normalizarFecha(a.Fecha);
+                const fechaB = normalizarFecha(b.Fecha);
+
+                if (fechaA !== fechaB) {
+                    return fechaA.localeCompare(fechaB);
+                }
+
+                const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
+                const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
+                return horaAMinutos(horaA) - horaAMinutos(horaB);
+            });
+
+            citas.forEach((cita, index) => {
+                const valor = parseFloat(cita.Ingreso) || 0;
+                const fechaNormal = normalizarFecha(cita.Fecha);
+
+                let mesCita = -1;
+                let anioCita = -1;
+
+                if (fechaNormal) {
+                    const partes = fechaNormal.split('-');
+                    if (partes.length === 3) {
+                        anioCita = parseInt(partes[0]);
+                        mesCita = parseInt(partes[1]) - 1; // Ajuste a base 0 (0=Enero)
+                        const fechaObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
+
+                        // 📊 Total Semana Actual (Independiente del filtro)
+                        if (fechaObjeto >= inicioSemanaActual && fechaObjeto <= finSemanaActual) {
+                            totalSemana += valor;
+                        }
+
+                        // 📊 Total Mes Actual (Independiente del filtro)
+                        if (mesCita === mesActual && anioCita === anioActual) {
+                            totalMes += valor;
+                        }
+                    }
+                }
+
+                // 🎯 FILTRAR CLIENTAS SEGÚN EL MES SELECCIONADO EN EL DROPDOWN
+                if (mesCita === mesSeleccionado && anioCita === anioActual) {
+                    const nombreCliente = cita.Descripcion || 'Cliente';
+                    let fechaMostrar = "";
+                    if (cita.Fecha) {
+                        const partes = fechaNormal.split('-');
+                        if (partes.length === 3) {
+                            fechaMostrar = `${partes[2]}/${partes[1]}`;
+                        } else {
+                            fechaMostrar = cita.Fecha;
+                        }
+                    }
+                    const horarioCita = cita.FEV || cita.Hora || '';
+                    const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
+
+                    htmlClientes += `
+                        <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                            <div class="client-info">
+                                <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
+                                <div class="client-meta" style="font-size: 0.85rem; color: #666;">
+                                    <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
+                                </div>
+                            </div>
+                            <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
+                                <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
+                                <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </li>
+                    `;
+                }
+            });
+
+            listaClientes.innerHTML = htmlClientes !== '' ? htmlClientes : '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento para este mês.</li>';
+        } else {
+            listaClientes.innerHTML = '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento registrado.</li>';
+        }
+
+        // 🎯 Actualizar tarjetas de totales
+        const elTotalSemana = document.getElementById('weeklyEarnings');
+        const elTotalMes = document.getElementById('monthlyEarnings');
+        
+        if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+        if (elTotalMes) elTotalMes.innerText = `R$ ${totalMes.toFixed(2)}`;
+
+        if (spinner) spinner.style.display = 'none';
+
+    } catch (error) {
+        console.error("Erro ao carregar clientes:", error);
+        listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
+    }
+}
+        /*async function obtenerGananciasYClientes() {
             const listaClientes = document.getElementById('lista-clientes');
             if (!listaClientes) return;
 
@@ -1070,90 +1226,6 @@
                 
                 if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
                 if (elTotalMes) elTotalMes.innerText = `R$ ${totalMes.toFixed(2)}`;
-
-                if (spinner) spinner.style.display = 'none';
-
-            } catch (error) {
-                console.error("Erro ao carregar clientes:", error);
-                listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
-            }
-        }
-        /*async function obtenerGananciasYClientes() {
-            const listaClientes = document.getElementById('lista-clientes');
-            if (!listaClientes) return;
-
-            const spinner = document.getElementById('loading-spinner');
-            if (spinner) spinner.style.display = 'block';
-
-            try {
-                const respuesta = await fetch(APPS_SCRIPT_URL);
-                let citas = await respuesta.json();
-
-                let htmlClientes = '';
-                let totalGanancias = 0;
-
-                if (citas && citas.length > 0) {
-
-                    // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora de Inicio)
-                    citas.sort((a, b) => {
-                        const fechaA = normalizarFecha(a.Fecha);
-                        const fechaB = normalizarFecha(b.Fecha);
-
-                        // Si las fechas son diferentes, ordena por fecha
-                        if (fechaA !== fechaB) {
-                            return fechaA.localeCompare(fechaB);
-                        }
-
-                        // Si son del mismo día, ordena por la hora de inicio
-                        const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
-                        const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
-                        return horaAMinutos(horaA) - horaAMinutos(horaB);
-                    });
-
-                    citas.forEach((cita, index) => {
-                        const valor = parseFloat(cita.Ingreso) || 0;
-                        totalGanancias += valor;
-
-                        const nombreCliente = cita.Descripcion || 'Cliente';
-                        let fechaMostrar = "";
-                        if (cita.Fecha) {
-                            const partes = normalizarFecha(cita.Fecha).split('-');
-                            if (partes.length === 3) {
-                                fechaMostrar = `${partes[2]}/${partes[1]}`; // Formato dd/mm
-                            } else {
-                                fechaMostrar = cita.Fecha;
-                            }
-                        }
-                        const horarioCita = cita.FEV || cita.Hora || '';
-                        const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
-
-                        htmlClientes += `
-                            <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
-                                <div class="client-info">
-                                    <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
-                                    <div class="client-meta" style="font-size: 0.85rem; color: #666;">
-                                        <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
-                                    </div>
-                                </div>
-                                <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
-                                    <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
-                                    <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </li>
-                        `;
-                    });
-
-                    listaClientes.innerHTML = htmlClientes;
-                } else {
-                    listaClientes.innerHTML = '<li style="padding: 10px; color: #888;">Nenhum atendimento registrado.</li>';
-                }
-
-                const elTotalSemana = document.getElementById('weeklyEarnings');
-                const elTotalMes = document.getElementById('monthlyEarnings');
-                if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalGanancias.toFixed(2)}`;
-                if (elTotalMes) elTotalMes.innerText = `R$ ${totalGanancias.toFixed(2)}`;
 
                 if (spinner) spinner.style.display = 'none';
 
