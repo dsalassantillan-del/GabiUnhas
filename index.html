@@ -701,13 +701,13 @@
         }
 
         // Normaliza cualquier formato de fecha a "YYYY-MM-DD" para una comparación exacta
-        // Normaliza CUALQUIER formato de fecha (incluyendo "Sat Aug 01 2026...") a "YYYY-MM-DD"
+        // Normaliza CUALQUIER fecha respetando la zona horaria local exacta ("YYYY-MM-DD")
         function normalizarFecha(fechaStr) {
         if (!fechaStr) return '';
 
         let str = fechaStr.toString().trim();
-    
-        // 1. Si viene en formato "dd/mm/yyyy"
+
+        // 1. Si viene en formato "dd/mm/yyyy" desde Sheets
         if (str.includes('/')) {
         const partes = str.split('/');
         if (partes.length === 3) {
@@ -718,7 +718,12 @@
         }
     }
 
-        // 2. Si viene como objeto de fecha o texto largo tipo "Sat Aug 01 2026..."
+        // 2. Si viene desde un <input type="date"> o string "yyyy-mm-dd"
+        if (str.includes('-') && !str.includes('Sat') && !str.includes('Sun') && !str.includes('Mon') && !str.includes('Tue') && !str.includes('Wed') && !str.includes('Thu') && !str.includes('Fri')) {
+        return str.split('T')[0];
+    }
+
+        // 3. Si viene como objeto de fecha o texto de sistema, extrae valores locales sin UTC
         const d = new Date(str);
         if (!isNaN(d.getTime())) {
         const year = d.getFullYear();
@@ -727,8 +732,7 @@
         return `${year}-${month}-${day}`;
     }
 
-        // 3. Resguardo tipo "yyyy-mm-ddT..."
-        return str.split('T')[0];
+    return str;
 }
 
         // Verifica si existe solapamiento en Google Sheets (Sincronizado con la planilla Registros)
