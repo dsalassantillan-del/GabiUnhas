@@ -173,11 +173,30 @@
             box-shadow: 0 0 0 3px rgba(140, 94, 88, 0.1);
         }
 
+        /* ⚖️ FILA DE HORAS: FLEXIBILIDAD Y TAMAÑO 50% IDÉNTICO EN IPHONE/ANDROID */
         .time-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            width: 100%;
+            display: flex !important;
+            gap: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .time-row .form-group {
+            flex: 1 1 50% !important;
+            width: 50% !important;
+            min-width: 0 !important; /* Previene colapso en cajas vacías */
+            margin-bottom: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .time-row input[type="time"] {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-height: 48px !important;
+            box-sizing: border-box !important;
+            -webkit-appearance: none;
+            appearance: none;
+            text-align: center;
         }
 
         .btn-submit {
@@ -346,27 +365,17 @@
         }
 
         .calc-input-field {
-            width: 100%;
-            min-width: 0;
-            box-sizing: border-box;
-            flex: 1;
-            font-size: 1.1rem;
-            padding: 10px 14px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            outline: none;
-        }
-
-            .calc-input-field {
             width: 100% !important;
             max-width: 100% !important;
+            min-width: 0 !important;
             box-sizing: border-box !important;
+            flex: 1;
             font-size: 1rem;
             padding: 10px 14px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             outline: none;
-            -webkit-appearance: none; /* 🛡️ Elimina estilos nativos forzados en iPhone */
+            -webkit-appearance: none; /* 🛡️ Elimina estilos nativos en iPhone */
             appearance: none;
             display: block;
         }
@@ -484,7 +493,7 @@
             transform: scale(0.93) !important;
             filter: brightness(0.88) !important;
         }
-    </style>
+</style>
 </head>
 <body ontouchstart="">
     <div class="phone-wrapper">
