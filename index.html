@@ -957,7 +957,128 @@
 
         // --- 📊 DASHBOARD & RESUMO ---
         // Función para obtener, ordenar cronológicamente y calcular los totales en el Dashboard
+        // Función para obtener ganancias (Semana/Mes actuales) y listar clientes ordenados
         async function obtenerGananciasYClientes() {
+            const listaClientes = document.getElementById('lista-clientes');
+            if (!listaClientes) return;
+
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) spinner.style.display = 'block';
+
+            try {
+                const respuesta = await fetch(APPS_SCRIPT_URL);
+                let citas = await respuesta.json();
+
+                let htmlClientes = '';
+                let totalSemana = 0;
+                let totalMes = 0;
+
+                // 🗓️ RANGOS DE FECHA EN TIEMPO REAL (SEMANA Y MES ACTUALES)
+                const ahora = new Date();
+                const mesActual = ahora.getMonth();
+                const anioActual = ahora.getFullYear();
+
+                // Lunes de la semana actual (00:00:00)
+                const diaSemana = ahora.getDay();
+                const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+                const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
+                inicioSemanaActual.setHours(0, 0, 0, 0);
+
+                // Domingo de la semana actual (23:59:59)
+                const finSemanaActual = new Date(inicioSemanaActual);
+                finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
+                finSemanaActual.setHours(23, 59, 59, 999);
+
+                if (citas && citas.length > 0) {
+
+                    // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora de Inicio)
+                    citas.sort((a, b) => {
+                        const fechaA = normalizarFecha(a.Fecha);
+                        const fechaB = normalizarFecha(b.Fecha);
+
+                        if (fechaA !== fechaB) {
+                            return fechaA.localeCompare(fechaB);
+                        }
+
+                        const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
+                        const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
+                        return horaAMinutos(horaA) - horaAMinutos(horaB);
+                    });
+
+                    citas.forEach((cita, index) => {
+                        const valor = parseFloat(cita.Ingreso) || 0;
+
+                        // 🔍 PARSEAR FECHA DE LA CITA PARA LOS KPIs
+                        const fechaNormal = normalizarFecha(cita.Fecha);
+                        if (fechaNormal) {
+                            const partes = fechaNormal.split('-');
+                            if (partes.length === 3) {
+                                const fechaObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
+
+                                // 📊 A) Total Ganancias de la Semana Actual
+                                if (fechaObjeto >= inicioSemanaActual && fechaObjeto <= finSemanaActual) {
+                                    totalSemana += valor;
+                                }
+
+                                // 📊 B) Total Ganancias del Mes Actual
+                                if (fechaObjeto.getMonth() === mesActual && fechaObjeto.getFullYear() === anioActual) {
+                                    totalMes += valor;
+                                }
+                            }
+                        }
+
+                        // 📋 GENERACIÓN DEL HTML DE CLIENTES
+                        const nombreCliente = cita.Descripcion || 'Cliente';
+                        let fechaMostrar = "";
+                        if (cita.Fecha) {
+                            const partes = normalizarFecha(cita.Fecha).split('-');
+                            if (partes.length === 3) {
+                                fechaMostrar = `${partes[2]}/${partes[1]}`; // Formato dd/mm
+                            } else {
+                                fechaMostrar = cita.Fecha;
+                            }
+                        }
+                        const horarioCita = cita.FEV || cita.Hora || '';
+                        const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
+
+                        htmlClientes += `
+                            <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
+                                <div class="client-info">
+                                    <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
+                                    <div class="client-meta" style="font-size: 0.85rem; color: #666;">
+                                        <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
+                                    </div>
+                                </div>
+                                <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
+                                    <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </li>
+                        `;
+                    });
+
+                    listaClientes.innerHTML = htmlClientes;
+                } else {
+                    listaClientes.innerHTML = '<li style="padding: 10px; color: #888;">Nenhum atendimento registrado.</li>';
+                }
+
+                // 🎯 ASIGNAR RESULTADOS A LOS CAMPOS SUPERIORES
+                const elTotalSemana = document.getElementById('weeklyEarnings');
+                const elTotalMes = document.getElementById('monthlyEarnings');
+                
+                if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+                if (elTotalMes) elTotalMes.innerText = `R$ ${totalMes.toFixed(2)}`;
+
+                if (spinner) spinner.style.display = 'none';
+
+            } catch (error) {
+                console.error("Erro ao carregar clientes:", error);
+                listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
+            }
+        }
+        /*async function obtenerGananciasYClientes() {
             const listaClientes = document.getElementById('lista-clientes');
             if (!listaClientes) return;
 
@@ -1004,75 +1125,6 @@
                             }
                         }
                         const horarioCita = cita.FEV || cita.Hora || '';
-                        const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
-
-                        htmlClientes += `
-                            <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
-                                <div class="client-info">
-                                    <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
-                                    <div class="client-meta" style="font-size: 0.85rem; color: #666;">
-                                        <span>🕒 ${fechaMostrar} | ${horarioCita}</span>
-                                    </div>
-                                </div>
-                                <div class="client-actions" style="display: flex; align-items: center; gap: 10px;">
-                                    <div class="client-price" style="font-weight: bold; color: #2e7d32;">R$ ${valor.toFixed(2)}</div>
-                                    <button type="button" class="btn-delete" onclick="borrarAtendimento('${nombreCliente}', '${fechaMostrar}', '${eventIdCalendar}')" style="background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px;">
-                                        🗑️
-                                    </button>
-                                </div>
-                            </li>
-                        `;
-                    });
-
-                    listaClientes.innerHTML = htmlClientes;
-                } else {
-                    listaClientes.innerHTML = '<li style="padding: 10px; color: #888;">Nenhum atendimento registrado.</li>';
-                }
-
-                const elTotalSemana = document.getElementById('weeklyEarnings');
-                const elTotalMes = document.getElementById('monthlyEarnings');
-                if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalGanancias.toFixed(2)}`;
-                if (elTotalMes) elTotalMes.innerText = `R$ ${totalGanancias.toFixed(2)}`;
-
-                if (spinner) spinner.style.display = 'none';
-
-            } catch (error) {
-                console.error("Erro ao carregar clientes:", error);
-                listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
-            }
-        }
-        /*async function obtenerGananciasYClientes() {
-            const listaClientes = document.getElementById('lista-clientes');
-            if (!listaClientes) return;
-
-            const spinner = document.getElementById('loading-spinner');
-            if (spinner) spinner.style.display = 'block';
-
-            try {
-                const respuesta = await fetch(APPS_SCRIPT_URL);
-                const citas = await respuesta.json();
-
-                let htmlClientes = '';
-                let totalGanancias = 0;
-
-                if (citas && citas.length > 0) {
-                    citas.forEach((cita, index) => {
-                        const valor = parseFloat(cita.Ingreso) || 0;
-                        totalGanancias += valor;
-
-                        const nombreCliente = cita.Descripcion || 'Cliente';
-                        let fechaMostrar = "";
-                        if (cita.Fecha) {
-                            const d = new Date(cita.Fecha);
-                            if (!isNaN(d.getTime())) {
-                                const dia = String(d.getDate()).padStart(2, '0');
-                                const mes = String(d.getMonth() + 1).padStart(2, '0');
-                                fechaMostrar = `${dia}/${mes}`;
-                            } else {
-                                fechaMostrar = cita.Fecha;
-                            }
-                        }
-                        const horarioCita = cita.FEV || '';
                         const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
 
                         htmlClientes += `
