@@ -526,6 +526,9 @@
             <button class="tab-button" onclick="switchTab('salidas')">Saidas</button>
         </div>
 
+
+
+        <!-- -------------------------------------------- ELIMINAR DEPUES --------------------------------------------- -->
         <!-- -------------------------------------------- SUPABASE --------------------------------------------- -->
         <button type="button" onclick="probarLoginSupabase()" style="padding: 10px 16px; margin: 10px;">
             Probar login Supabase
@@ -724,7 +727,9 @@
 
     </div>
 
+
     <!-- JAVASCRIPT: LÓGICA DE FUNCIONAMIENTO -->
+
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
     <script>
@@ -768,72 +773,6 @@
 
             console.log('Sesión iniciada:', data);
             alert(`Sesión iniciada correctamente con ${data.user.email}`);
-        }
-
-        async function probarCitaSupabase() {
-            const {
-                data: { user },
-                error: userError
-            } = await supabaseClient.auth.getUser();
-
-            if (userError || !user) {
-                alert('Primero debes iniciar sesión en Supabase.');
-                return;
-            }
-
-            const citaPrueba = {
-                user_id: user.id,
-                appointment_date: new Date().toISOString().split('T')[0],
-                client_name: 'Cliente de prueba',
-                service_name: 'Mantenimiento de prueba',
-                price: 140,
-                start_time: '14:00',
-                end_time: '16:00',
-                status: 'confirmed'
-            };
-
-            const { data, error } = await supabaseClient
-                .from('appointments')
-                .insert(citaPrueba)
-                .select()
-                .single();
-
-            if (error) {
-                console.error('Error al insertar cita:', error);
-                alert(`Error al guardar: ${error.message}`);
-                return;
-            }
-
-            console.log('Cita guardada:', data);
-            alert('Cita de prueba guardada correctamente en Supabase.');
-        }
-
-        async function leerCitasSupabase() {
-            const {
-                data: { user },
-                error: userError
-            } = await supabaseClient.auth.getUser();
-
-            if (userError || !user) {
-                alert('Primero debes iniciar sesión.');
-                return;
-            }
-
-            const { data, error } = await supabaseClient
-                .from('appointments')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('appointment_date', { ascending: true })
-                .order('start_time', { ascending: true });
-
-            if (error) {
-                console.error('Error al leer citas:', error);
-                alert(`Error al leer: ${error.message}`);
-                return;
-            }
-
-            console.table(data);
-            alert(`Se encontraron ${data.length} citas.`);
         }
 
         //SUPABASE----------------------------------------------------------------------END
@@ -903,41 +842,6 @@
             if (!horaStr) return 0;
             const [horas, minutos] = horaStr.split(':').map(Number);
             return horas * 60 + minutos;
-        }
-
-        // Normaliza cualquier formato de fecha a "YYYY-MM-DD" para una comparación exacta
-        // Normaliza CUALQUIER fecha respetando la zona horaria local exacta ("YYYY-MM-DD")
-        function normalizarFecha(fechaStr) {
-            if (!fechaStr) return '';
-
-            let str = fechaStr.toString().trim();
-
-            // 1. Si viene en formato "dd/mm/yyyy" desde Sheets
-            if (str.includes('/')) {
-                const partes = str.split('/');
-                if (partes.length === 3) {
-                    const dia = partes[0].padStart(2, '0');
-                    const mes = partes[1].padStart(2, '0');
-                    const anio = partes[2].length === 2 ? `20${partes[2]}` : partes[2];
-                    return `${anio}-${mes}-${dia}`;
-                }
-            }
-
-            // 2. Si viene desde un <input type="date"> o string "yyyy-mm-dd"
-            if (str.includes('-') && !str.includes('Sat') && !str.includes('Sun') && !str.includes('Mon') && !str.includes('Tue') && !str.includes('Wed') && !str.includes('Thu') && !str.includes('Fri')) {
-                return str.split('T')[0];
-            }
-
-            // 3. Si viene como objeto de fecha o texto de sistema, extrae valores locales sin UTC
-            const d = new Date(str);
-            if (!isNaN(d.getTime())) {
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-
-            return str;
         }
 
         const dateInput = document.getElementById('appointmentDate');
@@ -1149,21 +1053,34 @@
                         );
 
                     if (!resultadoSupabase.success) {
-                        alert(
-                            'La cita fue creada en Google Calendar, ' +
-                            'pero no pudo guardarse en Supabase.'
+                        console.warn(
+                            'Supabase falló. Intentando eliminar el evento recién creado en Google Calendar.'
                         );
+
+                        const resultadoRollback =
+                            await excluirEventoGoogleCalendar(
+                                eventIdObtenido
+                            );
+
+                        if (resultadoRollback.success) {
+                            alert(
+                                'Não foi possível salvar o atendimento. ' +
+                                'O evento criado no Google Calendar foi removido automaticamente.'
+                            );
+                        } else {
+                            alert(
+                                'Não foi possível salvar o atendimento no Supabase ' +
+                                'e também não foi possível remover o evento do Google Calendar. ' +
+                                'Verifique o calendário manualmente.'
+                            );
+                        }
 
                         return;
                     }
-                    // 3. Todo salió correctamente
+
                     finalizarAgendamientoExitoso();
                 };
 
-
-                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
-                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
-                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
 
                 if (gapi.client.getToken() !== null) {
                     await procesarAgendamiento();
@@ -1268,11 +1185,6 @@
 
             } catch (error) {
                 console.error('Error al guardar cita en Supabase:', error);
-
-                alert(
-                    'No fue posible guardar la cita en la base de datos. ' +
-                    'Revisa la conexión e intenta nuevamente.'
-                );
 
                 return {
                     success: false,
