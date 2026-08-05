@@ -471,6 +471,124 @@
             border-bottom: none;
         }
 
+        /* --- PANTALLA DE LOGIN --- */
+
+        .login-screen {
+            width: 100%;
+            min-height: calc(100vh - 20px);
+            display: none;
+            /* La lógica de sesión la mostrará después */
+            align-items: center;
+            justify-content: center;
+            padding: 20px 10px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 28px 22px;
+            box-shadow: 0 10px 30px rgba(140, 94, 88, 0.10);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .login-brand {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .login-logo {
+            width: 82px;
+            height: 82px;
+            object-fit: contain;
+            border-radius: 16px;
+            margin-bottom: 14px;
+        }
+
+        .login-brand h1 {
+            font-size: 1.35rem;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .login-brand p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        .login-form .form-group {
+            margin-bottom: 16px;
+        }
+
+        .login-password-wrapper {
+            position: relative;
+        }
+
+        .login-password-wrapper .form-control {
+            padding-right: 48px;
+        }
+
+        .btn-toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: var(--text-light);
+            font-size: 1rem;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            margin-top: 6px;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--primary);
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(140, 94, 88, 0.20);
+        }
+
+        .btn-login:active {
+            background-color: #734D48;
+        }
+
+        .login-message {
+            min-height: 22px;
+            margin-top: 14px;
+            text-align: center;
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        .login-footer {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.78rem;
+            line-height: 1.4;
+        }
+
+        /* La app permanece oculta hasta validar la sesión */
+        #app-screen {
+            display: none;
+        }
+
+        .login-screen {
+            display: none;
+        }
+
         /* ANIMACION DE BOTONES */
         button,
         input[type="submit"],
@@ -508,15 +626,85 @@
 </head>
 
 <body ontouchstart="">
-    <div class="phone-wrapper">
+    <!-- PANTALLA DE LOGIN -->
+    <section id="login-screen" class="login-screen">
+        <div class="login-card">
+
+            <div class="login-brand">
+                <img src="logo2.png" alt="Gabriela Alves Nails" class="login-logo">
+
+                <h1>Gabriela Alves Nails</h1>
+
+                <p>
+                    Entre com seus dados para acessar sua agenda
+                    e o painel financeiro.
+                </p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+
+                <div class="form-group">
+                    <label for="loginEmail">
+                        E-mail
+                    </label>
+
+                    <input type="email" id="loginEmail" class="form-control" placeholder="Digite seu e-mail"
+                        autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">
+                        Senha
+                    </label>
+
+                    <div class="login-password-wrapper">
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Digite sua senha"
+                            autocomplete="current-password" required>
+
+                        <button type="button" id="togglePasswordButton" class="btn-toggle-password"
+                            aria-label="Mostrar ou ocultar senha">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="loginButton" class="btn-login">
+                    Entrar
+                </button>
+
+                <div id="loginMessage" class="login-message" aria-live="polite"></div>
+            </form>
+
+            <div class="login-footer">
+                Acesso exclusivo para profissionais cadastrados.
+            </div>
+
+        </div>
+    </section>
+
+    <div id="app-screen" class="phone-wrapper">
 
         <!-- CABEÇALHO -->
         <header class="app-header">
             <img src="logo2.png" alt="Logo" class="app-logo">
-            <div class="header-title">
+
+            <div class="header-title" style="flex: 1;">
                 <h1>Gabriela Alves Nails</h1>
                 <p>Controle de Ganhos & Agendamentos</p>
             </div>
+
+            <button type="button" id="logoutButton" aria-label="Sair da aplicação" style="
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+        ">
+                Sair
+            </button>
         </header>
 
         <!-- NAVEGAÇÃO DE ABAS -->
@@ -525,15 +713,6 @@
             <button class="tab-button" onclick="switchTab('resumo')">Resumo</button>
             <button class="tab-button" onclick="switchTab('salidas')">Saidas</button>
         </div>
-
-
-
-        <!-- -------------------------------------------- ELIMINAR DEPUES --------------------------------------------- -->
-        <!-- -------------------------------------------- SUPABASE --------------------------------------------- -->
-        <button type="button" onclick="probarLoginSupabase()" style="padding: 10px 16px; margin: 10px;">
-            Probar login Supabase
-        </button>
-        <!-- -------------------------------------------- SUPABASE --------------------------------------------- -->
 
         <!-- ABA 1: AGENDAMENTO -->
         <section id="agendamento-view" class="view-section active">
@@ -742,29 +921,301 @@
             SUPABASE_PUBLISHABLE_KEY
         );
 
-        async function probarLoginSupabase() {
-            const email = prompt('Correo de prueba:');
-            const password = prompt('Contraseña de prueba:');
 
-            if (!email || !password) {
-                alert('Debes ingresar correo y contraseña.');
-                return;
+        // --- AUTENTICACIÓN Y CONTROL DE PANTALLAS ---
+
+        const loginScreen =
+            document.getElementById('login-screen');
+
+        const appScreen =
+            document.getElementById('app-screen');
+
+        const loginForm =
+            document.getElementById('loginForm');
+
+        const loginEmail =
+            document.getElementById('loginEmail');
+
+        const loginPassword =
+            document.getElementById('loginPassword');
+
+        const loginButton =
+            document.getElementById('loginButton');
+
+        const loginMessage =
+            document.getElementById('loginMessage');
+
+        const togglePasswordButton =
+            document.getElementById('togglePasswordButton');
+
+        const logoutButton =
+            document.getElementById('logoutButton');
+
+
+        function mostrarLogin() {
+            if (loginScreen) {
+                loginScreen.style.display = 'flex';
             }
 
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-                email,
-                password
-            });
-
-            if (error) {
-                console.error('Error de Supabase Auth:', error);
-                alert(`Error al iniciar sesión: ${error.message}`);
-                return;
+            if (appScreen) {
+                appScreen.style.display = 'none';
             }
 
-            console.log('Sesión iniciada:', data);
-            alert(`Sesión iniciada correctamente con ${data.user.email}`);
+            if (loginMessage) {
+                loginMessage.innerText = '';
+            }
         }
+
+
+        function mostrarAplicacion() {
+            if (loginScreen) {
+                loginScreen.style.display = 'none';
+            }
+
+            if (appScreen) {
+                appScreen.style.display = 'flex';
+            }
+        }
+
+
+        function mostrarMensajeLogin(
+            mensaje,
+            tipo = 'error'
+        ) {
+            if (!loginMessage) return;
+
+            loginMessage.innerText = mensaje;
+
+            loginMessage.style.color =
+                tipo === 'success'
+                    ? '#2D6A4F'
+                    : '#d32f2f';
+        }
+
+
+        async function verificarSesionInicial() {
+            try {
+                const {
+                    data: { session },
+                    error
+                } = await supabaseClient.auth.getSession();
+
+                if (error) {
+                    throw error;
+                }
+
+                if (session?.user) {
+                    mostrarAplicacion();
+                } else {
+                    mostrarLogin();
+                }
+
+            } catch (error) {
+                console.error(
+                    'Erro ao verificar sessão:',
+                    error
+                );
+
+                mostrarLogin();
+
+                mostrarMensajeLogin(
+                    'Não foi possível verificar sua sessão.'
+                );
+            }
+        }
+
+        if (loginForm) {
+            loginForm.addEventListener(
+                'submit',
+                async (event) => {
+                    event.preventDefault();
+
+                    const email =
+                        loginEmail?.value.trim();
+
+                    const password =
+                        loginPassword?.value;
+
+                    if (!email || !password) {
+                        mostrarMensajeLogin(
+                            'Preencha o e-mail e a senha.'
+                        );
+
+                        return;
+                    }
+
+                    if (loginButton) {
+                        loginButton.disabled = true;
+                        loginButton.innerText = 'Entrando...';
+                    }
+
+                    mostrarMensajeLogin(
+                        'Validando seus dados...',
+                        'success'
+                    );
+
+                    try {
+                        const { data, error } =
+                            await supabaseClient.auth
+                                .signInWithPassword({
+                                    email,
+                                    password
+                                });
+
+                        if (error) {
+                            throw error;
+                        }
+
+                        if (!data.session) {
+                            throw new Error(
+                                'Supabase não retornou uma sessão válida.'
+                            );
+                        }
+
+                        mostrarMensajeLogin(
+                            'Login realizado com sucesso.',
+                            'success'
+                        );
+
+                        if (loginPassword) {
+                            loginPassword.value = '';
+                        }
+
+                        mostrarAplicacion();
+
+                    } catch (error) {
+                        console.error(
+                            'Erro ao iniciar sessão:',
+                            error
+                        );
+
+                        let mensagem =
+                            'Não foi possível entrar. Verifique seus dados.';
+
+                        if (
+                            error.message
+                                ?.toLowerCase()
+                                .includes('invalid login credentials')
+                        ) {
+                            mensagem =
+                                'E-mail ou senha incorretos.';
+                        }
+
+                        mostrarMensajeLogin(mensagem);
+
+                        if (loginPassword) {
+                            loginPassword.value = '';
+                            loginPassword.focus();
+                        }
+
+                    } finally {
+                        if (loginButton) {
+                            loginButton.disabled = false;
+                            loginButton.innerText = 'Entrar';
+                        }
+                    }
+                }
+            );
+        }
+
+        if (
+            togglePasswordButton &&
+            loginPassword
+        ) {
+            togglePasswordButton.addEventListener(
+                'click',
+                () => {
+                    const senhaEstaOculta =
+                        loginPassword.type === 'password';
+
+                    loginPassword.type =
+                        senhaEstaOculta
+                            ? 'text'
+                            : 'password';
+
+                    togglePasswordButton.innerText =
+                        senhaEstaOculta
+                            ? '🙈'
+                            : '👁️';
+
+                    togglePasswordButton.setAttribute(
+                        'aria-label',
+                        senhaEstaOculta
+                            ? 'Ocultar senha'
+                            : 'Mostrar senha'
+                    );
+                }
+            );
+        }
+
+        if (logoutButton) {
+            logoutButton.addEventListener(
+                'click',
+                async () => {
+                    const confirmacao = confirm(
+                        'Deseja sair da aplicação?'
+                    );
+
+                    if (!confirmacao) return;
+
+                    try {
+                        logoutButton.disabled = true;
+                        logoutButton.innerText = 'Saindo...';
+
+                        const { error } =
+                            await supabaseClient.auth.signOut();
+
+                        if (error) {
+                            throw error;
+                        }
+
+                        // Limpia solamente el token usado por esta app.
+                        // No cierra la cuenta de Google del navegador.
+                        if (
+                            window.gapi &&
+                            gapi.client
+                        ) {
+                            gapi.client.setToken(null);
+                        }
+
+                        if (loginForm) {
+                            loginForm.reset();
+                        }
+
+                        mostrarLogin();
+
+                    } catch (error) {
+                        console.error(
+                            'Erro ao encerrar sessão:',
+                            error
+                        );
+
+                        alert(
+                            'Não foi possível sair da aplicação.'
+                        );
+
+                    } finally {
+                        logoutButton.disabled = false;
+                        logoutButton.innerText = 'Sair';
+                    }
+                }
+            );
+        }
+
+        supabaseClient.auth.onAuthStateChange(
+            (event, session) => {
+                if (
+                    event === 'SIGNED_IN' &&
+                    session?.user
+                ) {
+                    mostrarAplicacion();
+                }
+
+                if (event === 'SIGNED_OUT') {
+                    mostrarLogin();
+                }
+            }
+        );
 
         //SUPABASE----------------------------------------------------------------------END
         //SUPABASE----------------------------------------------------------------------END
@@ -2041,7 +2492,7 @@
         //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
 
         // --- 🚀 CARGA INICIAL ---
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             const hoy = new Date().toISOString().split('T')[0];
 
             const selectorMes =
@@ -2073,6 +2524,8 @@
             if (salidaFecha) {
                 salidaFecha.value = hoy;
             }
+
+            await verificarSesionInicial();
         });
     </script>
 </body>
