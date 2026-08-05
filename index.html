@@ -533,15 +533,6 @@
         <button type="button" onclick="probarLoginSupabase()" style="padding: 10px 16px; margin: 10px;">
             Probar login Supabase
         </button>
-
-        <button type="button" onclick="probarCitaSupabase()" style="padding: 10px 16px; margin: 10px;">
-            Probar cita Supabase
-        </button>
-
-        <button type="button" onclick="leerCitasSupabase()" style="padding: 10px 16px; margin: 10px;">
-            Leer citas Supabase
-        </button>
-
         <!-- -------------------------------------------- SUPABASE --------------------------------------------- -->
 
         <!-- ABA 1: AGENDAMENTO -->
@@ -1224,14 +1215,6 @@
         //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
 
         // --- 📊 DASHBOARD & RESUMO ---
-        // Establecer el mes actual en el filtro al cargar la página por primera vez
-        document.addEventListener("DOMContentLoaded", () => {
-            const selectorMes = document.getElementById('filtroMesResumo');
-            if (selectorMes) {
-                const mesActual = new Date().getMonth(); // 0-11
-                selectorMes.value = mesActual;
-            }
-        });
 
         async function excluirEventoGoogleCalendar(eventId) {
             if (!eventId) {
@@ -2059,15 +2042,37 @@
 
         // --- 🚀 CARGA INICIAL ---
         window.addEventListener('DOMContentLoaded', () => {
-            if (serviceSelect && valueInput && serviceSelect.options[serviceSelect.selectedIndex]) {
-                valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price') || '';
+            const hoy = new Date().toISOString().split('T')[0];
+
+            const selectorMes =
+                document.getElementById('filtroMesResumo');
+
+            if (selectorMes) {
+                selectorMes.value =
+                    String(new Date().getMonth());
+            }
+
+            if (
+                serviceSelect &&
+                valueInput &&
+                serviceSelect.options[serviceSelect.selectedIndex]
+            ) {
+                valueInput.value =
+                    serviceSelect.options[
+                        serviceSelect.selectedIndex
+                    ].getAttribute('data-price') || '';
             }
 
             if (dateInput) {
-                dateInput.value = new Date().toISOString().split('T')[0];
+                dateInput.value = hoy;
             }
 
+            const salidaFecha =
+                document.getElementById('salidaFecha');
 
+            if (salidaFecha) {
+                salidaFecha.value = hoy;
+            }
         });
     </script>
 </body>
