@@ -698,7 +698,7 @@
 
                 <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">
 
-                <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
+                <form id="salidaForm" onsubmit="guardarSalida(event)">
                     <div style="margin-bottom: 12px; width: 100%; box-sizing: border-box; overflow: hidden;">
                         <label for="salidaFecha"
                             style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Data de
@@ -943,7 +943,7 @@
         }
 
         // Verifica si existe solapamiento en Google Sheets (Sincronizado con la planilla Registros)
-        async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
+        async function verificarDisponibilidadHorarioSheets(fechaSeleccionada, horaInicioNue, horaFinNue) {
             try {
                 const respuesta = await fetch(APPS_SCRIPT_URL);
                 const citas = await respuesta.json();
@@ -1018,28 +1018,127 @@
                 statusLabel.innerText = '🔍 Validando...';
             }
 
-            const verificacion = await verificarDisponibilidadHorario(fecha, horaInicio, horaFin);
+            const verificacion = await verificarDisponibilidadSupabase(fecha, horaInicio, horaFin);
 
             if (!verificacion.disponible) {
+                if (verificacion.error) {
+                    if (statusLabel) {
+                        statusLabel.style.color = '#d32f2f';
+                        statusLabel.innerText =
+                            '❌ Não foi possível validar o horário';
+                    }
+
+                    alert(
+                        verificacion.mensaje ||
+                        'Não foi possível verificar o horário.'
+                    );
+
+                    return false;
+                }
+
                 if (statusLabel) {
                     statusLabel.style.color = '#d32f2f';
-                    statusLabel.innerText = `❌ Ocupado por ${verificacion.clienteConflicto} (${verificacion.horarioConflicto})`;
+                    statusLabel.innerText =
+                        `❌ Ocupado por ${verificacion.clienteConflicto} ` +
+                        `(${verificacion.horarioConflicto})`;
                 }
                 alert(`⚠️ HORÁRIO INDISPONÍVEL:\n\nJá tem agendamento para ${verificacion.clienteConflicto}\n\nDe ${verificacion.horarioConflicto}`);
 
                 if (startTimeInput) startTimeInput.value = '';
                 if (endTimeInput) endTimeInput.value = '';
-                if (statusLabel) statusLabel.innerText = '';
 
                 return false;
-            } else {
-                if (statusLabel) {
-                    statusLabel.style.color = '#2e7d32';
-                    statusLabel.innerText = '✅ Horário disponível';
+            }
+            if (statusLabel) {
+                statusLabel.style.color = '#2e7d32';
+                statusLabel.innerText = '✅ Horário disponível';
+            }
+            return true;
+        }
+
+
+        //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+
+        async function verificarDisponibilidadSupabase(
+            fechaSeleccionada,
+            horaInicioNueva,
+            horaFinNueva
+        ) {
+            try {
+                const {
+                    data: { user },
+                    error: userError
+                } = await supabaseClient.auth.getUser();
+
+                if (userError || !user) {
+                    return {
+                        disponible: false,
+                        error: true,
+                        mensaje: 'Tu sesión expiró. Inicia sesión nuevamente.'
+                    };
                 }
-                return true;
+
+                const { data: citas, error } = await supabaseClient
+                    .from('appointments')
+                    .select(`
+                id,
+                client_name,
+                start_time,
+                end_time,
+                status
+            `)
+                    .eq('user_id', user.id)
+                    .eq('appointment_date', fechaSeleccionada)
+                    .neq('status', 'cancelled')
+                    .lt('start_time', horaFinNueva)
+                    .gt('end_time', horaInicioNueva)
+                    .limit(1);
+
+                if (error) {
+                    throw error;
+                }
+
+                if (citas && citas.length > 0) {
+                    const citaConflicto = citas[0];
+
+                    return {
+                        disponible: false,
+                        clienteConflicto:
+                            citaConflicto.client_name || 'Cliente',
+                        horarioConflicto:
+                            `${String(citaConflicto.start_time).slice(0, 5)} - ` +
+                            `${String(citaConflicto.end_time).slice(0, 5)}`
+                    };
+                }
+
+                return {
+                    disponible: true
+                };
+
+            } catch (error) {
+                console.error(
+                    'Error al verificar disponibilidad en Supabase:',
+                    error
+                );
+
+                return {
+                    disponible: false,
+                    error: true,
+                    mensaje:
+                        'No fue posible verificar el horario. Intenta nuevamente.'
+                };
             }
         }
+
+
+
+
+        //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------EN
+
 
         if (dateInput) dateInput.addEventListener('change', comprobarDisponibilidadEnVivo);
         if (startTimeInput) startTimeInput.addEventListener('change', comprobarDisponibilidadEnVivo);
@@ -1364,104 +1463,102 @@
             }
         });
 
-        // Función para obtener ganancias (Semana/Mes) y filtrar clientas por el mes seleccionado
-
         //FUNCION PRÓXIMA A SER ELIMINADA ❌
 
         async function obtenerGananciasYClientesSheets() {
-                console.log('⚠️ Cargando RESUMO desde GOOGLE SHEETS');
-                const listaClientes = document.getElementById('lista-clientes');
-                if (!listaClientes) return;
+            console.log('⚠️ Cargando RESUMO desde GOOGLE SHEETS');
+            const listaClientes = document.getElementById('lista-clientes');
+            if (!listaClientes) return;
 
-                const spinner = document.getElementById('loading-spinner');
-                if (spinner) spinner.style.display = 'block';
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) spinner.style.display = 'block';
 
-                const selectorMes = document.getElementById('filtroMesResumo');
-                // Si el selector existe toma su valor, si no, toma el mes actual
-                const mesSeleccionado = selectorMes ? parseInt(selectorMes.value) : new Date().getMonth();
+            const selectorMes = document.getElementById('filtroMesResumo');
+            // Si el selector existe toma su valor, si no, toma el mes actual
+            const mesSeleccionado = selectorMes ? parseInt(selectorMes.value) : new Date().getMonth();
 
-                try {
-                    const respuesta = await fetch(APPS_SCRIPT_URL);
-                    let citas = await respuesta.json();
+            try {
+                const respuesta = await fetch(APPS_SCRIPT_URL);
+                let citas = await respuesta.json();
 
-                    let htmlClientes = '';
-                    let totalSemana = 0;
-                    let totalMes = 0;
+                let htmlClientes = '';
+                let totalSemana = 0;
+                let totalMes = 0;
 
-                    // 🗓️ RANGOS DE FECHA EN TIEMPO REAL
-                    const ahora = new Date();
-                    const mesActual = ahora.getMonth();
-                    const anioActual = ahora.getFullYear();
+                // 🗓️ RANGOS DE FECHA EN TIEMPO REAL
+                const ahora = new Date();
+                const mesActual = ahora.getMonth();
+                const anioActual = ahora.getFullYear();
 
-                    // Lunes de la semana actual
-                    const diaSemana = ahora.getDay();
-                    const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
-                    const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
-                    inicioSemanaActual.setHours(0, 0, 0, 0);
+                // Lunes de la semana actual
+                const diaSemana = ahora.getDay();
+                const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+                const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
+                inicioSemanaActual.setHours(0, 0, 0, 0);
 
-                    // Domingo de la semana actual
-                    const finSemanaActual = new Date(inicioSemanaActual);
-                    finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
-                    finSemanaActual.setHours(23, 59, 59, 999);
+                // Domingo de la semana actual
+                const finSemanaActual = new Date(inicioSemanaActual);
+                finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
+                finSemanaActual.setHours(23, 59, 59, 999);
 
-                    if (citas && citas.length > 0) {
+                if (citas && citas.length > 0) {
 
-                        // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora)
-                        citas.sort((a, b) => {
-                            const fechaA = normalizarFecha(a.Fecha);
-                            const fechaB = normalizarFecha(b.Fecha);
+                    // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora)
+                    citas.sort((a, b) => {
+                        const fechaA = normalizarFecha(a.Fecha);
+                        const fechaB = normalizarFecha(b.Fecha);
 
-                            if (fechaA !== fechaB) {
-                                return fechaA.localeCompare(fechaB);
+                        if (fechaA !== fechaB) {
+                            return fechaA.localeCompare(fechaB);
+                        }
+
+                        const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
+                        const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
+                        return horaAMinutos(horaA) - horaAMinutos(horaB);
+                    });
+
+                    citas.forEach((cita, index) => {
+                        const valor = parseFloat(cita.Ingreso) || 0;
+                        const fechaNormal = normalizarFecha(cita.Fecha);
+
+                        let mesCita = -1;
+                        let anioCita = -1;
+
+                        if (fechaNormal) {
+                            const partes = fechaNormal.split('-');
+                            if (partes.length === 3) {
+                                anioCita = parseInt(partes[0]);
+                                mesCita = parseInt(partes[1]) - 1; // Ajuste a base 0 (0=Enero)
+                                const fechaObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
+
+                                // 📊 Total Semana Actual (Independiente del filtro)
+                                if (fechaObjeto >= inicioSemanaActual && fechaObjeto <= finSemanaActual) {
+                                    totalSemana += valor;
+                                }
+
+                                // 📊 Total Mes Actual (Independiente del filtro)
+                                if (mesCita === mesActual && anioCita === anioActual) {
+                                    totalMes += valor;
+                                }
                             }
+                        }
 
-                            const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
-                            const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
-                            return horaAMinutos(horaA) - horaAMinutos(horaB);
-                        });
-
-                        citas.forEach((cita, index) => {
-                            const valor = parseFloat(cita.Ingreso) || 0;
-                            const fechaNormal = normalizarFecha(cita.Fecha);
-
-                            let mesCita = -1;
-                            let anioCita = -1;
-
-                            if (fechaNormal) {
+                        // 🎯 FILTRAR CLIENTAS SEGÚN EL MES SELECCIONADO EN EL DROPDOWN
+                        if (mesCita === mesSeleccionado && anioCita === anioActual) {
+                            const nombreCliente = cita.Descripcion || 'Cliente';
+                            let fechaMostrar = "";
+                            if (cita.Fecha) {
                                 const partes = fechaNormal.split('-');
                                 if (partes.length === 3) {
-                                    anioCita = parseInt(partes[0]);
-                                    mesCita = parseInt(partes[1]) - 1; // Ajuste a base 0 (0=Enero)
-                                    const fechaObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
-
-                                    // 📊 Total Semana Actual (Independiente del filtro)
-                                    if (fechaObjeto >= inicioSemanaActual && fechaObjeto <= finSemanaActual) {
-                                        totalSemana += valor;
-                                    }
-
-                                    // 📊 Total Mes Actual (Independiente del filtro)
-                                    if (mesCita === mesActual && anioCita === anioActual) {
-                                        totalMes += valor;
-                                    }
+                                    fechaMostrar = `${partes[2]}/${partes[1]}`;
+                                } else {
+                                    fechaMostrar = cita.Fecha;
                                 }
                             }
+                            const horarioCita = cita.FEV || cita.Hora || '';
+                            const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
 
-                            // 🎯 FILTRAR CLIENTAS SEGÚN EL MES SELECCIONADO EN EL DROPDOWN
-                            if (mesCita === mesSeleccionado && anioCita === anioActual) {
-                                const nombreCliente = cita.Descripcion || 'Cliente';
-                                let fechaMostrar = "";
-                                if (cita.Fecha) {
-                                    const partes = fechaNormal.split('-');
-                                    if (partes.length === 3) {
-                                        fechaMostrar = `${partes[2]}/${partes[1]}`;
-                                    } else {
-                                        fechaMostrar = cita.Fecha;
-                                    }
-                                }
-                                const horarioCita = cita.FEV || cita.Hora || '';
-                                const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
-
-                                htmlClientes += `
+                            htmlClientes += `
                         <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
                             <div class="client-info">
                                 <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
@@ -1477,120 +1574,120 @@
                             </div>
                         </li>
                     `;
-                            }
-                        });
-
-                        listaClientes.innerHTML = htmlClientes !== '' ? htmlClientes : '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento para este mês.</li>';
-                    } else {
-                        listaClientes.innerHTML = '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento registrado.</li>';
-                    }
-
-                    // 🎯 Actualizar tarjetas de totales
-                    const elTotalSemana = document.getElementById('weeklyEarnings');
-                    const elTotalMes = document.getElementById('monthlyEarnings');
-
-                    if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
-                    if (elTotalMes) elTotalMes.innerText = `R$ ${totalMes.toFixed(2)}`;
-
-                    if (spinner) spinner.style.display = 'none';
-
-                } catch (error) {
-                    console.error("Erro ao carregar clientes:", error);
-                    listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
-                }
-            }
-            
-
-            async function borrarAtendimento(nombre, fecha, eventId) {
-                const confirmacion = confirm("Desmarcar essa cliente?");
-                if (!confirmacion) return;
-
-                try {
-                    if (eventId && gapi.client.calendar) {
-                        await gapi.client.calendar.events.delete({
-                            'calendarId': 'primary',
-                            'eventId': eventId
-                        });
-                    }
-
-                    await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            accion: "eliminar",
-                            Nombre: nombre,
-                            Fecha: fecha
-                        })
+                        }
                     });
 
-                    alert("Atendimento desmarcado com sucesso! 🗑️");
-                    obtenerGananciasYClientesSheets();
-
-                } catch (error) {
-                    console.error("Erro ao desmarcar:", error);
-                    alert("Erro ao tentar desmarcar a cliente.");
+                    listaClientes.innerHTML = htmlClientes !== '' ? htmlClientes : '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento para este mês.</li>';
+                } else {
+                    listaClientes.innerHTML = '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento registrado.</li>';
                 }
+
+                // 🎯 Actualizar tarjetas de totales
+                const elTotalSemana = document.getElementById('weeklyEarnings');
+                const elTotalMes = document.getElementById('monthlyEarnings');
+
+                if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+                if (elTotalMes) elTotalMes.innerText = `R$ ${totalMes.toFixed(2)}`;
+
+                if (spinner) spinner.style.display = 'none';
+
+            } catch (error) {
+                console.error("Erro ao carregar clientes:", error);
+                listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
             }
+        }
 
 
-            //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
-            //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
-            //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        async function borrarAtendimento(nombre, fecha, eventId) {
+            const confirmacion = confirm("Desmarcar essa cliente?");
+            if (!confirmacion) return;
 
-            async function obtenerGananciasYClientes() {
-                    console.log('✅ Cargando RESUMO desde SUPABASE');
-                    const listaClientes = document.getElementById('lista-clientes');
-                    if (!listaClientes) return;
+            try {
+                if (eventId && gapi.client.calendar) {
+                    await gapi.client.calendar.events.delete({
+                        'calendarId': 'primary',
+                        'eventId': eventId
+                    });
+                }
 
-                    const spinner = document.getElementById('loading-spinner');
-                    if (spinner) spinner.style.display = 'block';
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        accion: "eliminar",
+                        Nombre: nombre,
+                        Fecha: fecha
+                    })
+                });
 
-                    try {
-                        const {
-                            data: { user },
-                            error: userError
-                        } = await supabaseClient.auth.getUser();
+                alert("Atendimento desmarcado com sucesso! 🗑️");
+                obtenerGananciasYClientesSheets();
 
-                        if (userError || !user) {
-                            throw new Error('No existe una sesión activa en Supabase.');
-                        }
+            } catch (error) {
+                console.error("Erro ao desmarcar:", error);
+                alert("Erro ao tentar desmarcar a cliente.");
+            }
+        }
 
-                        const selectorMes = document.getElementById('filtroMesResumo');
-                        const ahora = new Date();
 
-                        const mesSeleccionado = selectorMes
-                            ? parseInt(selectorMes.value, 10)
-                            : ahora.getMonth();
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
 
-                        const anioActual = ahora.getFullYear();
+        async function obtenerGananciasYClientes() {
+            console.log('✅ Cargando RESUMO desde SUPABASE');
+            const listaClientes = document.getElementById('lista-clientes');
+            if (!listaClientes) return;
 
-                        const inicioMes = new Date(
-                            anioActual,
-                            mesSeleccionado,
-                            1
-                        );
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) spinner.style.display = 'block';
 
-                        const finMes = new Date(
-                            anioActual,
-                            mesSeleccionado + 1,
-                            0
-                        );
+            try {
+                const {
+                    data: { user },
+                    error: userError
+                } = await supabaseClient.auth.getUser();
 
-                        const formatoFecha = (fecha) => {
-                            const year = fecha.getFullYear();
-                            const month = String(fecha.getMonth() + 1).padStart(2, '0');
-                            const day = String(fecha.getDate()).padStart(2, '0');
+                if (userError || !user) {
+                    throw new Error('No existe una sesión activa en Supabase.');
+                }
 
-                            return `${year}-${month}-${day}`;
-                        };
+                const selectorMes = document.getElementById('filtroMesResumo');
+                const ahora = new Date();
 
-                        const inicioMesTexto = formatoFecha(inicioMes);
-                        const finMesTexto = formatoFecha(finMes);
+                const mesSeleccionado = selectorMes
+                    ? parseInt(selectorMes.value, 10)
+                    : ahora.getMonth();
 
-                        const { data: citasMes, error: citasError } =
-                            await supabaseClient
-                                .from('appointments')
-                                .select(`
+                const anioActual = ahora.getFullYear();
+
+                const inicioMes = new Date(
+                    anioActual,
+                    mesSeleccionado,
+                    1
+                );
+
+                const finMes = new Date(
+                    anioActual,
+                    mesSeleccionado + 1,
+                    0
+                );
+
+                const formatoFecha = (fecha) => {
+                    const year = fecha.getFullYear();
+                    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+                    const day = String(fecha.getDate()).padStart(2, '0');
+
+                    return `${year}-${month}-${day}`;
+                };
+
+                const inicioMesTexto = formatoFecha(inicioMes);
+                const finMesTexto = formatoFecha(finMes);
+
+                const { data: citasMes, error: citasError } =
+                    await supabaseClient
+                        .from('appointments')
+                        .select(`
                     id,
                     appointment_date,
                     client_name,
@@ -1601,84 +1698,84 @@
                     status,
                     google_calendar_event_id
                 `)
-                                .eq('user_id', user.id)
-                                .gte('appointment_date', inicioMesTexto)
-                                .lte('appointment_date', finMesTexto)
-                                .neq('status', 'cancelled')
-                                .order('appointment_date', { ascending: true })
-                                .order('start_time', { ascending: true });
+                        .eq('user_id', user.id)
+                        .gte('appointment_date', inicioMesTexto)
+                        .lte('appointment_date', finMesTexto)
+                        .neq('status', 'cancelled')
+                        .order('appointment_date', { ascending: true })
+                        .order('start_time', { ascending: true });
 
-                        if (citasError) {
-                            throw citasError;
-                        }
+                if (citasError) {
+                    throw citasError;
+                }
 
-                        // Inicio y final de la semana actual
-                        const inicioSemana = new Date(ahora);
-                        const diaSemana = inicioSemana.getDay();
+                // Inicio y final de la semana actual
+                const inicioSemana = new Date(ahora);
+                const diaSemana = inicioSemana.getDay();
 
-                        inicioSemana.setDate(
-                            inicioSemana.getDate() -
-                            diaSemana +
-                            (diaSemana === 0 ? -6 : 1)
-                        );
+                inicioSemana.setDate(
+                    inicioSemana.getDate() -
+                    diaSemana +
+                    (diaSemana === 0 ? -6 : 1)
+                );
 
-                        inicioSemana.setHours(0, 0, 0, 0);
+                inicioSemana.setHours(0, 0, 0, 0);
 
-                        const finSemana = new Date(inicioSemana);
-                        finSemana.setDate(finSemana.getDate() + 6);
-                        finSemana.setHours(23, 59, 59, 999);
+                const finSemana = new Date(inicioSemana);
+                finSemana.setDate(finSemana.getDate() + 6);
+                finSemana.setHours(23, 59, 59, 999);
 
-                        const { data: citasSemana, error: semanaError } =
-                            await supabaseClient
-                                .from('appointments')
-                                .select('price, appointment_date, status')
-                                .eq('user_id', user.id)
-                                .gte(
-                                    'appointment_date',
-                                    formatoFecha(inicioSemana)
-                                )
-                                .lte(
-                                    'appointment_date',
-                                    formatoFecha(finSemana)
-                                )
-                                .neq('status', 'cancelled');
+                const { data: citasSemana, error: semanaError } =
+                    await supabaseClient
+                        .from('appointments')
+                        .select('price, appointment_date, status')
+                        .eq('user_id', user.id)
+                        .gte(
+                            'appointment_date',
+                            formatoFecha(inicioSemana)
+                        )
+                        .lte(
+                            'appointment_date',
+                            formatoFecha(finSemana)
+                        )
+                        .neq('status', 'cancelled');
 
-                        if (semanaError) {
-                            throw semanaError;
-                        }
+                if (semanaError) {
+                    throw semanaError;
+                }
 
-                        const totalSemana = (citasSemana || []).reduce(
-                            (total, cita) =>
-                                total + Number(cita.price || 0),
-                            0
-                        );
+                const totalSemana = (citasSemana || []).reduce(
+                    (total, cita) =>
+                        total + Number(cita.price || 0),
+                    0
+                );
 
-                        let totalMes = 0;
-                        let htmlClientes = '';
+                let totalMes = 0;
+                let htmlClientes = '';
 
-                        (citasMes || []).forEach((cita) => {
-                            const valor = Number(cita.price || 0);
-                            totalMes += valor;
+                (citasMes || []).forEach((cita) => {
+                    const valor = Number(cita.price || 0);
+                    totalMes += valor;
 
-                            const partesFecha =
-                                cita.appointment_date.split('-');
+                    const partesFecha =
+                        cita.appointment_date.split('-');
 
-                            const fechaMostrar =
-                                `${partesFecha[2]}/${partesFecha[1]}`;
+                    const fechaMostrar =
+                        `${partesFecha[2]}/${partesFecha[1]}`;
 
-                            const horaInicio =
-                                String(cita.start_time).slice(0, 5);
+                    const horaInicio =
+                        String(cita.start_time).slice(0, 5);
 
-                            const horaFin =
-                                String(cita.end_time).slice(0, 5);
+                    const horaFin =
+                        String(cita.end_time).slice(0, 5);
 
-                            const nombreSeguro =
-                                escaparHTML(cita.client_name || 'Cliente');
+                    const nombreSeguro =
+                        escaparHTML(cita.client_name || 'Cliente');
 
-                            const servicioSeguro =
-                                escaparHTML(cita.service_name || '');
+                    const servicioSeguro =
+                        escaparHTML(cita.service_name || '');
 
-                            htmlClientes += `
+                    htmlClientes += `
                 <li
                     class="client-item"
                     id="cita-${cita.id}"
@@ -1748,11 +1845,11 @@
                     </div>
                 </li>
             `;
-                        });
+                });
 
-                        listaClientes.innerHTML =
-                            htmlClientes ||
-                            `
+                listaClientes.innerHTML =
+                    htmlClientes ||
+                    `
                 <li
                     style="
                         padding: 10px;
@@ -1764,29 +1861,29 @@
                 </li>
             `;
 
-                        const elTotalSemana =
-                            document.getElementById('weeklyEarnings');
+                const elTotalSemana =
+                    document.getElementById('weeklyEarnings');
 
-                        const elTotalMes =
-                            document.getElementById('monthlyEarnings');
+                const elTotalMes =
+                    document.getElementById('monthlyEarnings');
 
-                        if (elTotalSemana) {
-                            elTotalSemana.innerText =
-                                `R$ ${totalSemana.toFixed(2)}`;
-                        }
+                if (elTotalSemana) {
+                    elTotalSemana.innerText =
+                        `R$ ${totalSemana.toFixed(2)}`;
+                }
 
-                        if (elTotalMes) {
-                            elTotalMes.innerText =
-                                `R$ ${totalMes.toFixed(2)}`;
-                        }
+                if (elTotalMes) {
+                    elTotalMes.innerText =
+                        `R$ ${totalMes.toFixed(2)}`;
+                }
 
-                    } catch (error) {
-                        console.error(
-                            'Erro ao carregar clientes do Supabase:',
-                            error
-                        );
+            } catch (error) {
+                console.error(
+                    'Erro ao carregar clientes do Supabase:',
+                    error
+                );
 
-                        listaClientes.innerHTML = `
+                listaClientes.innerHTML = `
             <li style="
                 padding: 10px;
                 color: red;
@@ -1796,233 +1893,647 @@
             </li>
         `;
 
-                    } finally {
-                        if (spinner) {
-                            spinner.style.display = 'none';
-                        }
-                    }
+            } finally {
+                if (spinner) {
+                    spinner.style.display = 'none';
                 }
+            }
+        }
 
 
-                function escaparHTML(valor) {
-                    return String(valor)
-                        .replaceAll('&', '&amp;')
-                        .replaceAll('<', '&lt;')
-                        .replaceAll('>', '&gt;')
-                        .replaceAll('"', '&quot;')
-                        .replaceAll("'", '&#039;');
-                }
-
-            
-
-                //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
-                //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
-                //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        function escaparHTML(valor) {
+            return String(valor)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
 
 
-                // --- 🧮 SALIDAS DE MATERIAL ---
-                let listaMontos = [];
-                let totalAcumuladoSalida = 0;
 
-                function procesarEntradaMonto() {
-                    const input = document.getElementById('calcInput');
-                    const valorLimpio = input.value.replace(',', '.');
-                    const valor = parseFloat(valorLimpio);
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
 
-                    if (isNaN(valor) || valor <= 0) return;
 
-                    listaMontos.push(valor);
-                    totalAcumuladoSalida += valor;
+        // --- 🧮 SALIDAS DE MATERIAL ---
+        let listaMontos = [];
+        let totalAcumuladoSalida = 0;
 
-                    actualizarVistaCalculadora();
-                    input.value = '';
-                    input.focus();
-                }
+        function procesarEntradaMonto() {
+            const input = document.getElementById('calcInput');
+            const valorLimpio = input.value.replace(',', '.');
+            const valor = parseFloat(valorLimpio);
 
-                function actualizarVistaCalculadora() {
-                    const ul = document.getElementById('listaTempCalc');
+            if (isNaN(valor) || valor <= 0) return;
 
-                    if (listaMontos.length === 0) {
-                        ul.innerHTML = `
+            listaMontos.push(valor);
+            totalAcumuladoSalida += valor;
+
+            actualizarVistaCalculadora();
+            input.value = '';
+            input.focus();
+        }
+
+        function actualizarVistaCalculadora() {
+            const ul = document.getElementById('listaTempCalc');
+
+            if (listaMontos.length === 0) {
+                ul.innerHTML = `
                     <li style="color: #999; font-size: 0.85rem; text-align: center; padding: 8px 0;">
                         Não tem quantidades ingresadas
                     </li>`;
-                    } else {
-                        ul.innerHTML = listaMontos.map((monto, index) =>
-                            `<li class="calc-item-row">
+            } else {
+                ul.innerHTML = listaMontos.map((monto, index) =>
+                    `<li class="calc-item-row">
                         <span>Item ${index + 1}: <strong>R$ ${monto.toFixed(2)}</strong></span>
                         <button type="button" class="btn-remove-item" onclick="eliminarEntradaIndividual(${index})">
                             ✖️
                         </button>
                     </li>`
-                        ).join('');
-                    }
+                ).join('');
+            }
 
-                    document.getElementById('totalCalc').innerText = `R$ ${totalAcumuladoSalida.toFixed(2)}`;
+            document.getElementById('totalCalc').innerText = `R$ ${totalAcumuladoSalida.toFixed(2)}`;
+        }
+
+        function eliminarEntradaIndividual(index) {
+            totalAcumuladoSalida -= listaMontos[index];
+            listaMontos.splice(index, 1);
+            if (totalAcumuladoSalida < 0) totalAcumuladoSalida = 0;
+            actualizarVistaCalculadora();
+        }
+
+        function limpiarSumadora() {
+            listaMontos = [];
+            totalAcumuladoSalida = 0;
+            actualizarVistaCalculadora();
+            document.getElementById('calcInput').value = '';
+        }
+
+
+        async function enviarSalidaAGoogleSheets(fecha, monto) {
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type':
+                            'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        accion: 'registrar_salida',
+                        Fecha: fecha,
+                        Monto: Number(monto)
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Error HTTP ${response.status}`
+                    );
                 }
 
-                function eliminarEntradaIndividual(index) {
-                    totalAcumuladoSalida -= listaMontos[index];
-                    listaMontos.splice(index, 1);
-                    if (totalAcumuladoSalida < 0) totalAcumuladoSalida = 0;
-                    actualizarVistaCalculadora();
+                const resultado = await response.json();
+
+                if (resultado.status !== 'success') {
+                    throw new Error(
+                        resultado.message ||
+                        'Google Sheets no confirmó el registro.'
+                    );
                 }
 
-                function limpiarSumadora() {
-                    listaMontos = [];
-                    totalAcumuladoSalida = 0;
-                    actualizarVistaCalculadora();
-                    document.getElementById('calcInput').value = '';
+                return {
+                    success: true,
+                    result: resultado
+                };
+
+            } catch (error) {
+                console.error(
+                    'Error al registrar salida en Sheets:',
+                    error
+                );
+
+                return {
+                    success: false,
+                    error
+                };
+            }
+        }
+
+        /*async function enviarSalidaAGoogleSheets(e) {
+            e.preventDefault();
+
+            if (totalAcumuladoSalida <= 0) {
+                alert("⚠️ Ingresa al menos un monto en la calculadora usando el botón '=' antes de guardar.");
+                return;
+            }
+
+            const fecha = document.getElementById('salidaFecha').value;
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        accion: "registrar_salida",
+                        Fecha: fecha,
+                        Monto: totalAcumuladoSalida
+                    })
+                });
+
+                const res = await response.json();
+
+                if (res.status === "success") {
+                    alert("¡Salida registrada con éxito! 📦✨");
+                    limpiarSumadora();
+                    obtenerMétricasYListaSalidas();
+                } else {
+                    alert("❌ Ocurrió un error al intentar registrar la salida.");
+                }
+            } catch (error) {
+                console.error("Error al registrar salida:", error);
+                alert("❌ Error al conectar con la planilla.");
+            }
+        }*/
+
+
+        async function guardarSalida(e) {
+            e.preventDefault();
+
+            if (totalAcumuladoSalida <= 0) {
+                alert(
+                    "⚠️ Ingresa al menos un monto en la " +
+                    "calculadora usando el botón '=' antes de guardar."
+                );
+                return;
+            }
+
+            const fechaInput =
+                document.getElementById('salidaFecha');
+
+            const fecha = fechaInput?.value;
+            const monto = Number(totalAcumuladoSalida);
+
+            if (!fecha) {
+                alert('Selecciona una fecha para la salida.');
+                return;
+            }
+
+            // 1. Guardar primero en Supabase
+            const resultadoSupabase =
+                await guardarSalidaSupabase(fecha, monto);
+
+            if (!resultadoSupabase.success) {
+                alert(
+                    'No fue posible guardar la salida en Supabase. ' +
+                    'No se continuará con el registro.'
+                );
+                return;
+            }
+
+            // 2. Mantener Sheets temporalmente
+            const resultadoSheets =
+                await enviarSalidaAGoogleSheets(fecha, monto);
+
+            if (!resultadoSheets.success) {
+                alert(
+                    'La salida fue guardada en Supabase, ' +
+                    'pero no pudo sincronizarse con Google Sheets.'
+                );
+
+                // No limpiamos todavía para que puedas revisar.
+                return;
+            }
+
+            alert('¡Salida registrada con éxito! 📦✨');
+            limpiarSumadora();
+
+            await obtenerMétricasYListaSalidas();
+        }
+
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+
+        async function guardarSalidaSupabase(fecha, monto) {
+            try {
+                const {
+                    data: { user },
+                    error: userError
+                } = await supabaseClient.auth.getUser();
+
+                if (userError || !user) {
+                    throw new Error(
+                        'No existe una sesión activa en Supabase.'
+                    );
                 }
 
-                async function guardarSalidaSheets(e) {
-                    e.preventDefault();
+                const nuevaSalida = {
+                    user_id: user.id,
+                    expense_date: fecha,
+                    amount: Number(monto)
+                };
 
-                    if (totalAcumuladoSalida <= 0) {
-                        alert("⚠️ Ingresa al menos un monto en la calculadora usando el botón '=' antes de guardar.");
-                        return;
-                    }
+                const { data, error } = await supabaseClient
+                    .from('expenses')
+                    .insert(nuevaSalida)
+                    .select()
+                    .single();
 
-                    const fecha = document.getElementById('salidaFecha').value;
+                if (error) {
+                    throw error;
+                }
 
-                    try {
-                        const response = await fetch(APPS_SCRIPT_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify({
-                                accion: "registrar_salida",
-                                Fecha: fecha,
-                                Monto: totalAcumuladoSalida
-                            })
-                        });
+                console.log(
+                    'Salida guardada en Supabase:',
+                    data
+                );
 
-                        const res = await response.json();
+                return {
+                    success: true,
+                    expense: data
+                };
 
-                        if (res.status === "success") {
-                            alert("¡Salida registrada con éxito! 📦✨");
-                            limpiarSumadora();
-                            obtenerMétricasYListaSalidas();
-                        } else {
-                            alert("❌ Ocurrió un error al intentar registrar la salida.");
+            } catch (error) {
+                console.error(
+                    'Error al guardar salida en Supabase:',
+                    error
+                );
+
+                return {
+                    success: false,
+                    error
+                };
+            }
+        }
+
+
+
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+
+
+
+        //FUNCIÓN PRÓXIMA A SER ELIMINADA ❌
+
+
+        async function obtenerMétricasYListaSalidasSheets() {
+            const elSemana = document.getElementById('gastos-semana-total');
+            const elMes = document.getElementById('gastos-mes-total');
+            const elLista = document.getElementById('lista-salidas-historial');
+
+            if (!elSemana || !elMes || !elLista) return;
+
+            try {
+                const response = await fetch(APPS_SCRIPT_URL + "?hoja=Salidas");
+                const salidas = await response.json();
+
+                const ahora = new Date();
+                const mesActual = ahora.getMonth();
+                const anioActual = ahora.getFullYear();
+
+                const diaSemana = ahora.getDay();
+                const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+
+                const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
+                inicioSemanaActual.setHours(0, 0, 0, 0);
+
+                const finSemanaActual = new Date(inicioSemanaActual);
+                finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
+                finSemanaActual.setHours(23, 59, 59, 999);
+
+                let totalSemana = 0;
+                let totalMes = 0;
+                let semanasAgrupadas = {};
+
+                if (Array.isArray(salidas) && salidas.length > 0) {
+                    salidas.forEach(item => {
+                        if (item.Fecha && item.Monto) {
+                            let montoVal = parseFloat(item.Monto) || 0;
+
+                            let partes = item.Fecha.split('/');
+                            let fechaItem;
+                            if (partes.length === 3) {
+                                fechaItem = new Date(partes[2], partes[1] - 1, partes[0]);
+                            } else {
+                                fechaItem = new Date(item.Fecha);
+                            }
+
+                            if (isNaN(fechaItem.getTime())) return;
+
+                            if (fechaItem >= inicioSemanaActual && fechaItem <= finSemanaActual) {
+                                totalSemana += montoVal;
+                            }
+
+                            if (fechaItem.getMonth() === mesActual && fechaItem.getFullYear() === anioActual) {
+                                totalMes += montoVal;
+                            }
+
+                            let dSem = fechaItem.getDay();
+                            let diffL = fechaItem.getDate() - dSem + (dSem === 0 ? -6 : 1);
+
+                            let lunesSemana = new Date(fechaItem);
+                            lunesSemana.setDate(diffL);
+
+                            let domingoSemana = new Date(lunesSemana);
+                            domingoSemana.setDate(lunesSemana.getDate() + 6);
+
+                            let fLunes = `${String(lunesSemana.getDate()).padStart(2, '0')}/${String(lunesSemana.getMonth() + 1).padStart(2, '0')}`;
+                            let fDomingo = `${String(domingoSemana.getDate()).padStart(2, '0')}/${String(domingoSemana.getMonth() + 1).padStart(2, '0')}`;
+                            let claveSemana = `Semana del ${fLunes} al ${fDomingo}`;
+
+                            if (!semanasAgrupadas[claveSemana]) {
+                                semanasAgrupadas[claveSemana] = 0;
+                            }
+                            semanasAgrupadas[claveSemana] += montoVal;
                         }
-                    } catch (error) {
-                        console.error("Error al registrar salida:", error);
-                        alert("❌ Error al conectar con la planilla.");
-                    }
-                }
+                    });
 
-                async function obtenerMétricasYListaSalidas() {
-                    const elSemana = document.getElementById('gastos-semana-total');
-                    const elMes = document.getElementById('gastos-mes-total');
-                    const elLista = document.getElementById('lista-salidas-historial');
+                    elSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+                    elMes.innerText = `R$ ${totalMes.toFixed(2)}`;
 
-                    if (!elSemana || !elMes || !elLista) return;
-
-                    try {
-                        const response = await fetch(APPS_SCRIPT_URL + "?hoja=Salidas");
-                        const salidas = await response.json();
-
-                        const ahora = new Date();
-                        const mesActual = ahora.getMonth();
-                        const anioActual = ahora.getFullYear();
-
-                        const diaSemana = ahora.getDay();
-                        const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
-
-                        const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
-                        inicioSemanaActual.setHours(0, 0, 0, 0);
-
-                        const finSemanaActual = new Date(inicioSemanaActual);
-                        finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
-                        finSemanaActual.setHours(23, 59, 59, 999);
-
-                        let totalSemana = 0;
-                        let totalMes = 0;
-                        let semanasAgrupadas = {};
-
-                        if (Array.isArray(salidas) && salidas.length > 0) {
-                            salidas.forEach(item => {
-                                if (item.Fecha && item.Monto) {
-                                    let montoVal = parseFloat(item.Monto) || 0;
-
-                                    let partes = item.Fecha.split('/');
-                                    let fechaItem;
-                                    if (partes.length === 3) {
-                                        fechaItem = new Date(partes[2], partes[1] - 1, partes[0]);
-                                    } else {
-                                        fechaItem = new Date(item.Fecha);
-                                    }
-
-                                    if (isNaN(fechaItem.getTime())) return;
-
-                                    if (fechaItem >= inicioSemanaActual && fechaItem <= finSemanaActual) {
-                                        totalSemana += montoVal;
-                                    }
-
-                                    if (fechaItem.getMonth() === mesActual && fechaItem.getFullYear() === anioActual) {
-                                        totalMes += montoVal;
-                                    }
-
-                                    let dSem = fechaItem.getDay();
-                                    let diffL = fechaItem.getDate() - dSem + (dSem === 0 ? -6 : 1);
-
-                                    let lunesSemana = new Date(fechaItem);
-                                    lunesSemana.setDate(diffL);
-
-                                    let domingoSemana = new Date(lunesSemana);
-                                    domingoSemana.setDate(lunesSemana.getDate() + 6);
-
-                                    let fLunes = `${String(lunesSemana.getDate()).padStart(2, '0')}/${String(lunesSemana.getMonth() + 1).padStart(2, '0')}`;
-                                    let fDomingo = `${String(domingoSemana.getDate()).padStart(2, '0')}/${String(domingoSemana.getMonth() + 1).padStart(2, '0')}`;
-                                    let claveSemana = `Semana del ${fLunes} al ${fDomingo}`;
-
-                                    if (!semanasAgrupadas[claveSemana]) {
-                                        semanasAgrupadas[claveSemana] = 0;
-                                    }
-                                    semanasAgrupadas[claveSemana] += montoVal;
-                                }
-                            });
-
-                            elSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
-                            elMes.innerText = `R$ ${totalMes.toFixed(2)}`;
-
-                            let htmlHistorial = '';
-                            for (let semana in semanasAgrupadas) {
-                                htmlHistorial += `
+                    let htmlHistorial = '';
+                    for (let semana in semanasAgrupadas) {
+                        htmlHistorial += `
                             <li class="salida-history-item">
                                 <span>📅 <strong>${semana}</strong></span>
                                 <strong style="color: #d32f2f;">| R$ ${semanasAgrupadas[semana].toFixed(2)}</strong>
                             </li>
                         `;
-                            }
-                            elLista.innerHTML = htmlHistorial || '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
-
-                        } else {
-                            elSemana.innerText = "R$ 0,00";
-                            elMes.innerText = "R$ 0,00";
-                            elLista.innerHTML = '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
-                        }
-
-                    } catch (error) {
-                        console.error("Error al procesar métricas de salidas:", error);
-                        elSemana.innerText = "R$ 0,00";
-                        elMes.innerText = "R$ 0,00";
-                        elLista.innerHTML = '<li style="color: red; text-align: center; padding: 10px;">Erro ao carregar histórico.</li>';
                     }
+                    elLista.innerHTML = htmlHistorial || '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
+
+                } else {
+                    elSemana.innerText = "R$ 0,00";
+                    elMes.innerText = "R$ 0,00";
+                    elLista.innerHTML = '<li style="color: #888; text-align: center; padding: 10px;">Nenhuma saída registrada.</li>';
                 }
 
-                // --- 🚀 CARGA INICIAL ---
-                window.addEventListener('DOMContentLoaded', () => {
-                    if (serviceSelect && valueInput && serviceSelect.options[serviceSelect.selectedIndex]) {
-                        valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price') || '';
+            } catch (error) {
+                console.error("Error al procesar métricas de salidas:", error);
+                elSemana.innerText = "R$ 0,00";
+                elMes.innerText = "R$ 0,00";
+                elLista.innerHTML = '<li style="color: red; text-align: center; padding: 10px;">Erro ao carregar histórico.</li>';
+            }
+        }
+
+
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+
+
+        async function obtenerMétricasYListaSalidas() {
+            const elSemana =
+                document.getElementById('gastos-semana-total');
+
+            const elMes =
+                document.getElementById('gastos-mes-total');
+
+            const elLista =
+                document.getElementById(
+                    'lista-salidas-historial'
+                );
+
+            if (!elSemana || !elMes || !elLista) {
+                return;
+            }
+
+            try {
+                const {
+                    data: { user },
+                    error: userError
+                } = await supabaseClient.auth.getUser();
+
+                if (userError || !user) {
+                    throw new Error(
+                        'No existe una sesión activa en Supabase.'
+                    );
+                }
+
+                const ahora = new Date();
+
+                const inicioMes = new Date(
+                    ahora.getFullYear(),
+                    ahora.getMonth(),
+                    1
+                );
+
+                const finMes = new Date(
+                    ahora.getFullYear(),
+                    ahora.getMonth() + 1,
+                    0
+                );
+
+                const inicioSemana = new Date(ahora);
+                const diaSemana = inicioSemana.getDay();
+
+                inicioSemana.setDate(
+                    inicioSemana.getDate() -
+                    diaSemana +
+                    (diaSemana === 0 ? -6 : 1)
+                );
+
+                inicioSemana.setHours(0, 0, 0, 0);
+
+                const finSemana = new Date(inicioSemana);
+                finSemana.setDate(finSemana.getDate() + 6);
+                finSemana.setHours(23, 59, 59, 999);
+
+                const formatearFechaSQL = (fecha) => {
+                    const anio = fecha.getFullYear();
+
+                    const mes = String(
+                        fecha.getMonth() + 1
+                    ).padStart(2, '0');
+
+                    const dia = String(
+                        fecha.getDate()
+                    ).padStart(2, '0');
+
+                    return `${anio}-${mes}-${dia}`;
+                };
+
+                const { data: salidas, error } =
+                    await supabaseClient
+                        .from('expenses')
+                        .select(`
+                    id,
+                    expense_date,
+                    amount,
+                    description,
+                    category
+                `)
+                        .eq('user_id', user.id)
+                        .order(
+                            'expense_date',
+                            { ascending: false }
+                        );
+
+                if (error) {
+                    throw error;
+                }
+
+                let totalSemana = 0;
+                let totalMes = 0;
+
+                const semanasAgrupadas = new Map();
+
+                (salidas || []).forEach((salida) => {
+                    const monto =
+                        Number(salida.amount || 0);
+
+                    const fechaSalida = new Date(
+                        `${salida.expense_date}T00:00:00`
+                    );
+
+                    if (
+                        fechaSalida >= inicioSemana &&
+                        fechaSalida <= finSemana
+                    ) {
+                        totalSemana += monto;
                     }
 
-                    if (dateInput) {
-                        dateInput.value = new Date().toISOString().split('T')[0];
+                    if (
+                        fechaSalida >= inicioMes &&
+                        fechaSalida <= finMes
+                    ) {
+                        totalMes += monto;
                     }
 
-                
+                    const lunes = new Date(fechaSalida);
+                    const dia = lunes.getDay();
+
+                    lunes.setDate(
+                        lunes.getDate() -
+                        dia +
+                        (dia === 0 ? -6 : 1)
+                    );
+
+                    lunes.setHours(0, 0, 0, 0);
+
+                    const domingo = new Date(lunes);
+                    domingo.setDate(domingo.getDate() + 6);
+
+                    const clave =
+                        formatearFechaSQL(lunes);
+
+                    if (!semanasAgrupadas.has(clave)) {
+                        semanasAgrupadas.set(clave, {
+                            lunes,
+                            domingo,
+                            total: 0
+                        });
+                    }
+
+                    semanasAgrupadas.get(clave).total += monto;
                 });
+
+                elSemana.innerText =
+                    `R$ ${totalSemana.toFixed(2)}`;
+
+                elMes.innerText =
+                    `R$ ${totalMes.toFixed(2)}`;
+
+                const semanasOrdenadas =
+                    Array.from(
+                        semanasAgrupadas.values()
+                    ).sort(
+                        (a, b) => b.lunes - a.lunes
+                    );
+
+                const formatearDiaMes = (fecha) => {
+                    const dia = String(
+                        fecha.getDate()
+                    ).padStart(2, '0');
+
+                    const mes = String(
+                        fecha.getMonth() + 1
+                    ).padStart(2, '0');
+
+                    return `${dia}/${mes}`;
+                };
+
+                const htmlHistorial =
+                    semanasOrdenadas.map((semana) => {
+                        const inicio =
+                            formatearDiaMes(semana.lunes);
+
+                        const final =
+                            formatearDiaMes(semana.domingo);
+
+                        return `
+                    <li class="salida-history-item">
+                        <span>
+                            📅
+                            <strong>
+                                Semana del ${inicio}
+                                al ${final}
+                            </strong>
+                        </span>
+
+                        <strong
+                            style="color: #d32f2f;"
+                        >
+                            | R$
+                            ${semana.total.toFixed(2)}
+                        </strong>
+                    </li>
+                `;
+                    }).join('');
+
+                elLista.innerHTML =
+                    htmlHistorial ||
+                    `
+                <li style="
+                    color: #888;
+                    text-align: center;
+                    padding: 10px;
+                ">
+                    Nenhuma saída registrada.
+                </li>
+            `;
+
+            } catch (error) {
+                console.error(
+                    'Error al cargar salidas desde Supabase:',
+                    error
+                );
+
+                elSemana.innerText = 'R$ 0,00';
+                elMes.innerText = 'R$ 0,00';
+
+                elLista.innerHTML = `
+            <li style="
+                color: red;
+                text-align: center;
+                padding: 10px;
+            ">
+                Erro ao carregar histórico.
+            </li>
+        `;
+            }
+        }
+
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+
+        // --- 🚀 CARGA INICIAL ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if (serviceSelect && valueInput && serviceSelect.options[serviceSelect.selectedIndex]) {
+                valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price') || '';
+            }
+
+            if (dateInput) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+
+
+        });
     </script>
 </body>
+
 </html>
