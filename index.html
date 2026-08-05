@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <link rel="apple-touch-icon" href="logo.png">
     <meta charset="UTF-8">
@@ -124,8 +125,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .section-title {
@@ -184,7 +192,8 @@
         .time-row .form-group {
             flex: 1 1 50% !important;
             width: 50% !important;
-            min-width: 0 !important; /* Previene colapso en cajas vacías */
+            min-width: 0 !important;
+            /* Previene colapso en cajas vacías */
             margin-bottom: 0 !important;
             box-sizing: border-box !important;
         }
@@ -375,7 +384,8 @@
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             outline: none;
-            -webkit-appearance: none; /* 🛡️ Elimina estilos nativos en iPhone */
+            -webkit-appearance: none;
+            /* 🛡️ Elimina estilos nativos en iPhone */
             appearance: none;
             display: block;
         }
@@ -462,9 +472,9 @@
         }
 
         /* ANIMACION DE BOTONES */
-        button, 
-        input[type="submit"], 
-        input[type="button"], 
+        button,
+        input[type="submit"],
+        input[type="button"],
         div[onclick],
         span[onclick],
         a,
@@ -479,9 +489,9 @@
             touch-action: manipulation !important;
         }
 
-        button:active, 
-        input[type="submit"]:active, 
-        input[type="button"]:active, 
+        button:active,
+        input[type="submit"]:active,
+        input[type="button"]:active,
         div[onclick]:active,
         span[onclick]:active,
         a:active,
@@ -493,11 +503,13 @@
             transform: scale(0.93) !important;
             filter: brightness(0.88) !important;
         }
-</style>
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body ontouchstart="">
     <div class="phone-wrapper">
-        
+
         <!-- CABEÇALHO -->
         <header class="app-header">
             <img src="logo2.png" alt="Logo" class="app-logo">
@@ -514,14 +526,30 @@
             <button class="tab-button" onclick="switchTab('salidas')">Saidas</button>
         </div>
 
+        <!-- -------------------------------------------- SUPABASE --------------------------------------------- -->
+        <button type="button" onclick="probarLoginSupabase()" style="padding: 10px 16px; margin: 10px;">
+            Probar login Supabase
+        </button>
+
+        <button type="button" onclick="probarCitaSupabase()" style="padding: 10px 16px; margin: 10px;">
+            Probar cita Supabase
+        </button>
+
+        <button type="button" onclick="leerCitasSupabase()" style="padding: 10px 16px; margin: 10px;">
+            Leer citas Supabase
+        </button>
+
+        <!-- -------------------------------------------- SUPABASE --------------------------------------------- -->
+
         <!-- ABA 1: AGENDAMENTO -->
         <section id="agendamento-view" class="view-section active">
             <h2 class="section-title">📝 Novo Atendimento</h2>
             <form id="appointmentForm">
-                
+
                 <div class="form-group">
                     <label for="clientName">Nome da Cliente</label>
-                    <input type="text" id="clientName" class="form-control" placeholder="Digite o nome completo" required>
+                    <input type="text" id="clientName" class="form-control" placeholder="Digite o nome completo"
+                        required>
                 </div>
 
                 <div class="form-group">
@@ -532,7 +560,8 @@
                         <option value="Manutenção" data-price="140">Manutenção</option>
                         <option value="Pedicure" data-price="75">Pedicure</option>
                         <option value="Combo blindagem e pedicure" data-price="150">Combo blindagem e pedicure</option>
-                        <option value="Combo banho de gel + pedicure" data-price="200">Combo banho de gel + pedicure</option>
+                        <option value="Combo banho de gel + pedicure" data-price="200">Combo banho de gel + pedicure
+                        </option>
                     </select>
                 </div>
 
@@ -547,19 +576,20 @@
                 </div>
 
                 <div class="time-row">
-                <div class="form-group">
-                    <label for="startTime">Hora Início</label>
-                    <input type="time" id="startTime" class="form-control" value="00:00" required>
-            </div>
                     <div class="form-group">
-                    <label for="endTime">Hora Fim</label>
-                    <input type="time" id="endTime" class="form-control" value="00:00" required>
+                        <label for="startTime">Hora Início</label>
+                        <input type="time" id="startTime" class="form-control" value="00:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endTime">Hora Fim</label>
+                        <input type="time" id="endTime" class="form-control" value="00:00" required>
+                    </div>
                 </div>
-            </div>
 
                 <!-- 🟢/🔴 Mensaje de disponibilidad centrado con espacio fijo (Evita saltos del botón) -->
                 <div style="min-height: 24px; margin: 8px 0 12px 0; text-align: center;">
-                    <small id="availability-status" style="display: inline-block; font-weight: bold; font-size: 0.88rem;"></small>
+                    <small id="availability-status"
+                        style="display: inline-block; font-weight: bold; font-size: 0.88rem;"></small>
                 </div>
 
                 <button type="submit" class="btn-submit">Salvar e Sincronizar</button>
@@ -569,7 +599,7 @@
         <!-- ABA 2: RESUMO -->
         <section id="resumo-view" class="view-section">
             <h2 class="section-title">📊 Faturamento Estimado</h2>
-            
+
             <div class="kpi-container">
                 <div class="kpi-card">
                     <h3>Ganhos da Semana</h3>
@@ -582,14 +612,14 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px;">
-        📋 Próximas Clientes
-    </h3>
-    
-    <!-- 📅 Selector con Estilo Custom Mapeado a la App -->
-    <div style="position: relative; display: inline-block;">
-        <select id="filtroMesResumo" onchange="obtenerGananciasYClientes()" 
-                style="appearance: none;
+                <h3
+                    style="margin: 0; font-size: 1.1rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px;">
+                    📋 Próximas Clientes
+                </h3>
+
+                <!-- 📅 Selector con Estilo Custom Mapeado a la App -->
+                <div style="position: relative; display: inline-block;">
+                    <select id="filtroMesResumo" onchange="obtenerGananciasYClientes()" style="appearance: none;
                        -webkit-appearance: none;
                        -moz-appearance: none;
                        background-color: #fff;
@@ -603,26 +633,27 @@
                        outline: none;
                        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
                        transition: all 0.2s ease;">
-            <option value="0">Janeiro</option>
-            <option value="1">Fevereiro</option>
-            <option value="2">Março</option>
-            <option value="3">Abril</option>
-            <option value="4">Maio</option>
-            <option value="5">Junho</option>
-            <option value="6">Julho</option>
-            <option value="7">Agosto</option>
-            <option value="8">Setembro</option>
-            <option value="9">Outubro</option>
-            <option value="10">Novembro</option>
-            <option value="11">Dezembro</option>
-        </select>
-        <!-- 🔽 Flechita estilizada en tono café -->
-        <span style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8c5e58; font-size: 0.75rem;">
-            ▼
-        </span>
-    </div>
-</div>
-            
+                        <option value="0">Janeiro</option>
+                        <option value="1">Fevereiro</option>
+                        <option value="2">Março</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Maio</option>
+                        <option value="5">Junho</option>
+                        <option value="6">Julho</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Setembro</option>
+                        <option value="9">Outubro</option>
+                        <option value="10">Novembro</option>
+                        <option value="11">Dezembro</option>
+                    </select>
+                    <!-- 🔽 Flechita estilizada en tono café -->
+                    <span
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #8c5e58; font-size: 0.75rem;">
+                        ▼
+                    </span>
+                </div>
+            </div>
+
             <ul class="client-list" id="lista-clientes"></ul>
             <div id="loading-spinner" style="text-align: center; color: #888; display: none;">Carregando...</div>
         </section>
@@ -642,9 +673,10 @@
 
             <div class="salidas-card" style="margin-bottom: 20px;">
                 <h3>🧮 Calculadora de Saídas</h3>
-                
+
                 <div class="calc-controls" style="margin-top: 15px;">
-                    <input type="text" id="calcInput" class="calc-input-field" placeholder="Monto R$" inputmode="decimal">
+                    <input type="text" id="calcInput" class="calc-input-field" placeholder="Monto R$"
+                        inputmode="decimal">
                     <button type="button" class="btn-calc-equal" onclick="procesarEntradaMonto()">=</button>
                 </div>
 
@@ -654,7 +686,8 @@
                     </li>
                 </ul>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-weight: bold;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-weight: bold;">
                     <span>Total a cadastrar:</span>
                     <span id="totalCalc" style="font-size: 1.2rem; color: #e91e63;">R$ 0,00</span>
                 </div>
@@ -667,8 +700,12 @@
 
                 <form id="salidaForm" onsubmit="guardarSalidaSheets(event)">
                     <div style="margin-bottom: 12px; width: 100%; box-sizing: border-box; overflow: hidden;">
-                        <label for="salidaFecha" style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Data de Cadastro:</label>
-                        <input type="date" id="salidaFecha" class="form-control" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;" required>
+                        <label for="salidaFecha"
+                            style="display: block; font-size: 0.85rem; color: #666; margin-bottom: 4px;">Data de
+                            Cadastro:</label>
+                        <input type="date" id="salidaFecha" class="form-control"
+                            style="width: 100% !important; max-width: 100% !important; box-sizing: border-box !important;"
+                            required>
                     </div>
 
                     <button type="submit" class="btn-save-salida">
@@ -695,6 +732,113 @@
         const API_KEY = 'AIzaSyDCu4FtYLx9fZ7dllqhFZU7-OLKVq9XYxA';
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
+
+        //SUPABASE--------------------------------------------------------------------START
+        //SUPABASE--------------------------------------------------------------------START
+        //SUPABASE--------------------------------------------------------------------START
+
+
+        const SUPABASE_URL = 'https://rfuvpkaoepcjyxegnbic.supabase.co';
+        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_vJ8ERp-GcIIBjoPlzwA71Q_7vg2PZMc';
+
+        const supabaseClient = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+        async function probarLoginSupabase() {
+            const email = prompt('Correo de prueba:');
+            const password = prompt('Contraseña de prueba:');
+
+            if (!email || !password) {
+                alert('Debes ingresar correo y contraseña.');
+                return;
+            }
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                console.error('Error de Supabase Auth:', error);
+                alert(`Error al iniciar sesión: ${error.message}`);
+                return;
+            }
+
+            console.log('Sesión iniciada:', data);
+            alert(`Sesión iniciada correctamente con ${data.user.email}`);
+        }
+
+        async function probarCitaSupabase() {
+            const {
+                data: { user },
+                error: userError
+            } = await supabaseClient.auth.getUser();
+
+            if (userError || !user) {
+                alert('Primero debes iniciar sesión en Supabase.');
+                return;
+            }
+
+            const citaPrueba = {
+                user_id: user.id,
+                appointment_date: new Date().toISOString().split('T')[0],
+                client_name: 'Cliente de prueba',
+                service_name: 'Mantenimiento de prueba',
+                price: 140,
+                start_time: '14:00',
+                end_time: '16:00',
+                status: 'confirmed'
+            };
+
+            const { data, error } = await supabaseClient
+                .from('appointments')
+                .insert(citaPrueba)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Error al insertar cita:', error);
+                alert(`Error al guardar: ${error.message}`);
+                return;
+            }
+
+            console.log('Cita guardada:', data);
+            alert('Cita de prueba guardada correctamente en Supabase.');
+        }
+
+        async function leerCitasSupabase() {
+            const {
+                data: { user },
+                error: userError
+            } = await supabaseClient.auth.getUser();
+
+            if (userError || !user) {
+                alert('Primero debes iniciar sesión.');
+                return;
+            }
+
+            const { data, error } = await supabaseClient
+                .from('appointments')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('appointment_date', { ascending: true })
+                .order('start_time', { ascending: true });
+
+            if (error) {
+                console.error('Error al leer citas:', error);
+                alert(`Error al leer: ${error.message}`);
+                return;
+            }
+
+            console.table(data);
+            alert(`Se encontraron ${data.length} citas.`);
+        }
+
+        //SUPABASE----------------------------------------------------------------------END
+        //SUPABASE----------------------------------------------------------------------END
+        //SUPABASE----------------------------------------------------------------------END
 
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdVJ5-eUhJ8l72J6FCdj5vm9Mqug6ckKGsMvQ02Y5Rsi8i4EiyZEy8cjEI6ClXmNxj/exec';
 
@@ -739,10 +883,10 @@
                 if (btn) btn.classList.add('active');
                 const view = document.getElementById('salidas-view');
                 if (view) view.classList.add('active');
-                
+
                 const inputFecha = document.getElementById('salidaFecha');
                 if (inputFecha) inputFecha.value = new Date().toISOString().split('T')[0];
-                
+
                 obtenerMétricasYListaSalidas();
             }
         }
@@ -767,85 +911,85 @@
         // Normaliza cualquier formato de fecha a "YYYY-MM-DD" para una comparación exacta
         // Normaliza CUALQUIER fecha respetando la zona horaria local exacta ("YYYY-MM-DD")
         function normalizarFecha(fechaStr) {
-        if (!fechaStr) return '';
+            if (!fechaStr) return '';
 
-        let str = fechaStr.toString().trim();
+            let str = fechaStr.toString().trim();
 
-        // 1. Si viene en formato "dd/mm/yyyy" desde Sheets
-        if (str.includes('/')) {
-        const partes = str.split('/');
-        if (partes.length === 3) {
-            const dia = partes[0].padStart(2, '0');
-            const mes = partes[1].padStart(2, '0');
-            const anio = partes[2].length === 2 ? `20${partes[2]}` : partes[2];
-            return `${anio}-${mes}-${dia}`;
+            // 1. Si viene en formato "dd/mm/yyyy" desde Sheets
+            if (str.includes('/')) {
+                const partes = str.split('/');
+                if (partes.length === 3) {
+                    const dia = partes[0].padStart(2, '0');
+                    const mes = partes[1].padStart(2, '0');
+                    const anio = partes[2].length === 2 ? `20${partes[2]}` : partes[2];
+                    return `${anio}-${mes}-${dia}`;
+                }
+            }
+
+            // 2. Si viene desde un <input type="date"> o string "yyyy-mm-dd"
+            if (str.includes('-') && !str.includes('Sat') && !str.includes('Sun') && !str.includes('Mon') && !str.includes('Tue') && !str.includes('Wed') && !str.includes('Thu') && !str.includes('Fri')) {
+                return str.split('T')[0];
+            }
+
+            // 3. Si viene como objeto de fecha o texto de sistema, extrae valores locales sin UTC
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            return str;
         }
-    }
-
-        // 2. Si viene desde un <input type="date"> o string "yyyy-mm-dd"
-        if (str.includes('-') && !str.includes('Sat') && !str.includes('Sun') && !str.includes('Mon') && !str.includes('Tue') && !str.includes('Wed') && !str.includes('Thu') && !str.includes('Fri')) {
-        return str.split('T')[0];
-    }
-
-        // 3. Si viene como objeto de fecha o texto de sistema, extrae valores locales sin UTC
-        const d = new Date(str);
-        if (!isNaN(d.getTime())) {
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    return str;
-}
 
         // Verifica si existe solapamiento en Google Sheets (Sincronizado con la planilla Registros)
         async function verificarDisponibilidadHorario(fechaSeleccionada, horaInicioNue, horaFinNue) {
-        try {
-        const respuesta = await fetch(APPS_SCRIPT_URL);
-        const citas = await respuesta.json();
+            try {
+                const respuesta = await fetch(APPS_SCRIPT_URL);
+                const citas = await respuesta.json();
 
-        if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
+                if (!Array.isArray(citas) || citas.length === 0) return { disponible: true };
 
-        const inicioNUEVO = horaAMinutos(horaInicioNue);
-        const finNUEVO = horaAMinutos(horaFinNue);
-        const fechaBuscada = normalizarFecha(fechaSeleccionada);
+                const inicioNUEVO = horaAMinutos(horaInicioNue);
+                const finNUEVO = horaAMinutos(horaFinNue);
+                const fechaBuscada = normalizarFecha(fechaSeleccionada);
 
-        for (let cita of citas) {
-            // Se obtiene la fecha (Columna A)
-            const fechaCita = normalizarFecha(cita.Fecha || cita.FECHA || '');
+                for (let cita of citas) {
+                    // Se obtiene la fecha (Columna A)
+                    const fechaCita = normalizarFecha(cita.Fecha || cita.FECHA || '');
 
-            // Se obtiene el horario (Columna H "FEV")
-            const horarioCita = (cita.FEV || cita.Hora || '').toString().trim();
+                    // Se obtiene el horario (Columna H "FEV")
+                    const horarioCita = (cita.FEV || cita.Hora || '').toString().trim();
 
-            if (fechaCita === fechaBuscada && horarioCita) {
-                // Reemplaza guiones especiales y normaliza separadores
-                const horarioLimpio = horarioCita.replace('–', '-').replace('a', '-');
-                
-                if (horarioLimpio.includes('-')) {
-                    const partesHorario = horarioLimpio.split('-');
-                    const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
-                    const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
+                    if (fechaCita === fechaBuscada && horarioCita) {
+                        // Reemplaza guiones especiales y normaliza separadores
+                        const horarioLimpio = horarioCita.replace('–', '-').replace('a', '-');
 
-                    // FÓRMULA MATEMÁTICA DE INTERSECCIÓN DE HORARIOS
-                    if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
-                        const nombreCliente = cita.Descripcion || cita.Nombre || 'Cliente';
-                        return {
-                            disponible: false,
-                            clienteConflicto: nombreCliente,
-                            horarioConflicto: horarioCita
-                        };
+                        if (horarioLimpio.includes('-')) {
+                            const partesHorario = horarioLimpio.split('-');
+                            const inicioEXISTENTE = horaAMinutos(partesHorario[0].trim());
+                            const finEXISTENTE = horaAMinutos(partesHorario[1].trim());
+
+                            // FÓRMULA MATEMÁTICA DE INTERSECCIÓN DE HORARIOS
+                            if (inicioNUEVO < finEXISTENTE && finNUEVO > inicioEXISTENTE) {
+                                const nombreCliente = cita.Descripcion || cita.Nombre || 'Cliente';
+                                return {
+                                    disponible: false,
+                                    clienteConflicto: nombreCliente,
+                                    horarioConflicto: horarioCita
+                                };
+                            }
+                        }
                     }
                 }
+
+                return { disponible: true };
+            } catch (error) {
+                console.error("Error al verificar disponibilidad:", error);
+                return { disponible: true };
             }
         }
-
-        return { disponible: true };
-        } catch (error) {
-        console.error("Error al verificar disponibilidad:", error);
-        return { disponible: true };
-    }
-}
 
         const dateInput = document.getElementById('appointmentDate');
         const startTimeInput = document.getElementById('startTime');
@@ -883,11 +1027,11 @@
                     statusLabel.innerText = `❌ Ocupado por ${verificacion.clienteConflicto} (${verificacion.horarioConflicto})`;
                 }
                 alert(`⚠️ HORÁRIO INDISPONÍVEL:\n\nJá tem agendamento para ${verificacion.clienteConflicto}\n\nDe ${verificacion.horarioConflicto}`);
-                
+
                 if (startTimeInput) startTimeInput.value = '';
                 if (endTimeInput) endTimeInput.value = '';
                 if (statusLabel) statusLabel.innerText = '';
-                
+
                 return false;
             } else {
                 if (statusLabel) {
@@ -919,10 +1063,10 @@
                 const horaFin = endTimeInput.value;
 
                 const datosCita = {
-                    Fecha: fecha, 
-                    Nombre: nombre, 
-                    Descripcion: servicio, 
-                    Ingreso: valor, 
+                    Fecha: fecha,
+                    Nombre: nombre,
+                    Descripcion: servicio,
+                    Ingreso: valor,
                     Hora: `${horaInicio} - ${horaFin}`
                 };
 
@@ -930,14 +1074,74 @@
                     alert('As bibliotecas do Google ainda estão carregando. Tente novamente em alguns segundos.');
                     return;
                 }
+                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
 
+                const procesarAgendamiento = async () => {
+                    const eventIdObtenido = await crearEventoCalendar(
+                        nombre,
+                        servicio,
+                        fecha,
+                        horaInicio,
+                        horaFin
+                    );
+
+                    if (!eventIdObtenido) {
+                        return;
+                    }
+
+                    datosCita.eventId = eventIdObtenido;
+
+                    // 1. Guardar primero en Supabase
+                    const resultadoSupabase =
+                        await enviarASupabase(
+                            datosCita,
+                            eventIdObtenido
+                        );
+
+                    if (!resultadoSupabase.success) {
+                        alert(
+                            'La cita fue creada en Google Calendar, ' +
+                            'pero no pudo guardarse en Supabase. ' +
+                            'No se continuará con el registro.'
+                        );
+
+                        return;
+                    }
+
+                    // 2. Mantener Google Sheets temporalmente
+                    const resultadoSheets =
+                        await enviarAGoogleSheets(datosCita);
+
+                    if (!resultadoSheets.success) {
+                        alert(
+                            'La cita fue guardada en Google Calendar y Supabase, ' +
+                            'pero no pudo sincronizarse con Google Sheets.'
+                        );
+
+                        return;
+                    }
+
+                    // 3. Todo salió correctamente
+                    finalizarAgendamientoExitoso();
+                };
+
+
+                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+                //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+
+                /*
+                FUNCION PROXIMA A SER ELIMINADA ❌
+                
                 const procesarAgendamiento = async () => {
                     const eventIdObtenido = await crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin);
                     if (eventIdObtenido) {
                         datosCita.eventId = eventIdObtenido;
                         await enviarAGoogleSheets(datosCita);
                     }
-                };
+                };*/
 
                 if (gapi.client.getToken() !== null) {
                     await procesarAgendamiento();
@@ -956,19 +1160,19 @@
                 'summary': `${nombre}`,
                 'description': `Serviço de Nails: ${servicio}`,
                 'colorId': '4',
-                'start': { 
-                    'dateTime': `${fecha}T${horaInicio}:00`, 
-                    'timeZone': 'America/Sao_Paulo' 
+                'start': {
+                    'dateTime': `${fecha}T${horaInicio}:00`,
+                    'timeZone': 'America/Sao_Paulo'
                 },
-                'end': { 
-                    'dateTime': `${fecha}T${horaFin}:00`, 
-                    'timeZone': 'America/Sao_Paulo' 
+                'end': {
+                    'dateTime': `${fecha}T${horaFin}:00`,
+                    'timeZone': 'America/Sao_Paulo'
                 }
             };
 
             try {
-                const respuestaCalendar = await gapi.client.calendar.events.insert({ 
-                    'calendarId': 'primary', 
+                const respuestaCalendar = await gapi.client.calendar.events.insert({
+                    'calendarId': 'primary',
                     'resource': event
                 });
                 return respuestaCalendar.result.id;
@@ -980,6 +1184,9 @@
             }
         }
 
+        /*
+        FUNCION PROXIMA A SER ELIMINADA ❌
+        
         async function enviarAGoogleSheets(datosCita) {
             try {
                 datosCita.accion = "agendar";
@@ -1003,112 +1210,255 @@
                 console.error('Error:', error);
                 alert('Cita guardada en calendario. Sincronizando con la planilla.');
             }
+        }*/
+
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
+
+        async function enviarAGoogleSheets(datosCita) {
+            try {
+                const datosParaSheets = {
+                    ...datosCita,
+                    accion: "agendar"
+                };
+
+                const response = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify(datosParaSheets)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP ${response.status}`);
+                }
+
+                const resultado = await response.json();
+
+                if (resultado.status !== 'success') {
+                    throw new Error(
+                        resultado.message || 'Google Sheets no confirmó el registro.'
+                    );
+                }
+
+                return {
+                    success: true,
+                    result: resultado
+                };
+
+            } catch (error) {
+                console.error('Error al guardar en Google Sheets:', error);
+
+                return {
+                    success: false,
+                    error
+                };
+            }
         }
+
+
+        async function enviarASupabase(datosCita, googleCalendarEventId = null) {
+            try {
+                const {
+                    data: { user },
+                    error: userError
+                } = await supabaseClient.auth.getUser();
+
+                if (userError || !user) {
+                    alert('Tu sesión expiró. Inicia sesión nuevamente.');
+                    return { success: false };
+                }
+
+                const horaCompleta = datosCita.Hora || '';
+                const partesHora = horaCompleta.split('-');
+
+                if (partesHora.length !== 2) {
+                    throw new Error('El horario de la cita no tiene un formato válido.');
+                }
+
+                const horaInicio = partesHora[0].trim();
+                const horaFin = partesHora[1].trim();
+
+                const nuevaCita = {
+                    user_id: user.id,
+                    appointment_date: datosCita.Fecha,
+                    client_name: datosCita.Nombre,
+                    service_name: datosCita.Descripcion,
+                    price: Number(datosCita.Ingreso),
+                    start_time: horaInicio,
+                    end_time: horaFin,
+                    status: 'confirmed',
+                    google_calendar_event_id: googleCalendarEventId
+                };
+
+                const { data, error } = await supabaseClient
+                    .from('appointments')
+                    .insert(nuevaCita)
+                    .select()
+                    .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                console.log('Cita guardada en Supabase:', data);
+
+                return {
+                    success: true,
+                    appointment: data
+                };
+
+            } catch (error) {
+                console.error('Error al guardar cita en Supabase:', error);
+
+                alert(
+                    'No fue posible guardar la cita en la base de datos. ' +
+                    'Revisa la conexión e intenta nuevamente.'
+                );
+
+                return {
+                    success: false,
+                    error
+                };
+            }
+        }
+
+        function finalizarAgendamientoExitoso() {
+            alert(
+                '¡Agendamento guardado en Google Calendar, Supabase y Sheets con éxito! 🎉'
+            );
+
+            formulario.reset();
+
+            if (
+                serviceSelect.selectedIndex >= 0 &&
+                serviceSelect.options[serviceSelect.selectedIndex]
+            ) {
+                valueInput.value =
+                    serviceSelect.options[
+                        serviceSelect.selectedIndex
+                    ].getAttribute('data-price') || '';
+            }
+
+            dateInput.value =
+                new Date().toISOString().split('T')[0];
+
+            statusLabel.innerText = '';
+
+            switchTab('resumo');
+        }
+
+
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
+        //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
 
         // --- 📊 DASHBOARD & RESUMO ---
         // Establecer el mes actual en el filtro al cargar la página por primera vez
         document.addEventListener("DOMContentLoaded", () => {
-        const selectorMes = document.getElementById('filtroMesResumo');
-        if (selectorMes) {
-        const mesActual = new Date().getMonth(); // 0-11
-        selectorMes.value = mesActual;
-        }
-    });
+            const selectorMes = document.getElementById('filtroMesResumo');
+            if (selectorMes) {
+                const mesActual = new Date().getMonth(); // 0-11
+                selectorMes.value = mesActual;
+            }
+        });
 
         // Función para obtener ganancias (Semana/Mes) y filtrar clientas por el mes seleccionado
         async function obtenerGananciasYClientes() {
-        const listaClientes = document.getElementById('lista-clientes');
-        if (!listaClientes) return;
+            const listaClientes = document.getElementById('lista-clientes');
+            if (!listaClientes) return;
 
-        const spinner = document.getElementById('loading-spinner');
-        if (spinner) spinner.style.display = 'block';
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) spinner.style.display = 'block';
 
-        const selectorMes = document.getElementById('filtroMesResumo');
-        // Si el selector existe toma su valor, si no, toma el mes actual
-        const mesSeleccionado = selectorMes ? parseInt(selectorMes.value) : new Date().getMonth();
+            const selectorMes = document.getElementById('filtroMesResumo');
+            // Si el selector existe toma su valor, si no, toma el mes actual
+            const mesSeleccionado = selectorMes ? parseInt(selectorMes.value) : new Date().getMonth();
 
-        try {
-            const respuesta = await fetch(APPS_SCRIPT_URL);
-            let citas = await respuesta.json();
-    
-            let htmlClientes = '';
-            let totalSemana = 0;
-            let totalMes = 0;
+            try {
+                const respuesta = await fetch(APPS_SCRIPT_URL);
+                let citas = await respuesta.json();
 
-        // 🗓️ RANGOS DE FECHA EN TIEMPO REAL
-        const ahora = new Date();
-        const mesActual = ahora.getMonth();
-        const anioActual = ahora.getFullYear();
+                let htmlClientes = '';
+                let totalSemana = 0;
+                let totalMes = 0;
 
-        // Lunes de la semana actual
-        const diaSemana = ahora.getDay();
-        const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
-        const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
-        inicioSemanaActual.setHours(0, 0, 0, 0);
+                // 🗓️ RANGOS DE FECHA EN TIEMPO REAL
+                const ahora = new Date();
+                const mesActual = ahora.getMonth();
+                const anioActual = ahora.getFullYear();
 
-        // Domingo de la semana actual
-        const finSemanaActual = new Date(inicioSemanaActual);
-        finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
-        finSemanaActual.setHours(23, 59, 59, 999);
+                // Lunes de la semana actual
+                const diaSemana = ahora.getDay();
+                const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+                const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
+                inicioSemanaActual.setHours(0, 0, 0, 0);
 
-        if (citas && citas.length > 0) {
+                // Domingo de la semana actual
+                const finSemanaActual = new Date(inicioSemanaActual);
+                finSemanaActual.setDate(inicioSemanaActual.getDate() + 6);
+                finSemanaActual.setHours(23, 59, 59, 999);
 
-            // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora)
-            citas.sort((a, b) => {
-                const fechaA = normalizarFecha(a.Fecha);
-                const fechaB = normalizarFecha(b.Fecha);
+                if (citas && citas.length > 0) {
 
-                if (fechaA !== fechaB) {
-                    return fechaA.localeCompare(fechaB);
-                }
+                    // 📅 ORDENAR CRONOLÓGICAMENTE (Por Fecha y Hora)
+                    citas.sort((a, b) => {
+                        const fechaA = normalizarFecha(a.Fecha);
+                        const fechaB = normalizarFecha(b.Fecha);
 
-                const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
-                const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
-                return horaAMinutos(horaA) - horaAMinutos(horaB);
-            });
-
-            citas.forEach((cita, index) => {
-                const valor = parseFloat(cita.Ingreso) || 0;
-                const fechaNormal = normalizarFecha(cita.Fecha);
-
-                let mesCita = -1;
-                let anioCita = -1;
-
-                if (fechaNormal) {
-                    const partes = fechaNormal.split('-');
-                    if (partes.length === 3) {
-                        anioCita = parseInt(partes[0]);
-                        mesCita = parseInt(partes[1]) - 1; // Ajuste a base 0 (0=Enero)
-                        const fechaObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
-
-                        // 📊 Total Semana Actual (Independiente del filtro)
-                        if (fechaObjeto >= inicioSemanaActual && fechaObjeto <= finSemanaActual) {
-                            totalSemana += valor;
+                        if (fechaA !== fechaB) {
+                            return fechaA.localeCompare(fechaB);
                         }
 
-                        // 📊 Total Mes Actual (Independiente del filtro)
-                        if (mesCita === mesActual && anioCita === anioActual) {
-                            totalMes += valor;
-                        }
-                    }
-                }
+                        const horaA = (a.FEV || a.Hora || '').split('-')[0].trim();
+                        const horaB = (b.FEV || b.Hora || '').split('-')[0].trim();
+                        return horaAMinutos(horaA) - horaAMinutos(horaB);
+                    });
 
-                // 🎯 FILTRAR CLIENTAS SEGÚN EL MES SELECCIONADO EN EL DROPDOWN
-                if (mesCita === mesSeleccionado && anioCita === anioActual) {
-                    const nombreCliente = cita.Descripcion || 'Cliente';
-                    let fechaMostrar = "";
-                    if (cita.Fecha) {
-                        const partes = fechaNormal.split('-');
-                        if (partes.length === 3) {
-                            fechaMostrar = `${partes[2]}/${partes[1]}`;
-                        } else {
-                            fechaMostrar = cita.Fecha;
-                        }
-                    }
-                    const horarioCita = cita.FEV || cita.Hora || '';
-                    const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
+                    citas.forEach((cita, index) => {
+                        const valor = parseFloat(cita.Ingreso) || 0;
+                        const fechaNormal = normalizarFecha(cita.Fecha);
 
-                    htmlClientes += `
+                        let mesCita = -1;
+                        let anioCita = -1;
+
+                        if (fechaNormal) {
+                            const partes = fechaNormal.split('-');
+                            if (partes.length === 3) {
+                                anioCita = parseInt(partes[0]);
+                                mesCita = parseInt(partes[1]) - 1; // Ajuste a base 0 (0=Enero)
+                                const fechaObjeto = new Date(partes[0], partes[1] - 1, partes[2]);
+
+                                // 📊 Total Semana Actual (Independiente del filtro)
+                                if (fechaObjeto >= inicioSemanaActual && fechaObjeto <= finSemanaActual) {
+                                    totalSemana += valor;
+                                }
+
+                                // 📊 Total Mes Actual (Independiente del filtro)
+                                if (mesCita === mesActual && anioCita === anioActual) {
+                                    totalMes += valor;
+                                }
+                            }
+                        }
+
+                        // 🎯 FILTRAR CLIENTAS SEGÚN EL MES SELECCIONADO EN EL DROPDOWN
+                        if (mesCita === mesSeleccionado && anioCita === anioActual) {
+                            const nombreCliente = cita.Descripcion || 'Cliente';
+                            let fechaMostrar = "";
+                            if (cita.Fecha) {
+                                const partes = fechaNormal.split('-');
+                                if (partes.length === 3) {
+                                    fechaMostrar = `${partes[2]}/${partes[1]}`;
+                                } else {
+                                    fechaMostrar = cita.Fecha;
+                                }
+                            }
+                            const horarioCita = cita.FEV || cita.Hora || '';
+                            const eventIdCalendar = cita.eventId || cita.EVENTID || cita.eventIdCalendar || '';
+
+                            htmlClientes += `
                         <li class="client-item" id="cita-${index}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
                             <div class="client-info">
                                 <h4 style="margin: 0 0 5px 0;">${nombreCliente}</h4>
@@ -1124,28 +1474,28 @@
                             </div>
                         </li>
                     `;
+                        }
+                    });
+
+                    listaClientes.innerHTML = htmlClientes !== '' ? htmlClientes : '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento para este mês.</li>';
+                } else {
+                    listaClientes.innerHTML = '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento registrado.</li>';
                 }
-            });
 
-            listaClientes.innerHTML = htmlClientes !== '' ? htmlClientes : '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento para este mês.</li>';
-        } else {
-            listaClientes.innerHTML = '<li style="padding: 10px; color: #888; text-align: center;">Nenhum atendimento registrado.</li>';
+                // 🎯 Actualizar tarjetas de totales
+                const elTotalSemana = document.getElementById('weeklyEarnings');
+                const elTotalMes = document.getElementById('monthlyEarnings');
+
+                if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
+                if (elTotalMes) elTotalMes.innerText = `R$ ${totalMes.toFixed(2)}`;
+
+                if (spinner) spinner.style.display = 'none';
+
+            } catch (error) {
+                console.error("Erro ao carregar clientes:", error);
+                listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
+            }
         }
-
-        // 🎯 Actualizar tarjetas de totales
-        const elTotalSemana = document.getElementById('weeklyEarnings');
-        const elTotalMes = document.getElementById('monthlyEarnings');
-        
-        if (elTotalSemana) elTotalSemana.innerText = `R$ ${totalSemana.toFixed(2)}`;
-        if (elTotalMes) elTotalMes.innerText = `R$ ${totalMes.toFixed(2)}`;
-
-        if (spinner) spinner.style.display = 'none';
-
-    } catch (error) {
-        console.error("Erro ao carregar clientes:", error);
-        listaClientes.innerHTML = '<li style="padding: 10px; color: red;">Erro ao carregar lista.</li>';
-    }
-}
         /*async function obtenerGananciasYClientes() {
             const listaClientes = document.getElementById('lista-clientes');
             if (!listaClientes) return;
@@ -1326,7 +1676,7 @@
                         Não tem quantidades ingresadas
                     </li>`;
             } else {
-                ul.innerHTML = listaMontos.map((monto, index) => 
+                ul.innerHTML = listaMontos.map((monto, index) =>
                     `<li class="calc-item-row">
                         <span>Item ${index + 1}: <strong>R$ ${monto.toFixed(2)}</strong></span>
                         <button type="button" class="btn-remove-item" onclick="eliminarEntradaIndividual(${index})">
@@ -1406,7 +1756,7 @@
 
                 const diaSemana = ahora.getDay();
                 const diffLunes = ahora.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
-                
+
                 const inicioSemanaActual = new Date(ahora.setDate(diffLunes));
                 inicioSemanaActual.setHours(0, 0, 0, 0);
 
@@ -1422,7 +1772,7 @@
                     salidas.forEach(item => {
                         if (item.Fecha && item.Monto) {
                             let montoVal = parseFloat(item.Monto) || 0;
-                            
+
                             let partes = item.Fecha.split('/');
                             let fechaItem;
                             if (partes.length === 3) {
@@ -1443,10 +1793,10 @@
 
                             let dSem = fechaItem.getDay();
                             let diffL = fechaItem.getDate() - dSem + (dSem === 0 ? -6 : 1);
-                            
+
                             let lunesSemana = new Date(fechaItem);
                             lunesSemana.setDate(diffL);
-                            
+
                             let domingoSemana = new Date(lunesSemana);
                             domingoSemana.setDate(lunesSemana.getDate() + 6);
 
@@ -1494,11 +1844,12 @@
             if (serviceSelect && valueInput && serviceSelect.options[serviceSelect.selectedIndex]) {
                 valueInput.value = serviceSelect.options[serviceSelect.selectedIndex].getAttribute('data-price') || '';
             }
-            
+
             if (dateInput) {
                 dateInput.value = new Date().toISOString().split('T')[0];
             }
         });
     </script>
 </body>
+
 </html>
