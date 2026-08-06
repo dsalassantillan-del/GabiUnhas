@@ -585,6 +585,81 @@
             display: none;
         }
 
+        /* --- INTEGRACIÓN GOOGLE CALENDAR --- */
+
+        .calendar-integration {
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .calendar-integration-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .calendar-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background-color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .calendar-integration-text {
+            min-width: 0;
+        }
+
+        .calendar-integration-text h3 {
+            font-size: 0.92rem;
+            color: var(--text-dark);
+            margin-bottom: 3px;
+        }
+
+        .calendar-status {
+            font-size: 0.78rem;
+            color: var(--text-light);
+        }
+
+        .calendar-status.connected {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .btn-calendar-connect {
+            flex-shrink: 0;
+            border: none;
+            border-radius: 10px;
+            padding: 9px 12px;
+            background-color: var(--primary);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-calendar-connect.connected {
+            background-color: transparent;
+            color: #d32f2f;
+            border: 1px solid #efc7c7;
+        }
+
+
+
+
         /* ANIMACION DE BOTONES */
         button,
         input[type="submit"],
@@ -682,6 +757,7 @@
 
         <!-- CABEÇALHO -->
         <header class="app-header">
+
             <img src="logo2.png" alt="Logo" class="app-logo">
 
             <div class="header-title" style="flex: 1;">
@@ -702,6 +778,29 @@
                 Sair
             </button>
         </header>
+
+        <!-- INTEGRACIÓN OPCIONAL CON GOOGLE CALENDAR -->
+        <div id="calendarIntegration" class="calendar-integration">
+            <div class="calendar-integration-info">
+
+                <div class="calendar-icon">
+                    📅
+                </div>
+
+                <div class="calendar-integration-text">
+                    <h3>Google Calendar</h3>
+
+                    <p id="calendarConnectionStatus" class="calendar-status">
+                        Desconectado
+                    </p>
+                </div>
+
+            </div>
+
+            <button type="button" id="calendarConnectButton" class="btn-calendar-connect">
+                Conectar
+            </button>
+        </div>
 
         <!-- NAVEGAÇÃO DE ABAS -->
         <div class="tab-navigation">
@@ -960,6 +1059,47 @@
         const logoutButton =
             document.getElementById('logoutButton');
 
+        const calendarConnectionStatus =
+            document.getElementById('calendarConnectionStatus');
+
+        const calendarConnectButton =
+            document.getElementById('calendarConnectButton');
+
+        const calendarIntegration =
+            document.getElementById('calendarIntegration');
+
+
+        function actualizarEstadoCalendar(conectado) {
+            if (
+                !calendarConnectionStatus ||
+                !calendarConnectButton
+            ) {
+                return;
+            }
+
+            if (conectado) {
+                calendarConnectionStatus.innerText =
+                    'Conectado';
+
+                calendarConnectionStatus.classList.add(
+                    'connected'
+                );
+
+                calendarConnectButton.style.display =
+                    'none';
+
+            } else {
+                calendarConnectionStatus.innerText =
+                    'Desconectado';
+
+                calendarConnectionStatus.classList.remove(
+                    'connected'
+                );
+
+                calendarConnectButton.style.display =
+                    'inline-flex';
+            }
+        }
 
         function mostrarLogin() {
             if (loginScreen) {
@@ -984,6 +1124,8 @@
             if (appScreen) {
                 appScreen.style.display = 'flex';
             }
+
+            await.verificarConexionGoogleCalendar();
         }
 
 
@@ -1187,6 +1329,8 @@
                             gapi.client.setToken(null);
                         }
 
+                        actualizarEstadoCalendar
+
                         if (loginForm) {
                             loginForm.reset();
                         }
@@ -1236,8 +1380,18 @@
 
         function gapiLoaded() { gapi.load('client', intializeGapiClient); }
         async function intializeGapiClient() {
-            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+            await gapi.client.init({
+                apiKey: API_KEY,
+                discoveryDocs: [DISCOVERY_DOC]
+            });
+
             gapiInited = true;
+
+            actualizarEstadoCalendar(
+                Boolean(
+                    gapi.client.getToken()?.access_token
+                )
+            );
         }
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
@@ -1245,6 +1399,260 @@
             });
             gisInited = true;
         }
+
+
+        async function conectarGoogleCalendar() {
+            if (!calendarConnectButton) return;
+
+            calendarConnectButton.disabled = true;
+            calendarConnectButton.innerText = 'Conectando...';
+
+            try {
+                const {
+                    data: { session },
+                    error: sessionError
+                } = await supabaseClient.auth.getSession();
+
+                if (sessionError || !session?.access_token) {
+                    throw new Error(
+                        'Sua sessão expirou. Entre novamente.'
+                    );
+                }
+
+                const { data, error } =
+                    await supabaseClient.functions.invoke(
+                        'google-calendar-connect',
+                        {
+                            method: 'POST'
+                        }
+                    );
+
+                if (error) {
+                    console.error(
+                        'Erro devolvido pela Edge Function:',
+                        error
+                    );
+
+                    throw error;
+                }
+
+                if (!data?.authorizationUrl) {
+                    throw new Error(
+                        'A função não devolveu a URL de autorização.'
+                    );
+                }
+
+                window.location.href =
+                    data.authorizationUrl;
+
+            } catch (error) {
+                console.error(
+                    'Erro ao iniciar conexão com Google Calendar:',
+                    error
+                );
+
+                alert(
+                    error.message ||
+                    'Não foi possível iniciar a conexão com o Google Calendar.'
+                );
+
+                calendarConnectButton.disabled = false;
+                calendarConnectButton.innerText = 'Conectar';
+            }
+        }
+
+
+        async function verificarConexionGoogleCalendar() {
+            try {
+                const {
+                    data: { user },
+                    error: userError
+                } = await supabaseClient.auth.getUser();
+
+                if (userError || !user) {
+                    actualizarEstadoCalendar(false);
+                    return false;
+                }
+
+                const { data, error } =
+                    await supabaseClient
+                        .from('google_calendar_connections')
+                        .select(
+                            'is_active, google_email, connected_at'
+                        )
+                        .eq('user_id', user.id)
+                        .maybeSingle();
+
+                if (error) {
+                    throw error;
+                }
+
+                const conectado =
+                    Boolean(data?.is_active);
+
+                actualizarEstadoCalendar(conectado);
+
+                return conectado;
+
+            } catch (error) {
+                console.error(
+                    'Erro ao verificar conexão do Google Calendar:',
+                    error
+                );
+
+                actualizarEstadoCalendar(false);
+
+                return false;
+            }
+        }
+
+        function actualizarEstadoCalendar(conectado) {
+            if (
+                !calendarIntegration ||
+                !calendarConnectionStatus ||
+                !calendarConnectButton
+            ) {
+                return;
+            }
+
+            if (conectado) {
+                calendarConnectionStatus.innerText =
+                    'Conectado';
+
+                calendarConnectionStatus.classList.add(
+                    'connected'
+                );
+
+                calendarIntegration.style.display =
+                    'none';
+
+            } else {
+                calendarConnectionStatus.innerText =
+                    'Desconectado';
+
+                calendarConnectionStatus.classList.remove(
+                    'connected'
+                );
+
+                calendarIntegration.style.display =
+                    'flex';
+
+                calendarConnectButton.style.display =
+                    'inline-flex';
+
+                calendarConnectButton.disabled = false;
+                calendarConnectButton.innerText =
+                    'Conectar';
+            }
+        }
+
+
+        async function procesarRetornoGoogleCalendar() {
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const estado =
+                params.get('calendar_connection');
+
+            const mensaje =
+                params.get('calendar_message');
+
+            if (!estado) return;
+
+            if (estado === 'success') {
+                await verificarConexionGoogleCalendar();
+
+                alert(
+                    'Google Calendar conectado com sucesso.'
+                );
+            } else {
+                alert(
+                    mensaje ||
+                    'Não foi possível conectar o Google Calendar.'
+                );
+            }
+
+            params.delete('calendar_connection');
+            params.delete('calendar_message');
+
+            const nuevaUrl =
+                window.location.pathname +
+                (
+                    params.toString()
+                        ? `?${params.toString()}`
+                        : ''
+                ) +
+                window.location.hash;
+
+            window.history.replaceState(
+                {},
+                document.title,
+                nuevaUrl
+            );
+        }
+
+
+        //PROXIMA A SER ELIMINADA ❌
+        /*async function conectarGoogleCalendar() {
+            if (!gapiInited || !gisInited || !tokenClient) {
+                alert(
+                    'Google Calendar ainda está carregando. ' +
+                    'Tente novamente em alguns segundos.'
+                );
+
+                return;
+            }
+
+            calendarConnectButton.disabled = true;
+            calendarConnectButton.innerText = 'Conectando...';
+
+            tokenClient.callback = async (response) => {
+                if (response.error) {
+                    console.error(
+                        'Erro ao conectar Google Calendar:',
+                        response
+                    );
+
+                    actualizarEstadoCalendar(false);
+
+                    alert(
+                        'Não foi possível conectar o Google Calendar.'
+                    );
+
+                    calendarConnectButton.disabled = false;
+                    calendarConnectButton.innerText = 'Conectar';
+
+                    return;
+                }
+
+                gapi.client.setToken({
+                    access_token: response.access_token
+                });
+
+                actualizarEstadoCalendar(true);
+
+                calendarConnectButton.disabled = false;
+                calendarConnectButton.innerText = 'Conectar';
+
+                alert(
+                    'Google Calendar conectado com sucesso.'
+                );
+            };
+
+            tokenClient.requestAccessToken({
+                prompt: ''
+            });
+        }*/
+
+        if (calendarConnectButton) {
+            calendarConnectButton.addEventListener(
+                'click',
+                conectarGoogleCalendar
+            );
+        }
+
 
         // --- 🔄 NAVEGACIÓN ENTRE PESTAÑAS ---
         function switchTab(tabName) {
@@ -2531,6 +2939,9 @@
             if (salidaFecha) {
                 salidaFecha.value = hoy;
             }
+
+            await verificarSesionInicial();
+            await procesarRetornoGoogleCalendar();
 
             await verificarSesionInicial();
         });
