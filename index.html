@@ -904,13 +904,26 @@
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
 
-        //SUPABASE--------------------------------------------------------------------START
-        //SUPABASE--------------------------------------------------------------------START
-        //SUPABASE--------------------------------------------------------------------START
 
+        //------------------------------------------------ENTORNOS--------------------------------------
+        // --- CONFIGURACIÓN DE ENTORNOS ---
 
-        const SUPABASE_URL = 'https://rfuvpkaoepcjyxegnbic.supabase.co';
-        const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_vJ8ERp-GcIIBjoPlzwA71Q_7vg2PZMc';
+        const esProduccion =
+            window.location.hostname === 'gabi-unhas.vercel.app';
+
+        const SUPABASE_URL = esProduccion
+            ? 'https://rfuvpkaoepcjyxegnbic.supabase.co'
+            : 'https://cuvlnwittrcryiyckota.supabase.co';//KEY DE DESARROLLO
+
+        const SUPABASE_PUBLISHABLE_KEY = esProduccion
+            ? 'sb_publishable_vJ8ERp-GcIIBjoPlzwA71Q_7vg2PZMc'
+            : 'sb_publishable_nyiMZ_fhT7gNK42is_ImjA_ROuYKbp3';
+
+        console.log(
+            esProduccion
+                ? 'Entorno: PRODUCCIÓN'
+                : 'Entorno: DESARROLLO'
+        );
 
         const supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
@@ -1528,9 +1541,7 @@
                         await procesarAgendamiento();
                     };
                     tokenClient.requestAccessToken({
-                        prompt: gapi.client.getToken()
-                            ? ''
-                            : 'consent'
+                        prompt: ''
                     });
                 }
             });
