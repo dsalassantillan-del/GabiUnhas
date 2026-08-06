@@ -1116,7 +1116,7 @@
         }
 
 
-        function mostrarAplicacion() {
+        async function mostrarAplicacion() {
             if (loginScreen) {
                 loginScreen.style.display = 'none';
             }
@@ -1125,7 +1125,7 @@
                 appScreen.style.display = 'flex';
             }
 
-            await.verificarConexionGoogleCalendar();
+            await verificarConexionGoogleCalendar();
         }
 
 
