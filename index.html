@@ -1387,11 +1387,6 @@
 
             gapiInited = true;
 
-            actualizarEstadoCalendar(
-                Boolean(
-                    gapi.client.getToken()?.access_token
-                )
-            );
         }
         function gisLoaded() {
             tokenClient = google.accounts.oauth2.initTokenClient({
@@ -1486,6 +1481,11 @@
                 if (error) {
                     throw error;
                 }
+
+                console.log(
+                    'Conexión Google Calendar recibida:',
+                    data
+                );
 
                 const conectado =
                     Boolean(data?.is_active);
@@ -2942,8 +2942,6 @@
 
             await verificarSesionInicial();
             await procesarRetornoGoogleCalendar();
-
-            await verificarSesionInicial();
         });
     </script>
 </body>
