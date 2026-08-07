@@ -1385,6 +1385,59 @@
         }
 
 
+        async function desconectarGoogleCalendar() {
+            if (!calendarConnectButton) return;
+
+            const confirmado = window.confirm(
+                'Deseja desconectar o Google Calendar? Os atendimentos já salvos serão mantidos.'
+            );
+
+            if (!confirmado) return;
+
+            calendarConnectButton.disabled = true;
+            calendarConnectButton.innerText = 'Desconectando...';
+
+            try {
+                const { data, error } =
+                    await supabaseClient.functions.invoke(
+                        'google-calendar-disconnect',
+                        {
+                            method: 'POST'
+                        }
+                    );
+
+                if (error) {
+                    throw error;
+                }
+
+                if (!data?.disconnected) {
+                    throw new Error(
+                        'A função não confirmou a desconexão.'
+                    );
+                }
+
+                actualizarEstadoCalendar(false);
+
+                alert(
+                    'Google Calendar desconectado com sucesso.'
+                );
+
+            } catch (error) {
+                console.error(
+                    'Erro ao desconectar Google Calendar:',
+                    error
+                );
+
+                alert(
+                    error.message ||
+                    'Não foi possível desconectar o Google Calendar.'
+                );
+
+                actualizarEstadoCalendar(true);
+            }
+        }
+
+
         async function verificarConexionGoogleCalendar() {
             try {
                 const {
@@ -1452,7 +1505,21 @@
                 );
 
                 calendarIntegration.style.display =
-                    'none';
+                    'flex';
+
+                calendarConnectButton.style.display =
+                    'inline-flex';
+
+                calendarConnectButton.classList.add(
+                    'connected'
+                );
+
+                calendarConnectButton.disabled = false;
+                calendarConnectButton.innerText =
+                    'Desconectar';
+
+                calendarConnectButton.dataset.connected =
+                    'true';
 
             } else {
                 calendarConnectionStatus.innerText =
@@ -1468,9 +1535,16 @@
                 calendarConnectButton.style.display =
                     'inline-flex';
 
+                calendarConnectButton.classList.remove(
+                    'connected'
+                );
+
                 calendarConnectButton.disabled = false;
                 calendarConnectButton.innerText =
                     'Conectar';
+
+                calendarConnectButton.dataset.connected =
+                    'false';
             }
         }
 
@@ -1524,7 +1598,17 @@
         if (calendarConnectButton) {
             calendarConnectButton.addEventListener(
                 'click',
-                conectarGoogleCalendar
+                () => {
+                    if (
+                        calendarConnectButton.dataset.connected ===
+                        'true'
+                    ) {
+                        desconectarGoogleCalendar();
+                        return;
+                    }
+
+                    conectarGoogleCalendar();
+                }
             );
         }
 
