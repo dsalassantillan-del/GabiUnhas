@@ -994,16 +994,7 @@
 
 
     <!-- JAVASCRIPT: LÓGICA DE FUNCIONAMIENTO -->
-
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
     <script>
-        const CLIENT_ID = '19004282784-e0277e8qmi3tubcdg2a71spqlorull2t.apps.googleusercontent.com';
-        const API_KEY = 'AIzaSyDCu4FtYLx9fZ7dllqhFZU7-OLKVq9XYxA';
-        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest';
-        const SCOPES = 'https://www.googleapis.com/auth/calendar.events';
-
-
         //------------------------------------------------ENTORNOS--------------------------------------
         // --- CONFIGURACIÓN DE ENTORNOS ---
 
@@ -1287,15 +1278,6 @@
                             throw error;
                         }
 
-                        // Limpia solamente el token usado por esta app.
-                        // No cierra la cuenta de Google del navegador.
-                        if (
-                            window.gapi &&
-                            gapi.client
-                        ) {
-                            gapi.client.setToken(null);
-                        }
-
                         actualizarEstadoCalendar(false);
 
                         if (loginForm) {
@@ -1340,27 +1322,6 @@
         //SUPABASE----------------------------------------------------------------------END
         //SUPABASE----------------------------------------------------------------------END
         //SUPABASE----------------------------------------------------------------------END
-
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
-
-        function gapiLoaded() { gapi.load('client', intializeGapiClient); }
-        async function intializeGapiClient() {
-            await gapi.client.init({
-                apiKey: API_KEY,
-                discoveryDocs: [DISCOVERY_DOC]
-            });
-
-            gapiInited = true;
-
-        }
-        function gisLoaded() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID, scope: SCOPES, callback: '',
-            });
-            gisInited = true;
-        }
 
 
         async function conectarGoogleCalendar() {
@@ -2010,83 +1971,46 @@
         //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------END
 
         // --- 📊 DASHBOARD & RESUMO ---
-
-        async function excluirEventoGoogleCalendar(eventId) {
-            if (!eventId) {
-                return {
-                    success: true,
-                    skipped: true
-                };
-            }
-
-            const executarExclusao = async () => {
-                try {
-                    await gapi.client.calendar.events.delete({
-                        calendarId: 'primary',
-                        eventId: eventId
-                    });
-
-                    return {
-                        success: true
-                    };
-
-                } catch (error) {
-                    console.error(
-                        'Erro ao excluir evento do Google Calendar:',
-                        error
-                    );
-
-                    return {
-                        success: false,
-                        error
-                    };
-                }
-            };
-
-            // Si existe un token, intentar eliminar directamente
-            const tokenAtual = gapi.client.getToken();
-
-            if (tokenAtual?.access_token) {
-                const resultado = await executarExclusao();
-
-                if (resultado.success) {
-                    return resultado;
-                }
-
-                // El token puede haber expirado
-                gapi.client.setToken(null);
-            }
-
-            // Solicitar un token nuevo
-            return new Promise((resolve) => {
-                tokenClient.callback = async (response) => {
-                    if (response.error) {
-                        console.error(
-                            'Erro ao renovar autorização do Google:',
-                            response
-                        );
-
-                        resolve({
-                            success: false,
-                            error: response
-                        });
-
-                        return;
+        async function excluirEventoGoogleCalendar(appointmentId) {
+            const { data, error } =
+                await supabaseClient.functions.invoke(
+                    'google-calendar-delete-event',
+                    {
+                        body: {
+                            appointmentId
+                        }
                     }
+                );
 
-                    const resultado = await executarExclusao();
-                    resolve(resultado);
+            if (error) {
+                let detalle = null;
+
+                try {
+                    detalle =
+                        await error.context?.json();
+                } catch {
+                    detalle = null;
+                }
+
+                console.error(
+                    'Erro ao excluir evento do Google Calendar:',
+                    detalhe || error
+                );
+
+                return {
+                    success: false,
+                    error: detalhe || error
                 };
+            }
 
-                tokenClient.requestAccessToken({
-                    prompt: ''
-                });
-            });
+            return {
+                success: true,
+                data
+            };
         }
 
         async function borrarAtendimentoSupabase(
-            appointmentId,
-            eventId
+            appointmentId
         ) {
             const confirmacion = confirm(
                 'Desmarcar essa cliente?'
@@ -2108,7 +2032,7 @@
 
                 // 1. Eliminar del calendario con token válido
                 const resultadoCalendar =
-                    await excluirEventoGoogleCalendar(eventId);
+                    await excluirEventoGoogleCalendar(appointmentId);
 
                 if (!resultadoCalendar.success) {
                     alert(
@@ -2349,8 +2273,7 @@
                             type="button"
                             class="btn-delete"
                             onclick="borrarAtendimentoSupabase(
-                                '${cita.id}',
-                                '${cita.google_calendar_event_id || ''}'
+                                '${cita.id}'
                             )"
                             style="
                                 background: transparent;
