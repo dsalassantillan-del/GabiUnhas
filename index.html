@@ -1593,59 +1593,6 @@
             );
         }
 
-
-        //PROXIMA A SER ELIMINADA ❌
-        /*async function conectarGoogleCalendar() {
-            if (!gapiInited || !gisInited || !tokenClient) {
-                alert(
-                    'Google Calendar ainda está carregando. ' +
-                    'Tente novamente em alguns segundos.'
-                );
-
-                return;
-            }
-
-            calendarConnectButton.disabled = true;
-            calendarConnectButton.innerText = 'Conectando...';
-
-            tokenClient.callback = async (response) => {
-                if (response.error) {
-                    console.error(
-                        'Erro ao conectar Google Calendar:',
-                        response
-                    );
-
-                    actualizarEstadoCalendar(false);
-
-                    alert(
-                        'Não foi possível conectar o Google Calendar.'
-                    );
-
-                    calendarConnectButton.disabled = false;
-                    calendarConnectButton.innerText = 'Conectar';
-
-                    return;
-                }
-
-                gapi.client.setToken({
-                    access_token: response.access_token
-                });
-
-                actualizarEstadoCalendar(true);
-
-                calendarConnectButton.disabled = false;
-                calendarConnectButton.innerText = 'Conectar';
-
-                alert(
-                    'Google Calendar conectado com sucesso.'
-                );
-            };
-
-            tokenClient.requestAccessToken({
-                prompt: ''
-            });
-        }*/
-
         if (calendarConnectButton) {
             calendarConnectButton.addEventListener(
                 'click',
@@ -1955,6 +1902,55 @@
             });
         }
 
+
+        async function sincronizarCitaConGoogleCalendar(appointmentId) {
+            const { data, error } =
+                await supabaseClient.functions.invoke(
+                    'google-calendar-create-event',
+                    {
+                        body: {
+                            appointmentId
+                        }
+                    }
+                );
+
+            if (error) {
+                let detalle = null;
+
+                try {
+                    detalle =
+                        await error.context?.json();
+                } catch {
+                    detalle = null;
+                }
+
+                if (
+                    detalle?.code ===
+                    'GOOGLE_CALENDAR_NOT_CONNECTED'
+                ) {
+                    return {
+                        sincronizado: false,
+                        desconectado: true
+                    };
+                }
+
+                console.error(
+                    'Error al sincronizar con Google Calendar:',
+                    detalle || error
+                );
+
+                return {
+                    sincronizado: false,
+                    error: detalle || error
+                };
+            }
+
+            return {
+                sincronizado: true,
+                data
+            };
+        }
+
         async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
             const event = {
                 'summary': `${nombre}`,
@@ -2019,11 +2015,13 @@
                     price: Number(datosCita.Ingreso),
                     start_time: horaInicio,
                     end_time: horaFin,
-                    status: 'confirmed',
-                    google_calendar_event_id: googleCalendarEventId
+                    status: 'confirmed'
                 };
 
-                const { data, error } = await supabaseClient
+                const {
+                    data: citaGuardada,
+                    error
+                } = await supabaseClient
                     .from('appointments')
                     .insert(nuevaCita)
                     .select()
@@ -2031,6 +2029,27 @@
 
                 if (error) {
                     throw error;
+                }
+
+                const resultadoCalendar =
+                    await sincronizarCitaConGoogleCalendar(
+                        citaGuardada.id
+                    );
+
+                if (resultadoCalendar.sincronizado) {
+                    console.log(
+                        'Cita sincronizada con Google Calendar:',
+                        resultadoCalendar.data
+                    );
+                } else if (resultadoCalendar.desconectado) {
+                    console.log(
+                        'Cita guardada sin Google Calendar'
+                    );
+                } else {
+                    console.error(
+                        'La cita se guardó, pero falló la sincronización:',
+                        resultadoCalendar.error
+                    );
                 }
 
                 console.log('Cita guardada en Supabase:', data);
