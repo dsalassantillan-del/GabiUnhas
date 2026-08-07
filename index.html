@@ -1068,39 +1068,6 @@
         const calendarIntegration =
             document.getElementById('calendarIntegration');
 
-
-        function actualizarEstadoCalendar(conectado) {
-            if (
-                !calendarConnectionStatus ||
-                !calendarConnectButton
-            ) {
-                return;
-            }
-
-            if (conectado) {
-                calendarConnectionStatus.innerText =
-                    'Conectado';
-
-                calendarConnectionStatus.classList.add(
-                    'connected'
-                );
-
-                calendarConnectButton.style.display =
-                    'none';
-
-            } else {
-                calendarConnectionStatus.innerText =
-                    'Desconectado';
-
-                calendarConnectionStatus.classList.remove(
-                    'connected'
-                );
-
-                calendarConnectButton.style.display =
-                    'inline-flex';
-            }
-        }
-
         function mostrarLogin() {
             if (loginScreen) {
                 loginScreen.style.display = 'flex';
@@ -1329,7 +1296,7 @@
                             gapi.client.setToken(null);
                         }
 
-                        actualizarEstadoCalendar
+                        actualizarEstadoCalendar(false);
 
                         if (loginForm) {
                             loginForm.reset();
@@ -1827,78 +1794,30 @@
                     Ingreso: valor,
                     Hora: `${horaInicio} - ${horaFin}`
                 };
-
-                if (!gapiInited || !gisInited) {
-                    alert('As bibliotecas do Google ainda estão carregando. Tente novamente em alguns segundos.');
-                    return;
-                }
                 //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
                 //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
                 //--------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
 
                 const procesarAgendamiento = async () => {
-                    const eventIdObtenido = await crearEventoCalendar(
-                        nombre,
-                        servicio,
-                        fecha,
-                        horaInicio,
-                        horaFin
-                    );
-
-                    if (!eventIdObtenido) {
-                        return;
-                    }
-
-                    datosCita.eventId = eventIdObtenido;
-
-                    // 1. Guardar primero en Supabase
                     const resultadoSupabase =
-                        await enviarASupabase(
-                            datosCita,
-                            eventIdObtenido
-                        );
+                        await enviarASupabase(datosCita);
 
                     if (!resultadoSupabase.success) {
-                        console.warn(
-                            'Supabase falló. Intentando eliminar el evento recién creado en Google Calendar.'
+                        alert(
+                            'Não foi possível salvar o atendimento.'
                         );
-
-                        const resultadoRollback =
-                            await excluirEventoGoogleCalendar(
-                                eventIdObtenido
-                            );
-
-                        if (resultadoRollback.success) {
-                            alert(
-                                'Não foi possível salvar o atendimento. ' +
-                                'O evento criado no Google Calendar foi removido automaticamente.'
-                            );
-                        } else {
-                            alert(
-                                'Não foi possível salvar o atendimento no Supabase ' +
-                                'e também não foi possível remover o evento do Google Calendar. ' +
-                                'Verifique o calendário manualmente.'
-                            );
-                        }
 
                         return;
                     }
 
-                    finalizarAgendamientoExitoso();
+                    finalizarAgendamientoExitoso(
+                        resultadoSupabase.calendar
+                    );
                 };
 
 
-                if (gapi.client.getToken() !== null) {
-                    await procesarAgendamiento();
-                } else {
-                    tokenClient.callback = async (resp) => {
-                        if (resp.error !== undefined) { throw (resp); }
-                        await procesarAgendamiento();
-                    };
-                    tokenClient.requestAccessToken({
-                        prompt: ''
-                    });
-                }
+                await procesarAgendamiento();
+
             });
         }
 
@@ -1951,41 +1870,12 @@
             };
         }
 
-        async function crearEventoCalendar(nombre, servicio, fecha, horaInicio, horaFin) {
-            const event = {
-                'summary': `${nombre}`,
-                'description': `Serviço de Nails: ${servicio}`,
-                'colorId': '4',
-                'start': {
-                    'dateTime': `${fecha}T${horaInicio}:00`,
-                    'timeZone': 'America/Sao_Paulo'
-                },
-                'end': {
-                    'dateTime': `${fecha}T${horaFin}:00`,
-                    'timeZone': 'America/Sao_Paulo'
-                }
-            };
-
-            try {
-                const respuestaCalendar = await gapi.client.calendar.events.insert({
-                    'calendarId': 'primary',
-                    'resource': event
-                });
-                return respuestaCalendar.result.id;
-            } catch (err) {
-                console.error('Error al crear evento en Calendar:', err);
-                gapi.client.setToken(null);
-                alert('Error al agendar en Google Calendar. Verifica los permisos.');
-                return null;
-            }
-        }
-
         //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
         //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
         //---------------------------------------------------------------SUPABASE MIGRACION--------------------------------------------------------------------START
 
 
-        async function enviarASupabase(datosCita, googleCalendarEventId = null) {
+        async function enviarASupabase(datosCita) {
             try {
                 const {
                     data: { user },
@@ -2052,11 +1942,15 @@
                     );
                 }
 
-                console.log('Cita guardada en Supabase:', data);
+                console.log(
+                    'Cita guardada en Supabase:',
+                    citaGuardada
+                );
 
                 return {
                     success: true,
-                    appointment: data
+                    appointment: citaGuardada,
+                    calendar: resultadoCalendar
                 };
 
             } catch (error) {
@@ -2069,16 +1963,30 @@
             }
         }
 
-        function finalizarAgendamientoExitoso() {
-            alert(
-                '¡Agendamento guardado en Google Calendar y Supabase con éxito! 🎉'
-            );
+        function finalizarAgendamientoExitoso(
+            resultadoCalendar
+        ) {
+            if (resultadoCalendar?.sincronizado) {
+                alert(
+                    'Atendimento salvo e sincronizado com Google Calendar com sucesso! 🎉'
+                );
+            } else if (resultadoCalendar?.desconectado) {
+                alert(
+                    'Atendimento salvo com sucesso no aplicativo.'
+                );
+            } else {
+                alert(
+                    'Atendimento salvo no aplicativo, mas não foi possível sincronizar com Google Calendar.'
+                );
+            }
 
             formulario.reset();
 
             if (
                 serviceSelect.selectedIndex >= 0 &&
-                serviceSelect.options[serviceSelect.selectedIndex]
+                serviceSelect.options[
+                serviceSelect.selectedIndex
+                ]
             ) {
                 valueInput.value =
                     serviceSelect.options[
@@ -2087,7 +1995,9 @@
             }
 
             dateInput.value =
-                new Date().toISOString().split('T')[0];
+                new Date()
+                    .toISOString()
+                    .split('T')[0];
 
             statusLabel.innerText = '';
 
@@ -2962,6 +2872,7 @@
             await verificarSesionInicial();
             await procesarRetornoGoogleCalendar();
         });
+        //enviar a chatGPT2
     </script>
 </body>
 
