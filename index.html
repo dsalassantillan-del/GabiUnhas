@@ -570,6 +570,45 @@
             font-weight: 600;
         }
 
+        .login-separator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 4px 0 14px;
+            color: var(--text-light);
+            font-size: 0.82rem;
+        }
+
+        .login-separator::before,
+        .login-separator::after {
+            content: '';
+            height: 1px;
+            background-color: var(--border);
+            flex: 1;
+        }
+
+        .btn-google-login {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background-color: #ffffff;
+            color: var(--text-dark);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 3px 9px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-google-login:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        .google-login-message {
+            margin-top: 10px;
+        }
+
         .login-footer {
             margin-top: 22px;
             padding-top: 18px;
@@ -693,7 +732,7 @@
             filter: brightness(0.88) !important;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.2"></script>
 </head>
 
 <body ontouchstart="">
@@ -744,6 +783,16 @@
                 </button>
 
                 <div id="loginMessage" class="login-message" aria-live="polite"></div>
+
+                <div class="login-separator" aria-hidden="true">
+                    <span>ou</span>
+                </div>
+
+                <button type="button" id="googleLoginButton" class="btn-google-login">
+                    Continuar com o Google
+                </button>
+
+                <div id="googleLoginMessage" class="login-message google-login-message" aria-live="polite"></div>
             </form>
 
             <div class="login-footer">
@@ -1044,6 +1093,12 @@
         const loginMessage =
             document.getElementById('loginMessage');
 
+        const googleLoginButton =
+            document.getElementById('googleLoginButton');
+
+        const googleLoginMessage =
+            document.getElementById('googleLoginMessage');
+
         const togglePasswordButton =
             document.getElementById('togglePasswordButton');
 
@@ -1059,7 +1114,13 @@
         const calendarIntegration =
             document.getElementById('calendarIntegration');
 
+        let usuarioAplicacionInicializadoId = null;
+        let aperturaAplicacionPromise = null;
+
         function mostrarLogin() {
+            usuarioAplicacionInicializadoId = null;
+            aperturaAplicacionPromise = null;
+
             if (loginScreen) {
                 loginScreen.style.display = 'flex';
             }
@@ -1071,19 +1132,45 @@
             if (loginMessage) {
                 loginMessage.innerText = '';
             }
+
+            if (googleLoginMessage) {
+                googleLoginMessage.innerText = '';
+            }
         }
 
 
-        async function mostrarAplicacion() {
-            if (loginScreen) {
-                loginScreen.style.display = 'none';
+        async function mostrarAplicacion(user) {
+            const userId = user?.id;
+
+            if (!userId) return;
+
+            if (usuarioAplicacionInicializadoId === userId) {
+                return aperturaAplicacionPromise;
             }
 
-            if (appScreen) {
-                appScreen.style.display = 'flex';
-            }
+            usuarioAplicacionInicializadoId = userId;
 
-            await verificarConexionGoogleCalendar();
+            const aperturaActual = (async () => {
+                if (loginScreen) {
+                    loginScreen.style.display = 'none';
+                }
+
+                if (appScreen) {
+                    appScreen.style.display = 'flex';
+                }
+
+                await verificarConexionGoogleCalendar();
+            })();
+
+            aperturaAplicacionPromise = aperturaActual;
+
+            try {
+                await aperturaActual;
+            } finally {
+                if (aperturaAplicacionPromise === aperturaActual) {
+                    aperturaAplicacionPromise = null;
+                }
+            }
         }
 
 
@@ -1102,6 +1189,21 @@
         }
 
 
+        function mostrarMensajeGoogleLogin(
+            mensaje,
+            tipo = 'error'
+        ) {
+            if (!googleLoginMessage) return;
+
+            googleLoginMessage.innerText = mensaje;
+
+            googleLoginMessage.style.color =
+                tipo === 'success'
+                    ? '#2D6A4F'
+                    : '#d32f2f';
+        }
+
+
         async function verificarSesionInicial() {
             try {
                 const {
@@ -1114,7 +1216,7 @@
                 }
 
                 if (session?.user) {
-                    mostrarAplicacion();
+                    await mostrarAplicacion(session.user);
                 } else {
                     mostrarLogin();
                 }
@@ -1190,7 +1292,9 @@
                             loginPassword.value = '';
                         }
 
-                        mostrarAplicacion();
+                        await mostrarAplicacion(
+                            data.session.user
+                        );
 
                     } catch (error) {
                         console.error(
@@ -1224,6 +1328,56 @@
                         }
                     }
                 }
+            );
+        }
+
+        async function iniciarLoginGoogle() {
+            if (!googleLoginButton) return;
+
+            googleLoginButton.disabled = true;
+            googleLoginButton.innerText =
+                'Redirecionando...';
+
+            mostrarMensajeGoogleLogin(
+                'Abrindo o acesso com Google...',
+                'success'
+            );
+
+            try {
+                const { error } =
+                    await supabaseClient.auth
+                        .signInWithOAuth({
+                            provider: 'google',
+                            options: {
+                                redirectTo:
+                                    `${window.location.origin}${window.location.pathname}`
+                            }
+                        });
+
+                if (error) {
+                    throw error;
+                }
+
+            } catch (error) {
+                console.error(
+                    'Erro ao iniciar sessão com Google:',
+                    error
+                );
+
+                mostrarMensajeGoogleLogin(
+                    'Não foi possível entrar com Google.'
+                );
+
+                googleLoginButton.disabled = false;
+                googleLoginButton.innerText =
+                    'Continuar com o Google';
+            }
+        }
+
+        if (googleLoginButton) {
+            googleLoginButton.addEventListener(
+                'click',
+                iniciarLoginGoogle
             );
         }
 
@@ -1310,7 +1464,7 @@
                     event === 'SIGNED_IN' &&
                     session?.user
                 ) {
-                    mostrarAplicacion();
+                    void mostrarAplicacion(session.user);
                 }
 
                 if (event === 'SIGNED_OUT') {
