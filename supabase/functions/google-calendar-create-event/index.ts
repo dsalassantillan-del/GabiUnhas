@@ -346,6 +346,7 @@ Deno.serve(async (req) => {
       "primary";
 
     const eventBody = {
+      colorId: '4',
       summary:
         `${appointment.client_name} - ` +
         `${appointment.service_name}`,
