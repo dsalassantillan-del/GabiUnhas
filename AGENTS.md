@@ -93,15 +93,24 @@ Do NOT:
 
 ### Development branch
 
-Current migration/development branch:
+Permanent development branch:
 
-`migration/supabase-vercel`
+`dev`
 
-All current development must be performed on this branch unless
+All development must be performed on `dev` unless
 explicitly instructed otherwise.
+
+All modifications must be implemented and tested in the DEV environment
+first. Promotion from `dev` to the production branch `main` requires
+explicit user approval.
+
+Supabase Edge Function deployments and database migrations are managed
+separately from Vercel deployments. A Vercel deployment does not deploy
+Supabase Edge Functions or apply database migrations.
 
 Before editing, always check:
 
 ```bash
 git status
 git branch --show-current
+```
